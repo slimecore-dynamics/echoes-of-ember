@@ -85,8 +85,9 @@ init -1 python:
 
 # Hook into existing save/load system
 # We need to extend FileActionWithMapData to also save player state
+# NOTE: This must run AFTER map_persistence.rpy (init -1), so we use init 1
 
-init -2 python:
+init 1 python:
     # Store reference to original save function
     _original_save_map_data_to_file = save_map_data_to_file
     _original_load_map_data_from_file = load_map_data_from_file
