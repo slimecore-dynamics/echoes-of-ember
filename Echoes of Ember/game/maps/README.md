@@ -53,7 +53,3 @@ You can share exported JSON files with other players. Simply copy the file from 
 ## Backups
 
 Automatic backups are created in the `backups/` directory. These can be used to restore your map if something goes wrong.
-
----
-
-For more information, see the mapping_file_io_specification.md in the project root.
