@@ -176,3 +176,113 @@ init python:
         ))
 
         return floor
+
+
+# Entry/Exit labels for exploration mode
+label enter_exploration_mode(floor_id):
+    """
+    Enter exploration mode for a specific floor.
+
+    Args:
+        floor_id: ID of the floor to explore (must exist in map_grid)
+
+    Returns:
+        "exit_exploration" when player leaves
+    """
+
+    python:
+        global map_grid, player_state
+
+        # Ensure systems are initialized
+        if not map_grid:
+            renpy.notify("Error: Map system not initialized")
+            renpy.return_statement(value="error")
+
+        # Check if floor exists
+        if floor_id not in map_grid.floors:
+            renpy.notify("Error: Floor {} not found".format(floor_id))
+            renpy.return_statement(value="error")
+
+        # Switch to floor
+        map_grid.switch_floor(floor_id)
+        floor = map_grid.get_floor(floor_id)
+
+        # Initialize or update player state
+        if not player_state:
+            player_state = PlayerState(
+                x=getattr(floor, 'starting_x', 10),
+                y=getattr(floor, 'starting_y', 10),
+                rotation=getattr(floor, 'starting_rotation', 0),
+                floor_id=floor_id
+            )
+        else:
+            # Move player to starting position
+            player_state.x = getattr(floor, 'starting_x', 10)
+            player_state.y = getattr(floor, 'starting_y', 10)
+            player_state.rotation = getattr(floor, 'starting_rotation', 0)
+            player_state.current_floor_id = floor_id
+
+    # Show exploration screen (this will block until player exits)
+    call screen exploration_view
+
+    # When we get here, player has exited exploration
+
+    # Autosave
+    $ renpy.save("auto-1")
+
+    return
+
+
+init python:
+    def delete_exploration_floor(floor_id, slot_name=None):
+        """
+        Delete a floor from the map grid and optionally from save files.
+
+        Args:
+            floor_id: ID of the floor to delete
+            slot_name: Optional slot name to delete map data from
+
+        Use this when story prevents returning to a location.
+        """
+        global map_grid
+
+        if not map_grid:
+            return False
+
+        # Remove floor from map grid
+        if floor_id in map_grid.floors:
+            del map_grid.floors[floor_id]
+            print("ExplorationInit - Deleted floor: {}".format(floor_id))
+
+        # If we're currently on this floor, switch to another floor
+        if map_grid.current_floor_id == floor_id:
+            if map_grid.floors:
+                # Switch to first available floor
+                map_grid.current_floor_id = list(map_grid.floors.keys())[0]
+            else:
+                map_grid.current_floor_id = None
+
+        # Optionally delete from save file
+        if slot_name:
+            try:
+                # Save the updated map grid (without the deleted floor)
+                save_map_data_to_file(slot_name)
+                print("ExplorationInit - Updated save file: {}".format(slot_name))
+            except Exception as e:
+                print("ExplorationInit - Error updating save: {}".format(e))
+
+        return True
+
+    def get_exploration_percent_for_floor(floor_id):
+        """
+        Get exploration percentage for a specific floor.
+
+        Returns: int (0-100)
+        """
+        global map_grid
+
+        if not map_grid or floor_id not in map_grid.floors:
+            return 0
+
+        floor = map_grid.floors[floor_id]
+        return calculate_exploration_percent(floor)

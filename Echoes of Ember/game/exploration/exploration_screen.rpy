@@ -1,5 +1,5 @@
 # exploration_screen.rpy
-# First-person dungeon exploration UI
+# First-person dungeon exploration UI with integrated map view
 
 # Colors for placeholder graphics
 define color_wall = "#666666"
@@ -11,32 +11,31 @@ define color_interact = "#FFFF00"
 
 screen exploration_view():
     """
-    Main exploration screen with first-person view and navigation controls.
+    Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
     """
 
     # Get current floor and player state
     $ floor = map_grid.get_current_floor() if map_grid else None
     $ ps = player_state
 
-    # Background
+    # Full screen container
     frame:
-        xalign 0.5
-        yalign 0.5
-        xsize 1280
-        ysize 720
+        xalign 0.0
+        yalign 0.0
+        xsize config.screen_width
+        ysize config.screen_height
+        padding (0, 0)
         background "#000000"
 
-        vbox:
-            spacing 20
-            xalign 0.5
-            yalign 0.5
+        hbox:
+            spacing 0
 
-            # First-person view area
+            # LEFT 2/3: First-person view
             frame:
-                xsize 800
-                ysize 600
-                xalign 0.5
+                xsize int(config.screen_width * 0.666)
+                ysize config.screen_height
                 background "#000000"
+                padding (0, 0)
 
                 if floor and ps:
                     # Get view data
@@ -47,176 +46,457 @@ screen exploration_view():
 
                     # Render first-person view
                     use render_first_person_view(view_data, floor, ps)
+
+                    # Interaction sparkle/pulse overlay
+                    $ icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
+                        floor, ps.x, ps.y, ps.rotation
+                    )
+
+                    if icon:
+                        # Show pulsing indicator in first-person view
+                        add AnimatedInteractIndicator() xalign 0.5 yalign 0.7
+
                 else:
-                    text "No floor loaded" xalign 0.5 yalign 0.5
+                    text "No floor loaded" xalign 0.5 yalign 0.5 color "#FFFFFF"
 
-            # Navigation controls
-            hbox:
-                spacing 20
-                xalign 0.5
-
-                # Turn Left
-                textbutton "Turn Left":
-                    action Function(handle_turn_left)
-                    xsize 150
-                    ysize 60
+            # RIGHT 1/3: Map + Controls
+            frame:
+                xsize int(config.screen_width * 0.334)
+                ysize config.screen_height
+                background "#1A1A1A"
+                padding (10, 10)
 
                 vbox:
                     spacing 10
                     xalign 0.5
 
-                    # Forward
+                    # MAP VIEW
+                    frame:
+                        xsize int(config.screen_width * 0.314)
+                        ysize int(config.screen_height * 0.40)
+                        background "#000000"
+                        padding (5, 5)
+
+                        if floor and ps:
+                            use compact_map_display(floor, ps)
+                        else:
+                            text "No map" xalign 0.5 yalign 0.5
+
+                    # PALETTE (conditional based on auto_map_enabled)
+                    frame:
+                        xsize int(config.screen_width * 0.314)
+                        ysize int(config.screen_height * 0.25)
+                        background "#2A2A2A"
+                        padding (5, 5)
+
+                        if floor and map_grid:
+                            $ auto_map_on = map_grid.auto_map_enabled if hasattr(map_grid, 'auto_map_enabled') else False
+
+                            if auto_map_on:
+                                # Icons only palette
+                                use icon_palette()
+                            else:
+                                # Full palette (tiles + icons)
+                                use full_palette()
+                        else:
+                            text "No palette" xalign 0.5 yalign 0.5 size 12
+
+                    # STATUS DISPLAY
+                    frame:
+                        xsize int(config.screen_width * 0.314)
+                        background "#2A2A2A"
+                        padding (10, 10)
+
+                        vbox:
+                            spacing 5
+
+                            if ps and floor:
+                                $ exploration_pct = calculate_exploration_percent(floor)
+
+                                text "Position: ({}, {})".format(ps.x, ps.y) size 14
+                                text "Facing: {}".format(ps.get_facing_direction_name()) size 14
+                                text "Health: {}/{}".format(ps.health, ps.max_health) size 14
+                                text "Explored: {}%".format(exploration_pct) size 14
+                            else:
+                                text "No status" size 14
+
+                    # NAVIGATION CONTROLS
+                    frame:
+                        xsize int(config.screen_width * 0.314)
+                        background "#2A2A2A"
+                        padding (10, 10)
+
+                        vbox:
+                            spacing 8
+
+                            # Forward button
+                            if floor and ps:
+                                $ view_data = FirstPersonView.get_view_data(
+                                    floor, ps.x, ps.y, ps.rotation,
+                                    view_distance=getattr(floor, 'view_distance', 3)
+                                )
+                                $ can_move = view_data.get("can_move_forward", False)
+                            else:
+                                $ can_move = False
+
+                            textbutton "Forward":
+                                action Function(handle_move_forward)
+                                xalign 0.5
+                                xsize 150
+                                ysize 40
+                                sensitive can_move
+
+                            # Turn buttons (Left/Right) + Back button
+                            hbox:
+                                spacing 10
+                                xalign 0.5
+
+                                textbutton "← Left":
+                                    action Function(handle_turn_left)
+                                    xsize 70
+                                    ysize 40
+
+                                textbutton "Back":
+                                    action Function(handle_move_backward)
+                                    xsize 70
+                                    ysize 40
+
+                                textbutton "Right →":
+                                    action Function(handle_turn_right)
+                                    xsize 70
+                                    ysize 40
+
+                    # AUTO-MAP TOGGLE + LEAVE BUTTON
+                    frame:
+                        xsize int(config.screen_width * 0.314)
+                        background "#2A2A2A"
+                        padding (10, 10)
+
+                        vbox:
+                            spacing 8
+
+                            textbutton "Auto-Map: {}".format("ON" if (map_grid and getattr(map_grid, 'auto_map_enabled', False)) else "OFF"):
+                                action Function(toggle_auto_map)
+                                xalign 0.5
+                                xsize 150
+                                ysize 35
+
+                            textbutton "Leave Exploration":
+                                action Function(exit_exploration_mode)
+                                xalign 0.5
+                                xsize 150
+                                ysize 35
+
+                    # INTERACTION PROMPT (if any)
                     if floor and ps:
-                        $ view_data = FirstPersonView.get_view_data(
-                            floor, ps.x, ps.y, ps.rotation,
-                            view_distance=getattr(floor, 'view_distance', 3)
+                        $ icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
+                            floor, ps.x, ps.y, ps.rotation
                         )
-                        $ can_move = view_data.get("can_move_forward", False)
-                    else:
-                        $ can_move = False
 
-                    textbutton "Forward":
-                        action Function(handle_move_forward)
-                        xsize 150
-                        ysize 60
-                        sensitive can_move
-
-                    # Backward
-                    textbutton "Backward":
-                        action Function(handle_move_backward)
-                        xsize 150
-                        ysize 60
-
-                # Turn Right
-                textbutton "Turn Right":
-                    action Function(handle_turn_right)
-                    xsize 150
-                    ysize 60
-
-            # Status info
-            hbox:
-                spacing 40
-                xalign 0.5
-
-                if ps:
-                    text "Position: ({}, {})".format(ps.x, ps.y)
-                    text "Facing: {}".format(ps.get_facing_direction_name())
-                    text "Health: {}/{}".format(ps.health, ps.max_health)
-
-            # Map toggle
-            textbutton "Toggle Map (M)":
-                action ToggleScreen("map_view")
-                xalign 0.5
-
-    # Interaction prompt (if any)
-    if floor and ps:
-        $ icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
-            floor, ps.x, ps.y, ps.rotation
-        )
-
-        if icon:
-            use interaction_prompt(icon, int_type, adj_x, adj_y)
-
-    # Keyboard shortcuts
-    key "m" action ToggleScreen("map_view")
-    key "M" action ToggleScreen("map_view")
+                        if icon:
+                            use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
 
 
-screen render_first_person_view(view_data, floor, ps):
+screen compact_map_display(floor, ps):
     """
-    Render the first-person view based on view_data.
+    Compact map display showing player position.
     """
 
-    # Background (ceiling and floor)
-    add Solid(color_ceiling) xpos 0 ypos 0 xsize 800 ysize 300
-    add Solid(color_floor) xpos 0 ypos 300 xsize 800 ysize 300
+    # Calculate map size
+    $ map_width = floor.dimensions[0]
+    $ map_height = floor.dimensions[1]
+    $ cell_size = 16  # Smaller cells for compact view
+    $ display_width = map_width * cell_size
+    $ display_height = map_height * cell_size
 
-    # Render tiles from farthest to nearest (painter's algorithm)
-    $ tiles = view_data.get("tiles", [])
-    $ icons = view_data.get("icons", [])
-
-    python:
-        # Render tiles by distance (farthest first)
-        for tile_x, tile_y, tile, dist in reversed(tiles):
-            # Calculate render position and size based on distance
-            # Distance 1 (closest): large, distance 3 (far): small
-            scale = 1.0 / dist
-            width = int(600 * scale)
-            height = int(400 * scale)
-            x_offset = (800 - width) // 2
-            y_offset = (600 - height) // 2
-
-            # Determine what to render based on tile type
-            tile_type = tile.tile_type
-
-            # Check if there's a wall ahead
-            walls = FirstPersonView.get_wall_configuration(floor, tile_x, tile_y)
-
-            # If looking at a wall face, render wall
-            if dist == 1:
-                # Check if forward is blocked
-                if not view_data.get("can_move_forward", False):
-                    # Render wall
-                    renpy.display.render.render(
-                        Solid(color_wall, xsize=width, ysize=height),
-                        width, height, 0, 0
-                    )
-
-            # Check for icons at this tile
-            for icon_x, icon_y, icon, icon_dist in icons:
-                if icon_x == tile_x and icon_y == tile_y:
-                    # Render icon
-                    if icon.icon_type == "door_closed":
-                        # Render door
-                        pass  # Placeholder
-                    elif icon.icon_type == "door_open":
-                        pass  # Placeholder
-
-
-screen interaction_prompt(icon, interaction_type, adj_x, adj_y):
-    """
-    Show interaction prompt for adjacent icons.
-    """
-
-    frame:
+    # Center the map in the frame
+    fixed:
+        xsize display_width
+        ysize display_height
         xalign 0.5
-        yalign 0.2
-        xpadding 40
-        ypadding 30
-        background "#000000CC"
+        yalign 0.5
 
-        vbox:
-            spacing 15
+        # Draw grid background
+        add Solid("#111111", xsize=display_width, ysize=display_height)
+
+        # Draw tiles
+        for y in range(map_height):
+            for x in range(map_width):
+                $ tile = floor.get_tile(x, y)
+                if tile and tile.tile_type != "empty":
+                    # Draw tile (simple colored square for now)
+                    $ tile_color = get_tile_color(tile.tile_type)
+                    add Solid(tile_color, xsize=cell_size-1, ysize=cell_size-1) xpos x*cell_size ypos y*cell_size
+
+        # Draw icons
+        for (icon_x, icon_y), icon in floor.icons.items():
+            $ icon_color = get_icon_color(icon.icon_type)
+            add Solid(icon_color, xsize=cell_size-2, ysize=cell_size-2) xpos icon_x*cell_size+1 ypos icon_y*cell_size+1
+
+        # Draw player marker (red triangle)
+        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
+
+
+init python:
+    class PlayerTriangleMarker(renpy.Displayable):
+        """Red triangle showing player position and facing direction."""
+
+        def __init__(self, x, y, rotation, cell_size, **kwargs):
+            super(PlayerTriangleMarker, self).__init__(**kwargs)
+            self.x = x
+            self.y = y
+            self.rotation = rotation
+            self.cell_size = cell_size
+
+        def render(self, width, height, st, at):
+            render = renpy.Render(width, height)
+
+            # Create simple red square as placeholder for triangle
+            # (Actual triangle rendering would need more complex drawing)
+            marker = Solid("#FF0000", xsize=int(self.cell_size*0.8), ysize=int(self.cell_size*0.8))
+            marker_render = renpy.render(marker, int(self.cell_size*0.8), int(self.cell_size*0.8), st, at)
+
+            # Position at player location
+            render.blit(marker_render, (int(self.x * self.cell_size + self.cell_size*0.1),
+                                        int(self.y * self.cell_size + self.cell_size*0.1)))
+
+            return render
+
+    class AnimatedInteractIndicator(renpy.Displayable):
+        """Pulsing yellow indicator for interactions."""
+
+        def render(self, width, height, st, at):
+            # Pulse between 0.5 and 1.0 opacity
+            alpha = 0.5 + 0.5 * abs(math.sin(st * 3.14))
+
+            render = renpy.Render(100, 100)
+            pulse = Solid(color_interact + "{:02x}".format(int(alpha * 255)), xsize=80, ysize=80)
+            pulse_render = renpy.render(pulse, 80, 80, st, at)
+            render.blit(pulse_render, (10, 10))
+
+            renpy.redraw(self, 0.05)  # Update frequently for animation
+            return render
+
+    def get_tile_color(tile_type):
+        """Get color for tile type on minimap."""
+        colors = {
+            "wall": "#888888",
+            "hallway": "#CCCCCC",
+            "corner": "#AAAAAA",
+            "t_intersection": "#BBBBBB",
+            "cross": "#DDDDDD",
+            "empty": "#000000"
+        }
+        return colors.get(tile_type, "#666666")
+
+    def get_icon_color(icon_type):
+        """Get color for icon type on minimap."""
+        colors = {
+            "stairs_up": "#00FFFF",
+            "stairs_down": "#FF00FF",
+            "door_closed": "#8B4513",
+            "door_open": "#D2B48C",
+            "gathering": "#00FF00",
+            "enemy": "#FF0000",
+            "event": "#FFFF00",
+            "teleporter": "#FF8800",
+            "note": "#FFFFFF"
+        }
+        return colors.get(icon_type, "#FFFFFF")
+
+
+screen icon_palette():
+    """Icon-only palette (when auto-map is ON)."""
+
+    vbox:
+        spacing 3
+        xalign 0.5
+
+        text "Icons" size 14 xalign 0.5
+
+        grid 4 2:
+            spacing 5
             xalign 0.5
 
+            for icon_type in ["stairs_up", "stairs_down", "door_closed", "gathering", "enemy", "event", "teleporter", "note"]:
+                $ is_selected = (map_grid.selected_icon_type == icon_type if map_grid else False)
+                textbutton icon_type.replace("_", " ").title():
+                    action Function(select_icon_for_placement, icon_type)
+                    xsize 100
+                    ysize 30
+                    text_size 10
+                    background ("#FFFF00" if is_selected else "#444444")
+
+
+screen full_palette():
+    """Full palette with tiles and icons (when auto-map is OFF)."""
+
+    vbox:
+        spacing 5
+        xalign 0.5
+
+        # Tiles
+        text "Tiles" size 12 xalign 0.5
+
+        grid 3 2:
+            spacing 3
+            xalign 0.5
+
+            for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
+                $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
+                textbutton tile_type.replace("_", " ")[:7]:
+                    action Function(select_tile_type, tile_type)
+                    xsize 70
+                    ysize 25
+                    text_size 9
+                    background ("#FFFF00" if is_selected else "#555555")
+
+        # Icons
+        text "Icons" size 12 xalign 0.5
+
+        grid 4 2:
+            spacing 3
+            xalign 0.5
+
+            for icon_type in ["stairs_up", "stairs_down", "door_closed", "gathering", "enemy", "event", "teleporter", "note"]:
+                $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                textbutton icon_type.replace("_", " ")[:7]:
+                    action Function(select_icon_for_placement, icon_type)
+                    xsize 70
+                    ysize 25
+                    text_size 8
+                    background ("#FFFF00" if is_selected else "#555555")
+
+        # Rotate button
+        textbutton "Rotate (R)":
+            action Function(rotate_selected_tile)
+            xsize 140
+            ysize 25
+            xalign 0.5
+            text_size 10
+
+
+screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
+    """Compact interaction prompt in right panel."""
+
+    frame:
+        xsize int(config.screen_width * 0.314)
+        background "#FF0000AA"
+        padding (10, 10)
+
+        vbox:
+            spacing 5
+
             if icon.icon_type == "stairs_up":
-                text "Stairs leading up" xalign 0.5
+                text "Stairs Up" size 14 xalign 0.5
                 textbutton "Climb Up":
                     action Function(handle_stairs_interaction, "up", adj_x, adj_y)
                     xalign 0.5
+                    xsize 120
+                    ysize 35
 
             elif icon.icon_type == "stairs_down":
-                text "Stairs leading down" xalign 0.5
+                text "Stairs Down" size 14 xalign 0.5
                 textbutton "Climb Down":
                     action Function(handle_stairs_interaction, "down", adj_x, adj_y)
                     xalign 0.5
+                    xsize 120
+                    ysize 35
 
             elif icon.icon_type == "door_closed":
-                text "A closed door" xalign 0.5
+                text "Closed Door" size 14 xalign 0.5
                 textbutton "Open":
                     action Function(handle_door_interaction, adj_x, adj_y)
                     xalign 0.5
+                    xsize 120
+                    ysize 35
 
             elif icon.icon_type == "door_open":
-                text "An open door" xalign 0.5
-
-            textbutton "Cancel":
-                action NullAction()
-                xalign 0.5
+                text "Open Door" size 14 xalign 0.5
 
 
-# Navigation handler functions
+screen render_first_person_view(view_data, floor, ps):
+    """Render the first-person view based on view_data."""
+
+    # Background (ceiling and floor)
+    $ view_width = int(config.screen_width * 0.666)
+    $ view_height = config.screen_height
+
+    add Solid(color_ceiling) xpos 0 ypos 0 xsize view_width ysize int(view_height / 2)
+    add Solid(color_floor) xpos 0 ypos int(view_height / 2) xsize view_width ysize int(view_height / 2)
+
+    # Simple wall rendering if blocked
+    if not view_data.get("can_move_forward", False):
+        # Show wall ahead
+        add Solid(color_wall) xpos int(view_width * 0.2) ypos int(view_height * 0.2) xsize int(view_width * 0.6) ysize int(view_height * 0.6)
+
+    # Text overlay showing what's ahead (temporary placeholder)
+    $ tiles = view_data.get("tiles", [])
+    if tiles:
+        text "Ahead: {} tiles visible".format(len(tiles)) xalign 0.5 ypos 20 color "#FFFFFF" size 16
+
+
+# Navigation and interaction handlers (from original file, unchanged)
 init python:
+    import math  # For AnimatedInteractIndicator
+
+    def calculate_exploration_percent(floor):
+        """
+        Calculate exploration percentage.
+
+        Formula: (tiles_drawn / total_walkable) * 0.7 + (discovered_items / total_items) * 0.3
+        """
+        if not floor:
+            return 0
+
+        # Count total walkable tiles
+        total_walkable = 0
+        tiles_drawn = 0
+
+        for y in range(floor.dimensions[1]):
+            for x in range(floor.dimensions[0]):
+                tile = floor.get_tile(x, y)
+                if tile and tile.tile_type != "empty":
+                    total_walkable += 1
+                    # Count as "drawn" if tile type is not empty
+                    if tile.tile_type != "empty":
+                        tiles_drawn += 1
+
+        # Count discoverable items (gathering points and notes)
+        total_items = 0
+        discovered_items = 0
+
+        for (icon_x, icon_y), icon in floor.icons.items():
+            if icon.icon_type in ["gathering", "note"]:
+                total_items += 1
+                # Mark as discovered if metadata has "discovered" flag
+                if icon.metadata.get("discovered", False):
+                    discovered_items += 1
+
+        # Calculate percentages
+        tile_pct = (float(tiles_drawn) / float(total_walkable)) if total_walkable > 0 else 0.0
+        item_pct = (float(discovered_items) / float(total_items)) if total_items > 0 else 0.0
+
+        # Weighted average (70% tiles, 30% items)
+        exploration = (tile_pct * 0.7) + (item_pct * 0.3)
+
+        # Round to nearest percent
+        return int(round(exploration * 100))
+
+    def toggle_auto_map():
+        """Toggle auto-mapping on/off."""
+        global map_grid
+
+        if map_grid:
+            map_grid.auto_map_enabled = not getattr(map_grid, 'auto_map_enabled', False)
+            renpy.notify("Auto-map: {}".format("ON" if map_grid.auto_map_enabled else "OFF"))
+            renpy.restart_interaction()
+
+    def exit_exploration_mode():
+        """Exit exploration and return to VN."""
+        # Set return value to indicate exit
+        renpy.return_statement(value="exit_exploration")
+
     def handle_turn_left():
         """Rotate player 90 degrees left"""
         global player_state
@@ -254,10 +534,14 @@ init python:
             # Move player
             player_state.set_position(new_x, new_y)
 
+            # Auto-map: reveal tile if enabled
+            if getattr(map_grid, 'auto_map_enabled', False):
+                auto_reveal_tile(floor, new_x, new_y)
+
             # Check for step-on triggers
             icon, trigger_type = InteractionHandler.check_step_on_trigger(floor, new_x, new_y)
             if icon:
-                handle_step_on_trigger(icon)
+                handle_step_on_trigger(icon, floor, new_x, new_y)
 
             renpy.restart_interaction()
         else:
@@ -286,16 +570,26 @@ init python:
             # Move player
             player_state.set_position(new_x, new_y)
 
+            # Auto-map: reveal tile if enabled
+            if getattr(map_grid, 'auto_map_enabled', False):
+                auto_reveal_tile(floor, new_x, new_y)
+
             # Check for step-on triggers
             icon, trigger_type = InteractionHandler.check_step_on_trigger(floor, new_x, new_y)
             if icon:
-                handle_step_on_trigger(icon)
+                handle_step_on_trigger(icon, floor, new_x, new_y)
 
             renpy.restart_interaction()
         else:
             renpy.notify("Cannot move: {}".format(reason))
 
-    def handle_step_on_trigger(icon):
+    def auto_reveal_tile(floor, x, y):
+        """Auto-reveal tile when walking on it (auto-map feature)."""
+        # Tile is already revealed by default in the current implementation
+        # This function is a placeholder for future "fog of war" implementation
+        pass
+
+    def handle_step_on_trigger(icon, floor, x, y):
         """Handle step-on interactions (gathering, event, teleporter, enemy)"""
         global player_state
 
@@ -306,6 +600,8 @@ init python:
                 result["damage"], result["health"]
             ))
         elif result["type"] == "gathering":
+            # Mark as discovered
+            icon.metadata["discovered"] = True
             renpy.notify(result["message"])
         elif result["type"] == "event":
             renpy.notify(result["message"])
@@ -372,4 +668,28 @@ init python:
             # Change door to open
             icon.icon_type = "door_open"
             renpy.notify("Door opened")
+            renpy.restart_interaction()
+
+    # Map editing functions (delegated to map_tools if available)
+    def select_tile_type(tile_type):
+        """Select tile type for placement."""
+        global map_grid
+        if map_grid:
+            map_grid.selected_tile_type = tile_type
+            map_grid.current_mode = "edit_tiles"
+            renpy.restart_interaction()
+
+    def select_icon_for_placement(icon_type):
+        """Select icon type for placement."""
+        global map_grid
+        if map_grid:
+            map_grid.selected_icon_type = icon_type
+            map_grid.current_mode = "edit_icons"
+            renpy.restart_interaction()
+
+    def rotate_selected_tile():
+        """Rotate the currently selected tile."""
+        global map_grid
+        if map_grid:
+            map_grid.rotate_selected_tile()
             renpy.restart_interaction()
