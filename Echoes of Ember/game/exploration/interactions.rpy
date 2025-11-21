@@ -102,9 +102,12 @@ init python:
                 }
 
             elif icon_type == "event":
+                # Check if event has a dialogue label
+                event_label = icon.metadata.get("label")
                 return {
                     "type": "event",
-                    "message": "An event occurs!",
+                    "message": icon.metadata.get("message", "An event occurs!"),
+                    "label": event_label,
                     "metadata": icon.metadata
                 }
 

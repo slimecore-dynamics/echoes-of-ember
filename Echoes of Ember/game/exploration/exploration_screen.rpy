@@ -9,6 +9,9 @@ define color_door_closed = "#8B4513"
 define color_door_open = "#D2B48C"
 define color_interact = "#FFFF00"
 
+# Global flag for dialogue state during exploration
+default exploration_dialogue_active = False
+
 screen exploration_view():
     """
     Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
@@ -144,7 +147,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 150
                                 ysize 40
-                                sensitive can_move
+                                sensitive (can_move and not exploration_dialogue_active)
 
                             # Turn buttons (Left/Right) + Back button
                             hbox:
@@ -155,16 +158,19 @@ screen exploration_view():
                                     action Function(handle_turn_left)
                                     xsize 70
                                     ysize 40
+                                    sensitive (not exploration_dialogue_active)
 
                                 textbutton "Back":
                                     action Function(handle_move_backward)
                                     xsize 70
                                     ysize 40
+                                    sensitive (not exploration_dialogue_active)
 
                                 textbutton "Right →":
                                     action Function(handle_turn_right)
                                     xsize 70
                                     ysize 40
+                                    sensitive (not exploration_dialogue_active)
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON
                     frame:
@@ -180,12 +186,14 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 150
                                 ysize 35
+                                sensitive (not exploration_dialogue_active)
 
                             textbutton "Leave Exploration":
                                 action Function(exit_exploration_mode)
                                 xalign 0.5
                                 xsize 150
                                 ysize 35
+                                sensitive (not exploration_dialogue_active)
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
@@ -326,6 +334,7 @@ screen icon_palette():
                     ysize 30
                     text_size 10
                     background ("#FFFF00" if is_selected else "#444444")
+                    sensitive (not exploration_dialogue_active)
 
 
 screen full_palette():
@@ -350,6 +359,7 @@ screen full_palette():
                     ysize 25
                     text_size 9
                     background ("#FFFF00" if is_selected else "#555555")
+                    sensitive (not exploration_dialogue_active)
 
         # Icons
         text "Icons" size 12 xalign 0.5
@@ -366,6 +376,7 @@ screen full_palette():
                     ysize 25
                     text_size 8
                     background ("#FFFF00" if is_selected else "#555555")
+                    sensitive (not exploration_dialogue_active)
 
         # Rotate button
         textbutton "Rotate (R)":
@@ -374,6 +385,7 @@ screen full_palette():
             ysize 25
             xalign 0.5
             text_size 10
+            sensitive (not exploration_dialogue_active)
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
@@ -394,6 +406,7 @@ screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
                     xalign 0.5
                     xsize 120
                     ysize 35
+                    sensitive (not exploration_dialogue_active)
 
             elif icon.icon_type == "stairs_down":
                 text "Stairs Down" size 14 xalign 0.5
@@ -402,6 +415,7 @@ screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
                     xalign 0.5
                     xsize 120
                     ysize 35
+                    sensitive (not exploration_dialogue_active)
 
             elif icon.icon_type == "door_closed":
                 text "Closed Door" size 14 xalign 0.5
@@ -410,6 +424,7 @@ screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
                     xalign 0.5
                     xsize 120
                     ysize 35
+                    sensitive (not exploration_dialogue_active)
 
             elif icon.icon_type == "door_open":
                 text "Open Door" size 14 xalign 0.5
@@ -591,7 +606,7 @@ init python:
 
     def handle_step_on_trigger(icon, floor, x, y):
         """Handle step-on interactions (gathering, event, teleporter, enemy)"""
-        global player_state
+        global player_state, exploration_dialogue_active
 
         result = InteractionHandler.handle_interaction(icon, "step_on", player_state, None)
 
@@ -604,7 +619,20 @@ init python:
             icon.metadata["discovered"] = True
             renpy.notify(result["message"])
         elif result["type"] == "event":
-            renpy.notify(result["message"])
+            # Check if event has a dialogue label
+            if "label" in result and result["label"]:
+                # Set dialogue active flag to disable UI
+                exploration_dialogue_active = True
+
+                # Call dialogue label in new context (overlays exploration screen)
+                renpy.call_in_new_context(result["label"])
+
+                # Dialogue finished, re-enable UI
+                exploration_dialogue_active = False
+                renpy.restart_interaction()
+            else:
+                # No label, just show notification
+                renpy.notify(result["message"])
         elif result["type"] == "teleporter":
             renpy.notify(result["message"])
 

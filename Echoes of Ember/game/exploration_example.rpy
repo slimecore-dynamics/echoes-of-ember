@@ -200,3 +200,149 @@ label gathering_example:
 #         else:
 #             renpy.notify("Unknown item: {}".format(item))
 #     # ... rest of handling ...
+
+
+# This label shows VN dialogue DURING exploration
+label dialogue_during_exploration_example:
+    """
+    Example: Show VN dialogue during exploration (overlays exploration screen).
+
+    Demonstrates:
+    - Event triggers dialogue label
+    - Dialogue appears over exploration UI
+    - Choices affect variables
+    - Returns to exploration after dialogue
+    """
+
+    call start_mapping_system
+    call start_exploration_system
+
+    # Character definitions (if not already defined)
+    define survivor = Character("Survivor", color="#00FF00")
+    define ai = Character("AI Voice", color="#00FFFF")
+
+    python:
+        # Create floor with event triggers
+        floor = FloorMap("wreck_floor", "Crashed Ship", dimensions=(20, 20))
+        floor.starting_x = 10
+        floor.starting_y = 10
+        floor.starting_rotation = 0
+        floor.view_distance = 3
+
+        # Corridor
+        for x in range(8, 15):
+            floor.set_tile(x, 10, MapTile("hallway", rotation=0))
+
+        # Event 1: Survivor at (9, 10)
+        floor.place_icon(9, 10, MapIcon("event", (9, 10),
+            metadata={"label": "found_survivor", "message": "You see someone..."}))
+
+        # Event 2: AI console at (12, 10)
+        floor.place_icon(12, 10, MapIcon("event", (12, 10),
+            metadata={"label": "ai_console", "message": "A console flickers..."}))
+
+        # Gathering point
+        floor.place_icon(14, 10, MapIcon("gathering", (14, 10),
+            metadata={"item": "data", "amount": 1}))
+
+        # Variables to track story
+        saved_survivor = False
+        got_ai_data = False
+
+        map_grid.floors["wreck_floor"] = floor
+        map_grid.current_floor_id = "wreck_floor"
+        player_state = PlayerState(x=10, y=10, rotation=0, floor_id="wreck_floor")
+
+    "You enter the crashed ship..."
+    "Explore and find what you can."
+
+    # Enter exploration mode
+    call enter_exploration_mode("wreck_floor")
+
+    # Player has exited exploration
+
+    # Check what happened during exploration
+    if saved_survivor and got_ai_data:
+        "You rescued the survivor and recovered the AI data."
+        "This will be very valuable."
+    elif saved_survivor:
+        "You rescued the survivor, but missed the AI data."
+    elif got_ai_data:
+        "You recovered the AI data, but left the survivor behind..."
+    else:
+        "You left empty-handed."
+
+    return
+
+
+# Dialogue labels that get called during exploration
+
+label found_survivor:
+    """Triggered when stepping on survivor event icon."""
+
+    # This dialogue appears OVER the exploration screen
+    # Map interaction is disabled during dialogue
+
+    show survivor at center with dissolve
+
+    survivor "Help! I've been trapped here for days!"
+    survivor "The ship's AI went haywire and locked me in."
+
+    menu:
+        "Will you help them?"
+
+        "Yes, I'll help you escape":
+            survivor "Thank you! Follow me, I know a way out."
+            $ saved_survivor = True
+            "The survivor escapes with you."
+
+        "Sorry, I can't risk it":
+            survivor "Please... don't leave me here..."
+            "You leave them behind."
+
+    hide survivor with dissolve
+
+    # Returns to exploration
+    return
+
+
+label ai_console:
+    """Triggered when stepping on AI console event icon."""
+
+    show screen console_screen
+
+    ai "Access granted. Data retrieval in progress."
+
+    menu:
+        "What do you do?"
+
+        "Download all data":
+            ai "Warning: This will alert security systems."
+
+            menu:
+                "Continue anyway":
+                    $ got_ai_data = True
+                    ai "Download complete. Intruder alert activated."
+                    "You got the data, but security is now active!"
+
+                "Cancel download":
+                    ai "Download cancelled."
+
+        "Leave it alone":
+            ai "Session terminated."
+
+    hide screen console_screen
+
+    return
+
+
+# Simple console screen overlay
+screen console_screen:
+    frame:
+        xalign 0.5
+        yalign 0.3
+        xpadding 40
+        ypadding 30
+        background "#000088DD"
+
+        text "AI CONSOLE ACTIVE" xalign 0.5 color "#00FFFF" size 24
