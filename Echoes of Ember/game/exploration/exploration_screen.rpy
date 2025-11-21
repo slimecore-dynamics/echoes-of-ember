@@ -236,10 +236,11 @@ screen compact_map_display(floor, ps):
                     $ tile_color = get_tile_color(tile.tile_type)
                     add Solid(tile_color, xsize=cell_size-1, ysize=cell_size-1) xpos x*cell_size ypos y*cell_size
 
-        # Draw icons
+        # Draw icons (but not events - those should be surprises)
         for (icon_x, icon_y), icon in floor.icons.items():
-            $ icon_color = get_icon_color(icon.icon_type)
-            add Solid(icon_color, xsize=cell_size-2, ysize=cell_size-2) xpos icon_x*cell_size+1 ypos icon_y*cell_size+1
+            if icon.icon_type != "event":  # Skip event icons - keep them hidden for surprises
+                $ icon_color = get_icon_color(icon.icon_type)
+                add Solid(icon_color, xsize=cell_size-2, ysize=cell_size-2) xpos icon_x*cell_size+1 ypos icon_y*cell_size+1
 
         # Draw player marker (red triangle)
         add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
