@@ -73,15 +73,15 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
-                    # MAP VIEW (using existing map_grid_display screen - square viewport)
+                    # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.25)  # 25% of screen height for square
+                        ysize int(config.screen_height * 0.45)  # 45% of screen height to show full 20x20 grid
                         background "#000000"
                         padding (10, 10)
 
                         if floor:
-                            # Show full map grid (no scrollbars, just bigger)
+                            # Show full map grid
                             use map_grid_display(floor)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
@@ -89,7 +89,7 @@ screen exploration_view():
                     # PALETTE (using existing combined_selector_panel screen)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.20)
+                        ysize int(config.screen_height * 0.15)  # Reduced to 15% to make room for larger map
                         background "#2A2A2A"
                         padding (5, 5)
 
