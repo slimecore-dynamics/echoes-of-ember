@@ -141,9 +141,23 @@ init python:
         for x in range(7, 10):
             floor.set_tile(x, 10, MapTile("hallway", rotation=0))  # Horizontal hallway
 
+        # SEPARATE DUNGEON FROM DRAWN MAP
+        # Store real dungeon tiles (for movement validation)
+        import copy
+        floor.dungeon_tiles = copy.deepcopy(floor.tiles)
+
+        # Clear drawn map (player starts with blank map)
+        for y in range(floor.dimensions[1]):
+            for x in range(floor.dimensions[0]):
+                floor.set_tile(x, y, MapTile("empty", rotation=0))
+
         # Add floor to map grid
         map_grid.floors[floor_id] = floor
         map_grid.current_floor_id = floor_id
+
+        # Set auto-map to False by default
+        if not hasattr(map_grid, 'auto_map_enabled'):
+            map_grid.auto_map_enabled = False
 
         # Initialize player state
         if not player_state:

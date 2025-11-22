@@ -28,8 +28,8 @@ init python:
             if to_x < 0 or to_x >= width or to_y < 0 or to_y >= height:
                 return (False, "Out of bounds")
 
-            # Get destination tile
-            dest_tile = floor.get_tile(to_x, to_y)
+            # Get destination tile from DUNGEON (real tiles), not drawn map
+            dest_tile = MovementValidator._get_dungeon_tile(floor, to_x, to_y)
             if not dest_tile:
                 return (False, "Invalid destination")
 
@@ -43,8 +43,8 @@ init python:
                 if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
                     return (False, "Blocked by {}".format(icon_at_dest.icon_type))
 
-            # Get source tile
-            source_tile = floor.get_tile(from_x, from_y)
+            # Get source tile from DUNGEON (real tiles), not drawn map
+            source_tile = MovementValidator._get_dungeon_tile(floor, from_x, from_y)
             if not source_tile:
                 return (False, "Invalid source")
 
@@ -162,6 +162,21 @@ init python:
                 "west": "east"
             }
             return opposites.get(direction, "")
+
+        @staticmethod
+        def _get_dungeon_tile(floor, x, y):
+            """
+            Get tile from real dungeon (for movement validation).
+            Falls back to drawn map if dungeon_tiles doesn't exist.
+            """
+            if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles:
+                # Use dungeon tiles (real layout)
+                if y < len(floor.dungeon_tiles) and x < len(floor.dungeon_tiles[y]):
+                    return floor.dungeon_tiles[y][x]
+                return None
+            else:
+                # Fall back to regular tiles (drawn map)
+                return floor.get_tile(x, y)
 
         @staticmethod
         def get_adjacent_icon(floor, x, y, rotation):

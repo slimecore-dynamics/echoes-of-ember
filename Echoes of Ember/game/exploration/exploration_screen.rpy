@@ -95,36 +95,71 @@ screen exploration_view():
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
-                    # PALETTE (using existing combined_selector_panel screen)
+                    # PALETTE with custom layout
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.065)  # Reduced to 15% to make room for larger map
-                        background "#2A2A2A"
-                        padding (5, 5)
-
-                        if map_grid:
-                            use combined_selector_panel()
-                        else:
-                            text "No palette" xalign 0.5 yalign 0.5 size 12
-
-                    # STATUS DISPLAY
-                    frame:
-                        xsize int(config.screen_width * 0.314)
+                        ysize int(config.screen_height * 0.15)
                         background "#2A2A2A"
                         padding (10, 10)
 
                         vbox:
-                            spacing 5
+                            spacing 8
 
-                            if ps and floor:
-                                $ exploration_pct = calculate_exploration_percent(floor)
+                            # Row 1: Tiles (center aligned)
+                            text "Tiles" size 12 xalign 0.5
+                            grid 6 1:
+                                spacing 3
+                                xalign 0.5
+                                for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
+                                    $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
+                                    textbutton tile_type.replace("_", " ")[:7]:
+                                        action Function(select_tile_type, tile_type)
+                                        xsize 60
+                                        ysize 25
+                                        text_size 8
+                                        selected is_selected
 
-                                text "Position: ({}, {})".format(ps.x, ps.y) size 14
-                                text "Facing: {}".format(ps.get_facing_direction_name()) size 14
-                                text "Health: {}/{}".format(ps.health, ps.max_health) size 14
-                                text "Explored: {}%".format(exploration_pct) size 14
-                            else:
-                                text "No status" size 14
+                            # Rows 2-3: hbox with icons on left, rotate on right
+                            hbox:
+                                spacing 10
+
+                                # Left half: vbox with icon rows
+                                vbox:
+                                    spacing 5
+
+                                    # Icons row 1 (stairs, doors)
+                                    text "Icons" size 12
+                                    grid 4 1:
+                                        spacing 3
+                                        for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
+                                            $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                            textbutton icon_type.replace("_", " ")[:7]:
+                                                action Function(select_icon_for_placement, icon_type)
+                                                xsize 60
+                                                ysize 25
+                                                text_size 7
+                                                selected is_selected
+
+                                    # Icons row 2 (gathering, enemy, event, etc)
+                                    grid 4 1:
+                                        spacing 3
+                                        for icon_type in ["gathering", "enemy", "event", "teleporter"]:
+                                            $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                            textbutton icon_type.replace("_", " ")[:7]:
+                                                action Function(select_icon_for_placement, icon_type)
+                                                xsize 60
+                                                ysize 25
+                                                text_size 7
+                                                selected is_selected
+
+                                # Right half: Rotate button
+                                textbutton "Rotate":
+                                    action Function(rotate_selected_tile)
+                                    xalign 1.0
+                                    yalign 1.0
+                                    xsize 60
+                                    ysize 55
+                                    sensitive (not exploration_dialogue_active)
 
                     # NAVIGATION CONTROLS
                     frame:
@@ -135,13 +170,13 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # DEBUG: Show movement info
+                            # DEBUG: Show movement info (using DUNGEON tiles)
                             if floor and ps:
                                 $ new_x, new_y = ps.get_forward_position()
                                 $ can_move, reason = MovementValidator.can_move_to(
                                     floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
-                                $ dest_tile = floor.get_tile(new_x, new_y)
+                                $ dest_tile = MovementValidator._get_dungeon_tile(floor, new_x, new_y)
                                 $ tile_info = "{}@{}".format(dest_tile.tile_type, dest_tile.rotation) if dest_tile else "None"
                                 $ debug_msg = "Fwd to ({},{}): {} [{}]".format(new_x, new_y, "OK" if can_move else reason, tile_info)
                                 $ debug_color = "#00FF00" if can_move else "#FF0000"
@@ -149,12 +184,13 @@ screen exploration_view():
                             else:
                                 $ can_move = False
 
-                            # Forward button (center aligned)
+                            # Forward button (text centered)
                             textbutton "Forward":
                                 action Function(handle_move_forward)
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
+                                text_align 0.5
                                 sensitive (can_move and not exploration_dialogue_active)
 
                             # Empty line
@@ -180,23 +216,16 @@ screen exploration_view():
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
-                            # # Empty line
-                            # null height 8
+                            # Empty line
+                            null height 8
 
-                            # Back button (center aligned)
+                            # Back button (text centered)
                             textbutton "Back":
                                 action Function(handle_move_backward)
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                sensitive (not exploration_dialogue_active)
-
-                            # Rotate button
-                            textbutton "Rotate":
-                                action Function(rotate_selected_tile)
-                                xalign 0.5
-                                xsize 150
-                                ysize 35
+                                text_align 0.5
                                 sensitive (not exploration_dialogue_active)
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
@@ -205,16 +234,17 @@ screen exploration_view():
                         background "#2A2A2A"
                         padding (10, 10)
 
-                        $ auto_map_on = (map_grid and getattr(map_grid, 'auto_map_enabled', False))
-
                         # Auto-Map on LEFT
                         textbutton "Auto-Map":
-                            action Function(toggle_auto_map)
+                            action ToggleField(map_grid, "auto_map_enabled")
                             xalign 0.0
                             xsize 200
                             ysize 35
-                            background ("#FFFF00" if auto_map_on else "#444444")
-                            hover_background ("#FFDD00" if auto_map_on else "#555555")
+                            selected_background "#FFFF00"
+                            selected_hover_background "#FFDD00"
+                            background "#444444"
+                            hover_background "#555555"
+                            selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
                             sensitive (not exploration_dialogue_active)
 
                         # Leave on RIGHT
@@ -521,21 +551,23 @@ init python:
             renpy.notify("Cannot move: {}".format(reason))
 
     def auto_reveal_tile(floor, x, y):
-        """Auto-reveal tile when walking on it (auto-map feature)."""
-        # Get the actual tile at this position
-        tile = floor.get_tile(x, y)
+        """Auto-reveal tile when walking on it - copy from dungeon to drawn map."""
+        # Get the REAL tile from dungeon
+        if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles:
+            if y < len(floor.dungeon_tiles) and x < len(floor.dungeon_tiles[y]):
+                dungeon_tile = floor.dungeon_tiles[y][x]
 
-        if tile and tile.tile_type != "empty":
-            # Mark this tile as "drawn" by setting it on the floor
-            # The existing map system should handle displaying it
-            # In Etrian Odyssey style, we automatically "draw" the tile the player walks on
+                if dungeon_tile and dungeon_tile.tile_type != "empty":
+                    # Copy dungeon tile to drawn map
+                    import copy
+                    floor.set_tile(x, y, copy.deepcopy(dungeon_tile))
 
-            # Initialize revealed_tiles set if it doesn't exist
-            if not hasattr(floor, 'revealed_tiles'):
-                floor.revealed_tiles = set()
+                    # Initialize revealed_tiles set if it doesn't exist
+                    if not hasattr(floor, 'revealed_tiles'):
+                        floor.revealed_tiles = set()
 
-            # Add this tile to revealed tiles
-            floor.revealed_tiles.add((x, y))
+                    # Add this tile to revealed tiles
+                    floor.revealed_tiles.add((x, y))
 
     def handle_step_on_trigger(icon, floor, x, y):
         """Handle step-on interactions (gathering, event, teleporter, enemy)"""
