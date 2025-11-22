@@ -135,7 +135,9 @@ screen exploration_view():
                                 # DEBUG: Show movement check result and tile info
                                 $ dest_tile = floor.get_tile(new_x, new_y)
                                 $ tile_info = "{}@{}".format(dest_tile.tile_type, dest_tile.rotation) if dest_tile else "None"
-                                text "Fwd to ({},{}): {} [{}]".format(new_x, new_y, "OK" if can_move else reason, tile_info) size 10 color ("#00FF00" if can_move else "#FF0000")
+                                $ debug_msg = "Fwd to ({},{}): {} [{}]".format(new_x, new_y, "OK" if can_move else reason, tile_info)
+                                $ debug_color = "#00FF00" if can_move else "#FF0000"
+                                text "[debug_msg]" size 10 color debug_color
                             else:
                                 $ can_move = False
 
