@@ -118,43 +118,28 @@ init python:
         # Set exploration metadata
         floor.starting_x = 10
         floor.starting_y = 10
-        floor.starting_rotation = 90  # Facing East (so player can move along the corridor)
+        floor.starting_rotation = 0  # Facing North
         floor.view_distance = 3
 
-        # Create a simple dungeon layout:
-        # Starting position needs to allow movement - use cross tile
+        # Create a simple test layout:
+        # Center cross at 10,10 with 3 hallways extending in each cardinal direction
         floor.set_tile(10, 10, MapTile("cross", rotation=0))
 
-        # Row 10: horizontal hallways from (8,10) to (12,10)
-        for x in range(8, 13):
-            if x != 10:  # Skip starting position (already set as cross)
-                floor.set_tile(x, 10, MapTile("hallway", rotation=0))
+        # North hallways (y decreases) - 3 tiles
+        for y in range(7, 10):
+            floor.set_tile(10, y, MapTile("hallway", rotation=90))  # Vertical hallway
 
-        # Add t_intersection at (13, 10) with rotation 0 (wall at north)
-        floor.set_tile(13, 10, MapTile("t_intersection", rotation=0))
+        # South hallways (y increases) - 3 tiles
+        for y in range(11, 14):
+            floor.set_tile(10, y, MapTile("hallway", rotation=90))  # Vertical hallway
 
-        # Add vertical hallway going south from t_intersection
-        for y in range(11, 15):
-            floor.set_tile(13, y, MapTile("hallway", rotation=90))
+        # East hallways (x increases) - 3 tiles
+        for x in range(11, 14):
+            floor.set_tile(x, 10, MapTile("hallway", rotation=0))  # Horizontal hallway
 
-        # Add some walls around the corridor
-        for x in range(7, 14):
-            if x != 10:  # Don't block starting position
-                floor.set_tile(x, 9, MapTile("wall", rotation=180))  # North wall
-                floor.set_tile(x, 11, MapTile("wall", rotation=0))   # South wall (except at junction)
-
-        # Add a door at (11, 10)
-        floor.place_icon(11, 10, MapIcon("door_closed", (11, 10)))
-
-        # Add gathering point at (13, 14)
-        floor.place_icon(13, 14, MapIcon("gathering", (13, 14), metadata={"item": "data", "amount": 1}))
-
-        # Add enemy at (12, 10)
-        floor.place_icon(12, 10, MapIcon("enemy", (12, 10), metadata={"damage": 5}))
-
-        # Add stairs down at (13, 15)
-        # (This would lead to floor_2 if it existed)
-        floor.place_icon(13, 15, MapIcon("stairs_down", (13, 15)))
+        # West hallways (x decreases) - 3 tiles
+        for x in range(7, 10):
+            floor.set_tile(x, 10, MapTile("hallway", rotation=0))  # Horizontal hallway
 
         # Add floor to map grid
         map_grid.floors[floor_id] = floor

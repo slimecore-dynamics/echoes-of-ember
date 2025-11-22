@@ -12,10 +12,24 @@ define color_interact = "#FFFF00"
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False
 
+# Global flag to track if we're in exploration mode (used to hide Map button)
+default in_exploration_mode = False
+
 screen exploration_view():
     """
     Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
     """
+
+    # Set exploration mode flag
+    on "show" action SetVariable("in_exploration_mode", True)
+    on "hide" action SetVariable("in_exploration_mode", False)
+
+    # Make this modal to prevent M key from opening map
+    modal True
+
+    # Block M key during exploration
+    key "m" action NullAction()
+    key "M" action NullAction()
 
     # Get current floor and player state
     $ floor = map_grid.get_current_floor() if map_grid else None
@@ -73,15 +87,21 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
-                    # MAP VIEW (using existing map_grid_display screen)
+                    # MAP VIEW (using existing map_grid_display screen - scaled down)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.40)
+                        ysize int(config.screen_height * 0.35)
                         background "#000000"
-                        padding (5, 5)
+                        padding (10, 10)
 
                         if floor:
-                            use map_grid_display(floor)
+                            # Scale down the map display to fit with buffer
+                            viewport:
+                                xsize int(config.screen_width * 0.294)
+                                ysize int(config.screen_height * 0.33)
+                                xalign 0.5
+                                yalign 0.5
+                                use map_grid_display(floor)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -165,26 +185,28 @@ screen exploration_view():
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
-                    # AUTO-MAP TOGGLE + LEAVE BUTTON
+                    # AUTO-MAP TOGGLE + LEAVE BUTTON (one line at bottom right)
                     frame:
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
 
-                        vbox:
+                        hbox:
                             spacing 8
+                            xalign 1.0  # Right align
 
-                            textbutton "Auto-Map: {}".format("ON" if (map_grid and getattr(map_grid, 'auto_map_enabled', False)) else "OFF"):
+                            $ auto_map_on = (map_grid and getattr(map_grid, 'auto_map_enabled', False))
+                            textbutton "Auto Map":
                                 action Function(toggle_auto_map)
-                                xalign 0.5
-                                xsize 150
+                                xsize 90
                                 ysize 35
+                                background ("#FFFF00" if auto_map_on else "#444444")
+                                hover_background ("#FFDD00" if auto_map_on else "#555555")
                                 sensitive (not exploration_dialogue_active)
 
-                            textbutton "Leave Exploration":
+                            textbutton "Leave":
                                 action Function(exit_exploration_mode)
-                                xalign 0.5
-                                xsize 150
+                                xsize 90
                                 ysize 35
                                 sensitive (not exploration_dialogue_active)
 
@@ -387,8 +409,8 @@ init python:
 
     def exit_exploration_mode():
         """Exit exploration and return to VN."""
-        # Set return value to indicate exit
-        renpy.return_statement(value="exit_exploration")
+        # Hide the exploration screen to return to VN
+        renpy.hide_screen("exploration_view")
 
     def handle_turn_left():
         """Rotate player 90 degrees left"""
