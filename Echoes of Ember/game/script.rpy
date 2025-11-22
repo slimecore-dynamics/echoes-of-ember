@@ -33,6 +33,8 @@ label start:
 
     e "The mapping system has been initialized. You can use it to create Etrian Odyssey-style dungeon maps!"
 
+    jump start_dungeon_exploration_example
+
     # This ends the game.
 
     return
