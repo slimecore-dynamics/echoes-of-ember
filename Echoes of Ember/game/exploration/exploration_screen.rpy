@@ -76,21 +76,41 @@ screen exploration_view():
                     # SPACER - move everything down 200 pixels
                     null height 100
 
-                    # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
+                    # MAP VIEW - inline display with proper sizing
                     frame:
-                        xsize int(config.screen_width * 0.3)
-                        ysize int(config.screen_height * 0.4)  # 45% of screen height to show full 20x20 grid
+                        xsize int(config.screen_width * 0.314)
+                        ysize int(config.screen_width * 0.314)  # Square viewport
                         background "#000000"
                         padding (10, 10)
 
                         if floor:
+                            $ grid_width = floor.dimensions[0]
+                            $ grid_height = floor.dimensions[1]
+                            $ available_size = int(config.screen_width * 0.314) - 20  # Minus padding
+                            $ cell_size = min(available_size // grid_width, available_size // grid_height)
+
                             fixed:
-                                # Show full map grid
-                                use map_grid_display(floor)
+                                xysize (grid_width * cell_size, grid_height * cell_size)
+                                xalign 0.5
+                                yalign 0.5
+
+                                # Draw all tiles from drawn map (floor.tiles)
+                                for y in range(grid_height):
+                                    for x in range(grid_width):
+                                        $ tile = floor.get_tile(x, y)
+                                        if tile and tile.tile_type != "empty":
+                                            $ tile_color = get_tile_color(tile.tile_type)
+                                            add Solid(tile_color, xysize=(cell_size-1, cell_size-1)) xpos x*cell_size ypos y*cell_size
+
+                                # Draw icons (if visible)
+                                for (icon_x, icon_y), icon in floor.icons.items():
+                                    # Only show non-event icons (hide story events)
+                                    if icon.icon_type not in ["event"]:
+                                        $ icon_color = get_icon_color(icon.icon_type)
+                                        add Solid(icon_color, xysize=(cell_size//2, cell_size//2)) xpos icon_x*cell_size + cell_size//4 ypos icon_y*cell_size + cell_size//4
 
                                 # Add player marker (red triangle)
-                                if ps and map_grid:
-                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
+                                if ps:
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
@@ -105,19 +125,22 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # Row 1: Tiles (center aligned)
-                            text "Tiles" size 12 xalign 0.5
+                            # Row 1: Tiles (center aligned, no header)
                             grid 6 1:
                                 spacing 3
                                 xalign 0.5
                                 for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
                                     $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
-                                    textbutton tile_type.replace("_", " ")[:7]:
+                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_type)
+                                    imagebutton:
+                                        idle tile_image
+                                        hover tile_image
+                                        selected_idle tile_image
                                         action Function(select_tile_type, tile_type)
-                                        xsize 60
-                                        ysize 25
-                                        text_size 8
+                                        xysize (30, 30)
                                         selected is_selected
+                                        if is_selected:
+                                            background "#FFFF00"
 
                             # Rows 2-3: hbox with icons on left, rotate on right
                             hbox:
@@ -127,30 +150,39 @@ screen exploration_view():
                                 vbox:
                                     spacing 5
 
-                                    # Icons row 1 (stairs, doors)
-                                    text "Icons" size 12
+                                    # Icons row 1 (stairs, doors) - no header
                                     grid 4 1:
                                         spacing 3
                                         for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
                                             $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                            textbutton icon_type.replace("_", " ")[:7]:
+                                            # Map door_closed/door_open to door.png
+                                            $ icon_name = "door" if "door" in icon_type else icon_type
+                                            $ icon_image = "images/maps/icons/{}.png".format(icon_name)
+                                            imagebutton:
+                                                idle icon_image
+                                                hover icon_image
+                                                selected_idle icon_image
                                                 action Function(select_icon_for_placement, icon_type)
-                                                xsize 60
-                                                ysize 25
-                                                text_size 7
+                                                xysize (30, 30)
                                                 selected is_selected
+                                                if is_selected:
+                                                    background "#FFFF00"
 
                                     # Icons row 2 (gathering, enemy, event, etc)
                                     grid 4 1:
                                         spacing 3
                                         for icon_type in ["gathering", "enemy", "event", "teleporter"]:
                                             $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                            textbutton icon_type.replace("_", " ")[:7]:
+                                            $ icon_image = "images/maps/icons/{}.png".format(icon_type)
+                                            imagebutton:
+                                                idle icon_image
+                                                hover icon_image
+                                                selected_idle icon_image
                                                 action Function(select_icon_for_placement, icon_type)
-                                                xsize 60
-                                                ysize 25
-                                                text_size 7
+                                                xysize (30, 30)
                                                 selected is_selected
+                                                if is_selected:
+                                                    background "#FFFF00"
 
                                 # Right half: Rotate button
                                 textbutton "Rotate":
@@ -190,7 +222,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                text_align 0.5
+                                text_xalign 0.5
                                 sensitive (can_move and not exploration_dialogue_active)
 
                             # Empty line
@@ -225,7 +257,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                text_align 0.5
+                                text_xalign 0.5
                                 sensitive (not exploration_dialogue_active)
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
