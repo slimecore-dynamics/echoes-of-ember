@@ -76,15 +76,16 @@ screen exploration_view():
                     # MAP VIEW (using existing map_grid_display screen - square viewport)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_width * 0.314)  # Square: same as width
+                        ysize int(config.screen_height * 0.25)  # 25% of screen height for square
                         background "#000000"
                         padding (10, 10)
 
                         if floor:
-                            # Square viewport for map display
+                            # Square viewport for map display (fit within frame)
+                            $ map_size = min(int(config.screen_width * 0.294), int(config.screen_height * 0.23))
                             viewport:
-                                xsize int(config.screen_width * 0.294)
-                                ysize int(config.screen_width * 0.294)  # Square: same as width
+                                xsize map_size
+                                ysize map_size  # Square
                                 xalign 0.5
                                 yalign 0.5
                                 use map_grid_display(floor)
@@ -94,7 +95,7 @@ screen exploration_view():
                     # PALETTE (using existing combined_selector_panel screen)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.25)
+                        ysize int(config.screen_height * 0.20)
                         background "#2A2A2A"
                         padding (5, 5)
 
@@ -134,9 +135,11 @@ screen exploration_view():
                             # Forward button
                             if floor and ps:
                                 $ new_x, new_y = ps.get_forward_position()
-                                $ can_move, _ = MovementValidator.can_move_to(
+                                $ can_move, reason = MovementValidator.can_move_to(
                                     floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
+                                # DEBUG: Show movement check result
+                                text "Fwd to ({},{}): {}".format(new_x, new_y, "OK" if can_move else reason) size 10 color ("#00FF00" if can_move else "#FF0000")
                             else:
                                 $ can_move = False
 
