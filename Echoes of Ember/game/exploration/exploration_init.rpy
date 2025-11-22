@@ -155,9 +155,8 @@ init python:
         map_grid.floors[floor_id] = floor
         map_grid.current_floor_id = floor_id
 
-        # Set auto-map to False by default
-        if not hasattr(map_grid, 'auto_map_enabled'):
-            map_grid.auto_map_enabled = False
+        # Force auto-map to False
+        map_grid.auto_map_enabled = False
 
         # Initialize player state
         if not player_state:
