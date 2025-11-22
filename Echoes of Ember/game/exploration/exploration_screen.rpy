@@ -62,7 +62,7 @@ screen exploration_view():
                 else:
                     text "No floor loaded" xalign 0.5 yalign 0.5 color "#FFFFFF"
 
-            # RIGHT 1/3: Map + Controls
+            # RIGHT 1/3: Map + Controls (using existing map screen components)
             frame:
                 xsize int(config.screen_width * 0.334)
                 ysize config.screen_height
@@ -73,34 +73,27 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
-                    # MAP VIEW
+                    # MAP VIEW (using existing map_grid_display screen)
                     frame:
                         xsize int(config.screen_width * 0.314)
                         ysize int(config.screen_height * 0.40)
                         background "#000000"
                         padding (5, 5)
 
-                        if floor and ps:
-                            use compact_map_display(floor, ps)
+                        if floor:
+                            use map_grid_display(floor)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
-                    # PALETTE (conditional based on auto_map_enabled)
+                    # PALETTE (using existing combined_selector_panel screen)
                     frame:
                         xsize int(config.screen_width * 0.314)
                         ysize int(config.screen_height * 0.25)
                         background "#2A2A2A"
                         padding (5, 5)
 
-                        if floor and map_grid:
-                            $ auto_map_on = map_grid.auto_map_enabled if hasattr(map_grid, 'auto_map_enabled') else False
-
-                            if auto_map_on:
-                                # Icons only palette
-                                use icon_palette()
-                            else:
-                                # Full palette (tiles + icons)
-                                use full_palette()
+                        if map_grid:
+                            use combined_selector_panel()
                         else:
                             text "No palette" xalign 0.5 yalign 0.5 size 12
 
@@ -205,53 +198,6 @@ screen exploration_view():
                             use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
 
 
-screen compact_map_display(floor, ps):
-    """
-    Compact map display showing player position.
-    """
-
-    # Calculate map size
-    $ map_width = floor.dimensions[0]
-    $ map_height = floor.dimensions[1]
-    $ cell_size = 16  # Smaller cells for compact view
-    $ display_width = map_width * cell_size
-    $ display_height = map_height * cell_size
-
-    # Center the map in the frame
-    fixed:
-        xsize display_width
-        ysize display_height
-        xalign 0.5
-        yalign 0.5
-
-        # Draw grid background
-        add Solid("#111111", xsize=display_width, ysize=display_height)
-
-        # Draw tiles
-        for y in range(map_height):
-            for x in range(map_width):
-                $ tile = floor.get_tile(x, y)
-                if tile and tile.tile_type != "empty":
-                    # Draw tile (simple colored square for now)
-                    $ tile_color = get_tile_color(tile.tile_type)
-                    add Solid(tile_color, xsize=cell_size-1, ysize=cell_size-1) xpos x*cell_size ypos y*cell_size
-
-        # Draw icons (but hide story events - those should be surprises)
-        for (icon_x, icon_y), icon in floor.icons.items():
-            # Hide event icons that have a dialogue label (story events)
-            # Show event icons without labels (player markers) and all other icon types
-            $ is_story_event = (icon.icon_type == "event" and
-                                icon.metadata and
-                                "label" in icon.metadata)
-
-            if not is_story_event:
-                $ icon_color = get_icon_color(icon.icon_type)
-                add Solid(icon_color, xsize=cell_size-2, ysize=cell_size-2) xpos icon_x*cell_size+1 ypos icon_y*cell_size+1
-
-        # Draw player marker (red triangle)
-        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
-
-
 init python:
     class PlayerTriangleMarker(renpy.Displayable):
         """Red triangle showing player position and facing direction."""
@@ -318,81 +264,6 @@ init python:
             "note": "#FFFFFF"
         }
         return colors.get(icon_type, "#FFFFFF")
-
-
-screen icon_palette():
-    """Icon-only palette (when auto-map is ON)."""
-
-    vbox:
-        spacing 3
-        xalign 0.5
-
-        text "Icons" size 14 xalign 0.5
-
-        grid 4 2:
-            spacing 5
-            xalign 0.5
-
-            for icon_type in ["stairs_up", "stairs_down", "door_closed", "gathering", "enemy", "event", "teleporter", "note"]:
-                $ is_selected = (map_grid.selected_icon_type == icon_type if map_grid else False)
-                textbutton icon_type.replace("_", " ").title():
-                    action Function(select_icon_for_placement, icon_type)
-                    xsize 100
-                    ysize 30
-                    text_size 10
-                    background ("#FFFF00" if is_selected else "#444444")
-                    sensitive (not exploration_dialogue_active)
-
-
-screen full_palette():
-    """Full palette with tiles and icons (when auto-map is OFF)."""
-
-    vbox:
-        spacing 5
-        xalign 0.5
-
-        # Tiles
-        text "Tiles" size 12 xalign 0.5
-
-        grid 3 2:
-            spacing 3
-            xalign 0.5
-
-            for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
-                $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
-                textbutton tile_type.replace("_", " ")[:7]:
-                    action Function(select_tile_type, tile_type)
-                    xsize 70
-                    ysize 25
-                    text_size 9
-                    background ("#FFFF00" if is_selected else "#555555")
-                    sensitive (not exploration_dialogue_active)
-
-        # Icons
-        text "Icons" size 12 xalign 0.5
-
-        grid 4 2:
-            spacing 3
-            xalign 0.5
-
-            for icon_type in ["stairs_up", "stairs_down", "door_closed", "gathering", "enemy", "event", "teleporter", "note"]:
-                $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                textbutton icon_type.replace("_", " ")[:7]:
-                    action Function(select_icon_for_placement, icon_type)
-                    xsize 70
-                    ysize 25
-                    text_size 8
-                    background ("#FFFF00" if is_selected else "#555555")
-                    sensitive (not exploration_dialogue_active)
-
-        # Rotate button
-        textbutton "Rotate (R)":
-            action Function(rotate_selected_tile)
-            xsize 140
-            ysize 25
-            xalign 0.5
-            text_size 10
-            sensitive (not exploration_dialogue_active)
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
@@ -607,9 +478,20 @@ init python:
 
     def auto_reveal_tile(floor, x, y):
         """Auto-reveal tile when walking on it (auto-map feature)."""
-        # Tile is already revealed by default in the current implementation
-        # This function is a placeholder for future "fog of war" implementation
-        pass
+        # Get the actual tile at this position
+        tile = floor.get_tile(x, y)
+
+        if tile and tile.tile_type != "empty":
+            # Mark this tile as "drawn" by setting it on the floor
+            # The existing map system should handle displaying it
+            # In Etrian Odyssey style, we automatically "draw" the tile the player walks on
+
+            # Initialize revealed_tiles set if it doesn't exist
+            if not hasattr(floor, 'revealed_tiles'):
+                floor.revealed_tiles = set()
+
+            # Add this tile to revealed tiles
+            floor.revealed_tiles.add((x, y))
 
     def handle_step_on_trigger(icon, floor, x, y):
         """Handle step-on interactions (gathering, event, teleporter, enemy)"""

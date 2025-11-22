@@ -118,13 +118,17 @@ init python:
         # Set exploration metadata
         floor.starting_x = 10
         floor.starting_y = 10
-        floor.starting_rotation = 0  # Facing North
+        floor.starting_rotation = 90  # Facing East (so player can move along the corridor)
         floor.view_distance = 3
 
         # Create a simple dungeon layout:
-        # Row 10: 4 horizontal hallways from (8,10) to (12,10)
+        # Starting position needs to allow movement - use cross tile
+        floor.set_tile(10, 10, MapTile("cross", rotation=0))
+
+        # Row 10: horizontal hallways from (8,10) to (12,10)
         for x in range(8, 13):
-            floor.set_tile(x, 10, MapTile("hallway", rotation=0))
+            if x != 10:  # Skip starting position (already set as cross)
+                floor.set_tile(x, 10, MapTile("hallway", rotation=0))
 
         # Add t_intersection at (13, 10) with rotation 0 (wall at north)
         floor.set_tile(13, 10, MapTile("t_intersection", rotation=0))
@@ -221,6 +225,12 @@ label enter_exploration_mode(floor_id):
             player_state.y = getattr(floor, 'starting_y', 10)
             player_state.rotation = getattr(floor, 'starting_rotation', 0)
             player_state.current_floor_id = floor_id
+
+        # Auto-reveal starting tile if auto-map is enabled
+        if getattr(map_grid, 'auto_map_enabled', False):
+            if not hasattr(floor, 'revealed_tiles'):
+                floor.revealed_tiles = set()
+            floor.revealed_tiles.add((player_state.x, player_state.y))
 
     # Show exploration screen (this will block until player exits)
     call screen exploration_view
