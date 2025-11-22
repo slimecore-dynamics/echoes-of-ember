@@ -73,6 +73,9 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
+                    # SPACER - move everything down 200 pixels
+                    null height 200
+
                     # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
                     frame:
                         xsize int(config.screen_width * 0.314)
@@ -81,8 +84,14 @@ screen exploration_view():
                         padding (10, 10)
 
                         if floor:
-                            # Show full map grid
-                            use map_grid_display(floor)
+                            fixed:
+                                # Show full map grid
+                                use map_grid_display(floor)
+
+                                # Add player marker (red triangle)
+                                if ps and map_grid:
+                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
+                                    add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -126,13 +135,12 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # Forward button
+                            # DEBUG: Show movement info
                             if floor and ps:
                                 $ new_x, new_y = ps.get_forward_position()
                                 $ can_move, reason = MovementValidator.can_move_to(
                                     floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
-                                # DEBUG: Show movement check result and tile info
                                 $ dest_tile = floor.get_tile(new_x, new_y)
                                 $ tile_info = "{}@{}".format(dest_tile.tile_type, dest_tile.rotation) if dest_tile else "None"
                                 $ debug_msg = "Fwd to ({},{}): {} [{}]".format(new_x, new_y, "OK" if can_move else reason, tile_info)
@@ -141,6 +149,7 @@ screen exploration_view():
                             else:
                                 $ can_move = False
 
+                            # Forward button (center aligned)
                             textbutton "Forward":
                                 action Function(handle_move_forward)
                                 xalign 0.5
@@ -148,10 +157,12 @@ screen exploration_view():
                                 ysize 40
                                 sensitive (can_move and not exploration_dialogue_active)
 
-                            # Turn buttons (Left/Right) + Back button
+                            # Empty line
+                            null height 8
+
+                            # Left and Right buttons (on same line, left and right aligned)
                             hbox:
-                                spacing 10
-                                xalign 0.5
+                                xfill True
 
                                 textbutton "← Left":
                                     action Function(handle_turn_left)
@@ -159,11 +170,7 @@ screen exploration_view():
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
-                                textbutton "Back":
-                                    action Function(handle_move_backward)
-                                    xsize 70
-                                    ysize 40
-                                    sensitive (not exploration_dialogue_active)
+                                null  # Spacer
 
                                 textbutton "Right →":
                                     action Function(handle_turn_right)
@@ -171,34 +178,50 @@ screen exploration_view():
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
+                            # Empty line
+                            null height 8
+
+                            # Back button (center aligned)
+                            textbutton "Back":
+                                action Function(handle_move_backward)
+                                xalign 0.5
+                                xsize 150
+                                ysize 40
+                                sensitive (not exploration_dialogue_active)
+
+                            # Rotate button
+                            textbutton "Rotate (R)":
+                                action Function(rotate_selected_tile)
+                                xalign 0.5
+                                xsize 150
+                                ysize 35
+                                sensitive (not exploration_dialogue_active)
+
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
                     frame:
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
 
-                        hbox:
-                            spacing 8
+                        $ auto_map_on = (map_grid and getattr(map_grid, 'auto_map_enabled', False))
 
-                            # Auto-Map on LEFT
-                            $ auto_map_on = (map_grid and getattr(map_grid, 'auto_map_enabled', False))
-                            textbutton "Auto-Map":
-                                action Function(toggle_auto_map)
-                                xsize 150
-                                ysize 35
-                                background ("#FFFF00" if auto_map_on else "#444444")
-                                hover_background ("#FFDD00" if auto_map_on else "#555555")
-                                sensitive (not exploration_dialogue_active)
+                        # Auto-Map on LEFT
+                        textbutton "Auto-Map":
+                            action Function(toggle_auto_map)
+                            xpos 10
+                            xsize 200
+                            ysize 35
+                            background ("#FFFF00" if auto_map_on else "#444444")
+                            hover_background ("#FFDD00" if auto_map_on else "#555555")
+                            sensitive (not exploration_dialogue_active)
 
-                            # Flexible spacer to push Leave to the right
-                            null
-
-                            # Leave on RIGHT
-                            textbutton "Leave":
-                                action Return("exit")
-                                xsize 90
-                                ysize 35
-                                sensitive (not exploration_dialogue_active)
+                        # Leave on RIGHT
+                        textbutton "Leave":
+                            action Return("exit")
+                            xalign 1.0
+                            xsize 90
+                            ysize 35
+                            sensitive (not exploration_dialogue_active)
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
