@@ -12,24 +12,10 @@ define color_interact = "#FFFF00"
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False
 
-# Global flag to track if we're in exploration mode (used to hide Map button)
-default in_exploration_mode = False
-
 screen exploration_view():
     """
     Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
     """
-
-    # Set exploration mode flag
-    on "show" action SetVariable("in_exploration_mode", True)
-    on "hide" action SetVariable("in_exploration_mode", False)
-
-    # Make this modal to prevent M key from opening map
-    modal True
-
-    # Block M key during exploration
-    key "m" action NullAction()
-    key "M" action NullAction()
 
     # Get current floor and player state
     $ floor = map_grid.get_current_floor() if map_grid else None
@@ -87,18 +73,18 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
-                    # MAP VIEW (using existing map_grid_display screen - scaled down)
+                    # MAP VIEW (using existing map_grid_display screen - square viewport)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.35)
+                        ysize int(config.screen_width * 0.314)  # Square: same as width
                         background "#000000"
                         padding (10, 10)
 
                         if floor:
-                            # Scale down the map display to fit with buffer
+                            # Square viewport for map display
                             viewport:
                                 xsize int(config.screen_width * 0.294)
-                                ysize int(config.screen_height * 0.33)
+                                ysize int(config.screen_width * 0.294)  # Square: same as width
                                 xalign 0.5
                                 yalign 0.5
                                 use map_grid_display(floor)
@@ -147,11 +133,10 @@ screen exploration_view():
 
                             # Forward button
                             if floor and ps:
-                                $ view_data = FirstPersonView.get_view_data(
-                                    floor, ps.x, ps.y, ps.rotation,
-                                    view_distance=getattr(floor, 'view_distance', 3)
+                                $ new_x, new_y = ps.get_forward_position()
+                                $ can_move, _ = MovementValidator.can_move_to(
+                                    floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
-                                $ can_move = view_data.get("can_move_forward", False)
                             else:
                                 $ can_move = False
 
@@ -185,7 +170,7 @@ screen exploration_view():
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
-                    # AUTO-MAP TOGGLE + LEAVE BUTTON (one line at bottom right)
+                    # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
                     frame:
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
@@ -193,19 +178,23 @@ screen exploration_view():
 
                         hbox:
                             spacing 8
-                            xalign 1.0  # Right align
 
+                            # Auto-Map on LEFT
                             $ auto_map_on = (map_grid and getattr(map_grid, 'auto_map_enabled', False))
-                            textbutton "Auto Map":
+                            textbutton "Auto-Map":
                                 action Function(toggle_auto_map)
-                                xsize 90
+                                xsize 120
                                 ysize 35
                                 background ("#FFFF00" if auto_map_on else "#444444")
                                 hover_background ("#FFDD00" if auto_map_on else "#555555")
                                 sensitive (not exploration_dialogue_active)
 
+                            # Spacer to push Leave to the right
+                            null width 30
+
+                            # Leave on RIGHT
                             textbutton "Leave":
-                                action Function(exit_exploration_mode)
+                                action Return("exit")
                                 xsize 90
                                 ysize 35
                                 sensitive (not exploration_dialogue_active)
@@ -399,18 +388,25 @@ init python:
         return int(round(exploration * 100))
 
     def toggle_auto_map():
-        """Toggle auto-mapping on/off."""
+        """Toggle auto-mapping on/off - ONLY toggles, does not exit."""
         global map_grid
 
-        if map_grid:
-            map_grid.auto_map_enabled = not getattr(map_grid, 'auto_map_enabled', False)
-            renpy.notify("Auto-map: {}".format("ON" if map_grid.auto_map_enabled else "OFF"))
-            renpy.restart_interaction()
+        if not map_grid:
+            return
 
-    def exit_exploration_mode():
-        """Exit exploration and return to VN."""
-        # Hide the exploration screen to return to VN
-        renpy.hide_screen("exploration_view")
+        # Initialize auto_map_enabled if it doesn't exist
+        if not hasattr(map_grid, 'auto_map_enabled'):
+            map_grid.auto_map_enabled = False
+
+        # Toggle the flag
+        map_grid.auto_map_enabled = not map_grid.auto_map_enabled
+
+        # Show notification
+        status = "ON" if map_grid.auto_map_enabled else "OFF"
+        renpy.notify("Auto-map: " + status)
+
+        # Restart interaction to update UI
+        renpy.restart_interaction()
 
     def handle_turn_left():
         """Rotate player 90 degrees left"""

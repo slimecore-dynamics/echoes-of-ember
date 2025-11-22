@@ -254,8 +254,6 @@ screen quick_menu():
             textbutton _("Q.Save") action QuickSave()
             textbutton _("Q.Load") action QuickLoad()
             textbutton _("Prefs") action ShowMenu('preferences')
-            if not in_exploration_mode:
-                textbutton _("Map") action ToggleScreen("map_view")
 
 
 ## This code ensures that the quick_menu screen is displayed in-game, whenever
@@ -1535,8 +1533,6 @@ screen quick_menu():
             textbutton _("Back") action Rollback()
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
             textbutton _("Auto") action Preference("auto-forward", "toggle")
-            if not in_exploration_mode:
-                textbutton _("Map") action ToggleScreen("map_view")
             textbutton _("Menu") action ShowMenu()
 
 
