@@ -81,14 +81,8 @@ screen exploration_view():
                         padding (10, 10)
 
                         if floor:
-                            # Square viewport for map display (fit within frame)
-                            $ map_size = min(int(config.screen_width * 0.294), int(config.screen_height * 0.23))
-                            viewport:
-                                xsize map_size
-                                ysize map_size  # Square
-                                xalign 0.5
-                                yalign 0.5
-                                use map_grid_display(floor)
+                            # Show full map grid (no scrollbars, just bigger)
+                            use map_grid_display(floor)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -138,8 +132,10 @@ screen exploration_view():
                                 $ can_move, reason = MovementValidator.can_move_to(
                                     floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
-                                # DEBUG: Show movement check result
-                                text "Fwd to ({},{}): {}".format(new_x, new_y, "OK" if can_move else reason) size 10 color ("#00FF00" if can_move else "#FF0000")
+                                # DEBUG: Show movement check result and tile info
+                                $ dest_tile = floor.get_tile(new_x, new_y)
+                                $ tile_info = "{}@{}".format(dest_tile.tile_type, dest_tile.rotation) if dest_tile else "None"
+                                text "Fwd to ({},{}): {} [{}]".format(new_x, new_y, "OK" if can_move else reason, tile_info) size 10 color ("#00FF00" if can_move else "#FF0000")
                             else:
                                 $ can_move = False
 
@@ -186,14 +182,14 @@ screen exploration_view():
                             $ auto_map_on = (map_grid and getattr(map_grid, 'auto_map_enabled', False))
                             textbutton "Auto-Map":
                                 action Function(toggle_auto_map)
-                                xsize 120
+                                xsize 150
                                 ysize 35
                                 background ("#FFFF00" if auto_map_on else "#444444")
                                 hover_background ("#FFDD00" if auto_map_on else "#555555")
                                 sensitive (not exploration_dialogue_active)
 
-                            # Spacer to push Leave to the right
-                            null width 30
+                            # Flexible spacer to push Leave to the right
+                            null
 
                             # Leave on RIGHT
                             textbutton "Leave":
