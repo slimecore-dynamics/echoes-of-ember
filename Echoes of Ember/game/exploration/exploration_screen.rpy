@@ -74,12 +74,12 @@ screen exploration_view():
                     xalign 0.5
 
                     # SPACER - move everything down 200 pixels
-                    null height 200
+                    null height 100
 
                     # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
                     frame:
-                        xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.45)  # 45% of screen height to show full 20x20 grid
+                        xsize int(config.screen_width * 0.3)
+                        ysize int(config.screen_height * 0.4)  # 45% of screen height to show full 20x20 grid
                         background "#000000"
                         padding (10, 10)
 
@@ -98,7 +98,7 @@ screen exploration_view():
                     # PALETTE (using existing combined_selector_panel screen)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.15)  # Reduced to 15% to make room for larger map
+                        ysize int(config.screen_height * 0.065)  # Reduced to 15% to make room for larger map
                         background "#2A2A2A"
                         padding (5, 5)
 
@@ -153,7 +153,7 @@ screen exploration_view():
                             textbutton "Forward":
                                 action Function(handle_move_forward)
                                 xalign 0.5
-                                xsize 150
+                                xsize 100
                                 ysize 40
                                 sensitive (can_move and not exploration_dialogue_active)
 
@@ -164,33 +164,35 @@ screen exploration_view():
                             hbox:
                                 xfill True
 
-                                textbutton "← Left":
+                                textbutton "Left":
                                     action Function(handle_turn_left)
-                                    xsize 70
+                                    xalign 0.0
+                                    xsize 100
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
                                 null  # Spacer
 
-                                textbutton "Right →":
+                                textbutton "Right":
                                     action Function(handle_turn_right)
-                                    xsize 70
+                                    xalign 1.0
+                                    xsize 100
                                     ysize 40
                                     sensitive (not exploration_dialogue_active)
 
-                            # Empty line
-                            null height 8
+                            # # Empty line
+                            # null height 8
 
                             # Back button (center aligned)
                             textbutton "Back":
                                 action Function(handle_move_backward)
                                 xalign 0.5
-                                xsize 150
+                                xsize 100
                                 ysize 40
                                 sensitive (not exploration_dialogue_active)
 
                             # Rotate button
-                            textbutton "Rotate (R)":
+                            textbutton "Rotate":
                                 action Function(rotate_selected_tile)
                                 xalign 0.5
                                 xsize 150
@@ -208,7 +210,7 @@ screen exploration_view():
                         # Auto-Map on LEFT
                         textbutton "Auto-Map":
                             action Function(toggle_auto_map)
-                            xpos 10
+                            xalign 0.0
                             xsize 200
                             ysize 35
                             background ("#FFFF00" if auto_map_on else "#444444")
