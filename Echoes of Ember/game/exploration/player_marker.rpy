@@ -83,9 +83,6 @@ screen player_marker_overlay():
 
 
 init python:
-    from renpy.display.layout import Fixed
-    from renpy.display.im import Image as RenpyImage
-
     class CanvasMarker(renpy.Displayable):
         """
         Custom displayable that draws the player marker triangle.
