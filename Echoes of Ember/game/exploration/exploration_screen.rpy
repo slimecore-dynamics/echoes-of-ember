@@ -694,6 +694,9 @@ init python:
         if map_grid:
             map_grid.selected_icon_type = icon_type
             map_grid.current_mode = "edit_icons"
+            # Clear tile selection (mutually exclusive)
+            map_grid.selected_tile_variant = None
+            map_grid.selected_tile_type = None
             renpy.restart_interaction()
 
     def rotate_selected_tile():
@@ -713,6 +716,8 @@ init python:
             tile_type = variant.split('_')[0] if '_' in variant else variant
             map_grid.selected_tile_type = tile_type
             map_grid.current_mode = "edit_tiles"
+            # Clear icon selection (mutually exclusive)
+            map_grid.selected_icon_type = None
             renpy.restart_interaction()
 
     def place_tile_on_map(x, y):
@@ -756,14 +761,14 @@ init python:
             # Extract base type
             tile_type = variant.split('_')[0] if '_' in variant else variant
 
-            # Create new tile with the variant (MapTile is in the store namespace)
-            new_tile = store.MapTile(tile_type, rotation)
+            # Create new tile with the variant
+            new_tile = MapTile(tile_type, rotation)
             floor.set_tile(x, y, new_tile)
             renpy.restart_interaction()
         # Check if we have an icon selected
         elif map_grid.current_mode == "edit_icons" and hasattr(map_grid, 'selected_icon_type'):
-            # Place icon instead (MapIcon is in the store namespace)
-            new_icon = store.MapIcon(map_grid.selected_icon_type)
+            # Place icon instead
+            new_icon = MapIcon(map_grid.selected_icon_type)
             floor.set_icon(x, y, new_icon)
             renpy.restart_interaction()
 
@@ -778,8 +783,8 @@ init python:
         if not floor:
             return
 
-        # Clear tile (MapTile is in the store namespace)
-        floor.set_tile(x, y, store.MapTile("empty", 0))
+        # Clear tile
+        floor.set_tile(x, y, MapTile("empty", 0))
 
         # Clear icon if present
         if (x, y) in floor.icons:
