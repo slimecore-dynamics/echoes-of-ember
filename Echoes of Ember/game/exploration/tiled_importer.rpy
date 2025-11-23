@@ -29,11 +29,11 @@ init python:
             elif filename == "cross":
                 return ("cross", 0)
             elif filename.startswith("hallway_"):
-                # hallway_we = horizontal (W-E) = 0 degrees
-                # hallway_ns = vertical (N-S) = 90 degrees
-                if "we" in filename:
+                # hallway_we/hor = horizontal (W-E) = 0 degrees
+                # hallway_ns/ver = vertical (N-S) = 90 degrees
+                if "we" in filename or "hor" in filename:
                     return ("hallway", 0)
-                elif "ns" in filename:
+                elif "ns" in filename or "ver" in filename:
                     return ("hallway", 90)
             elif filename.startswith("corner_"):
                 # corner_es = E+S openings = 0 degrees
