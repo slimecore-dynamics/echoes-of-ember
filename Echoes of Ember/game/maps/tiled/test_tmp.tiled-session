@@ -3,7 +3,7 @@
     "last.imagePath": "D:/Ren'Py Projects/echoes-of-ember/Echoes of Ember/game/images/maps/tiles",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
-    "property.type": "string",
+    "property.type": "int",
     "tileset.embedInMap": true,
     "tileset.type": 1
 }
