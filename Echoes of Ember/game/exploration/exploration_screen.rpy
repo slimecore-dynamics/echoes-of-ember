@@ -221,7 +221,6 @@ screen exploration_view():
                             textbutton "Forward":
                                 action Function(handle_move_forward)
                                 xalign 0.5
-                                xfit True
                                 padding (20, 8)
                                 text_xalign 0.5
                                 background "#444444"
@@ -235,7 +234,6 @@ screen exploration_view():
                                 textbutton "Left":
                                     action Function(handle_turn_left)
                                     xalign 0.0
-                                    xfit True
                                     padding (20, 8)
                                     background "#444444"
                                     hover_background "#555555"
@@ -246,7 +244,6 @@ screen exploration_view():
                                 textbutton "Right":
                                     action Function(handle_turn_right)
                                     xalign 1.0
-                                    xfit True
                                     padding (20, 8)
                                     background "#444444"
                                     hover_background "#555555"
@@ -256,7 +253,6 @@ screen exploration_view():
                             textbutton "Back":
                                 action Function(handle_move_backward)
                                 xalign 0.5
-                                xfit True
                                 padding (20, 8)
                                 text_xalign 0.5
                                 background "#444444"
@@ -277,7 +273,6 @@ screen exploration_view():
                             textbutton "Auto-Map":
                                 action ToggleField(map_grid, "auto_map_enabled")
                                 xalign 0.0
-                                xfit True
                                 padding (20, 8)
                                 selected_background "#FFFF00"
                                 selected_hover_background "#FFDD00"
@@ -290,7 +285,6 @@ screen exploration_view():
                             textbutton "Leave":
                                 action Return("exit")
                                 xalign 1.0
-                                xfit True
                                 padding (20, 8)
                                 background "#444444"
                                 hover_background "#555555"
