@@ -282,6 +282,13 @@ init -1 python:
                 print("DEBUG FileActionWithMapData: FileLoad completed, now loading map data from slot {}".format(self.slot))
                 load_map_data_from_file(self.slot)
                 load_player_state_from_file(self.slot)
+                # Verify map_grid has loaded data
+                if map_grid and map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
+                    floor = map_grid.floors[map_grid.current_floor_id]
+                    tile_00 = floor.get_tile(0, 0)
+                    print("DEBUG FileActionWithMapData: After load, tile at (0,0) = {} rotation {}".format(tile_00.tile_type, tile_00.rotation))
+                else:
+                    print("DEBUG FileActionWithMapData: After load, map_grid is invalid or has no floors")
             else:
                 # Save: First save map data, then save game state
                 print("DEBUG FileActionWithMapData: Saving map data before FileSave")
