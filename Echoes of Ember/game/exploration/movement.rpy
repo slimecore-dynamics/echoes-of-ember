@@ -28,21 +28,6 @@ init python:
             if to_x < 0 or to_x >= width or to_y < 0 or to_y >= height:
                 return (False, "Out of bounds")
 
-            # Get destination tile from DUNGEON (real tiles), not drawn map
-            dest_tile = MovementValidator._get_dungeon_tile(floor, to_x, to_y)
-            if not dest_tile:
-                return (False, "Invalid destination")
-
-            # Empty tiles are voids (unreachable)
-            if dest_tile.tile_type == "empty":
-                return (False, "Empty void")
-
-            # Check if there's a blocking icon at destination
-            icon_at_dest = floor.icons.get((to_x, to_y))
-            if icon_at_dest:
-                if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
-                    return (False, "Blocked by {}".format(icon_at_dest.icon_type))
-
             # Get source tile from DUNGEON (real tiles), not drawn map
             source_tile = MovementValidator._get_dungeon_tile(floor, from_x, from_y)
             if not source_tile:
@@ -67,13 +52,28 @@ init python:
             # Check if source tile allows this direction of movement
             allowed_dirs = MovementValidator._get_allowed_directions(source_tile)
             if move_dir not in allowed_dirs:
-                return (False, "Tile blocks {} movement".format(move_dir))
+                return (False, "Current tile blocks {} movement".format(move_dir))
+
+            # Get destination tile from DUNGEON (real tiles), not drawn map
+            dest_tile = MovementValidator._get_dungeon_tile(floor, to_x, to_y)
+            if not dest_tile:
+                return (False, "Invalid destination")
+
+            # Empty tiles are voids (unreachable)
+            if dest_tile.tile_type == "empty":
+                return (False, "Empty void")
 
             # Check if destination tile allows entry from opposite direction
             opposite_dir = MovementValidator._get_opposite_direction(move_dir)
             dest_allowed_dirs = MovementValidator._get_allowed_directions(dest_tile)
             if opposite_dir not in dest_allowed_dirs:
-                return (False, "Destination tile blocks entry from {}".format(opposite_dir))
+                return (False, "Destination blocks entry from {}".format(opposite_dir))
+
+            # Check if there's a blocking icon at destination
+            icon_at_dest = floor.icons.get((to_x, to_y))
+            if icon_at_dest:
+                if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
+                    return (False, "Blocked by {}".format(icon_at_dest.icon_type))
 
             return (True, "OK")
 

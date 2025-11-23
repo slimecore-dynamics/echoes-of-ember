@@ -88,10 +88,10 @@ screen exploration_view():
                                 # Show full map grid
                                 use map_grid_display(floor)
 
-                                # Add player marker (red triangle)
+                                # Add player marker (red triangle) at player's grid position
                                 if ps and map_grid:
                                     $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
-                                    add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
+                                    add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -300,16 +300,16 @@ init python:
             self.cell_size = cell_size
 
         def render(self, width, height, st, at):
-            render = renpy.Render(width, height)
+            # Create a render the size of one cell
+            render = renpy.Render(self.cell_size, self.cell_size)
 
             # Create simple red square as placeholder for triangle
             # (Actual triangle rendering would need more complex drawing)
             marker = Solid("#FF0000", xsize=int(self.cell_size*0.8), ysize=int(self.cell_size*0.8))
             marker_render = renpy.render(marker, int(self.cell_size*0.8), int(self.cell_size*0.8), st, at)
 
-            # Position at player location
-            render.blit(marker_render, (int(self.x * self.cell_size + self.cell_size*0.1),
-                                        int(self.y * self.cell_size + self.cell_size*0.1)))
+            # Center the marker in the cell
+            render.blit(marker_render, (int(self.cell_size*0.1), int(self.cell_size*0.1)))
 
             return render
 
@@ -365,26 +365,33 @@ screen map_grid_display(floor):
     $ grid_w = floor.dimensions[0]
     $ grid_h = floor.dimensions[1]
 
-    # Grid with tiles
-    grid grid_w grid_h:
-        spacing 0
-        for y in range(grid_h):
-            for x in range(grid_w):
-                $ tile = floor.get_tile(x, y)
-                $ icon = floor.icons.get((x, y))
+    # Viewport to handle scrolling if grid is larger than available space
+    viewport:
+        scrollbars "both"
+        mousewheel True
+        draggable True
 
-                button:
-                    xysize (cell_size, cell_size)
-                    background "#444444"  # Grey cell background
-                    action Function(handle_map_click, x, y, floor, map_grid)
+        # Grid with tiles
+        grid grid_w grid_h:
+            spacing 0
+            for y in range(grid_h):
+                for x in range(grid_w):
+                    $ tile = floor.get_tile(x, y)
+                    $ icon = floor.icons.get((x, y))
 
-                    # Tile
-                    if tile.tile_type != "empty":
-                        add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation, xysize=(cell_size, cell_size))
+                    button:
+                        xysize (cell_size, cell_size)
+                        background "#444444"  # Grey cell background
+                        action Function(handle_map_click, x, y, floor, map_grid)
+                        padding (0, 0)
 
-                    # Icon on top
-                    if icon:
-                        add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
+                        # Tile
+                        if tile.tile_type != "empty":
+                            add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation, fit="contain", xysize=(cell_size, cell_size)) xalign 0.0 yalign 0.0
+
+                        # Icon on top
+                        if icon:
+                            add Transform("images/maps/icons/{}.png".format(icon.icon_type), fit="contain", xysize=(cell_size, cell_size)) xalign 0.0 yalign 0.0
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
