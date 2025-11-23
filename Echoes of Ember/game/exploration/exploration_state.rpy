@@ -112,5 +112,5 @@ init -1 python:
 
 # Initialize global variables (not persistent - loaded from external JSON)
 init python:
-    player_state = None
-    map_grid = None
+    store.player_state = None
+    store.map_grid = None
