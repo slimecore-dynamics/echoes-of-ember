@@ -91,24 +91,12 @@ screen exploration_view():
                             $ cell_size = min(available_size // grid_w, available_size // grid_h)
 
                             fixed:
-                                # Show full map grid
-                                use map_grid_display(floor)
+                                # Show full map grid with tooltip info
+                                use map_grid_display(floor, cell_size)
 
                                 # Add player marker (red triangle) at player's grid position
                                 if ps:
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
-
-                                # TOOLTIP DISPLAY for notes (overlay on map)
-                                $ tooltip_text = GetTooltip()
-                                if tooltip_text:
-                                    nearrect:
-                                        focus "tooltip"
-                                        prefer_top True
-
-                                        frame:
-                                            background "#000000DD"
-                                            padding (8, 5)
-                                            text tooltip_text size 11 color "#FFFFFF"
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -388,17 +376,13 @@ init python:
         return colors.get(icon_type, "#FFFFFF")
 
 
-screen map_grid_display(floor):
+screen map_grid_display(floor, cell_size):
     """
     Display the map grid with clickable tiles for drawing.
     This is the main map display that shows tiles, icons, and allows editing.
     """
     $ grid_w = floor.dimensions[0]
     $ grid_h = floor.dimensions[1]
-
-    # Calculate cell size to fit entire grid in viewport (subtract padding)
-    $ available_size = int(config.screen_width * 0.25) - 20  # Subtract frame padding
-    $ cell_size = min(available_size // grid_w, available_size // grid_h)
 
     # Grid with tiles
     grid grid_w grid_h:
@@ -416,7 +400,7 @@ screen map_grid_display(floor):
 
                     # Show tooltip for notes
                     if icon and icon.icon_type == "note":
-                        tooltip icon.metadata.get("note_text", "")
+                        tooltip (x, y, icon.metadata.get("note_text", ""))
 
                     # Tile (no rotation - causes offset issues)
                     if tile.tile_type != "empty":
@@ -425,6 +409,17 @@ screen map_grid_display(floor):
                     # Icon on top
                     if icon:
                         add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
+
+    # Display tooltip at note position
+    $ tooltip_data = GetTooltip()
+    if tooltip_data:
+        $ note_x, note_y, note_text = tooltip_data
+        frame:
+            xpos (note_x * cell_size)
+            ypos (note_y * cell_size - 25)  # Above the note icon
+            background "#000000DD"
+            padding (5, 3)
+            text note_text size 10 color "#FFFFFF"
 
 
 screen note_input_popup(x, y, floor, map_grid):
