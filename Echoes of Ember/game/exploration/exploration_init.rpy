@@ -67,7 +67,6 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
                     player_state.x, player_state.y, player_state.rotation
                 ))
 
-            renpy.notify("Loaded floor: {}".format(floor.floor_name))
         else:
             renpy.notify("Failed to load floor from: {}".format(floor_filepath))
 

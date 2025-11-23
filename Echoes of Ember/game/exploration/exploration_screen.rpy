@@ -501,6 +501,15 @@ screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
             elif icon.icon_type == "door_open":
                 text "Open Door" size 14 xalign 0.5
 
+            elif icon.icon_type == "teleporter":
+                text "Teleporter" size 14 xalign 0.5
+                textbutton "Use":
+                    action Function(handle_teleporter_interaction, adj_x, adj_y)
+                    xalign 0.5
+                    xsize 120
+                    ysize 35
+                    sensitive (not exploration_dialogue_active)
+
 
 screen render_first_person_view(view_data, floor, ps):
     """Render the first-person view based on view_data."""
@@ -802,6 +811,57 @@ init python:
             icon.icon_type = "door_open"
             renpy.notify("Door opened")
             renpy.restart_interaction()
+
+    def handle_teleporter_interaction(adj_x, adj_y):
+        """Handle teleporter interaction (teleport to paired teleporter)"""
+        global player_state, map_grid
+
+        if not map_grid:
+            return
+
+        floor = map_grid.get_current_floor()
+        if not floor:
+            return
+
+        # Get icon at teleporter position from dungeon icons
+        icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
+        if not icon or icon.icon_type != "teleporter":
+            return
+
+        # Get pair_id from teleporter metadata
+        pair_id = icon.metadata.get("pair_id")
+
+        if pair_id is not None:
+            # Find matching teleporter with same pair_id
+            target_pos = None
+
+            # Search dungeon_icons for another teleporter with same pair_id
+            if hasattr(floor, 'dungeon_icons'):
+                for pos, other_icon in floor.dungeon_icons.items():
+                    # Skip the current teleporter
+                    if pos == (adj_x, adj_y):
+                        continue
+
+                    # Check if it's a teleporter with matching pair_id
+                    if (other_icon.icon_type == "teleporter" and
+                        other_icon.metadata.get("pair_id") == pair_id):
+                        target_pos = pos
+                        break
+
+            if target_pos:
+                # Teleport player to target position
+                player_state.x, player_state.y = target_pos
+                renpy.notify("Teleported to ({}, {})".format(target_pos[0], target_pos[1]))
+
+                # Trigger auto-map reveal at new location if enabled
+                if getattr(player_state, 'auto_map_enabled', False):
+                    reveal_nearby_tiles(floor, target_pos[0], target_pos[1], player_state.rotation)
+
+                renpy.restart_interaction()
+            else:
+                renpy.notify("Teleporter pair not found (pair_id: {})".format(pair_id))
+        else:
+            renpy.notify("Teleporter has no pair_id")
 
     # Map editing functions (delegated to map_tools if available)
     def select_tile_type(tile_type):

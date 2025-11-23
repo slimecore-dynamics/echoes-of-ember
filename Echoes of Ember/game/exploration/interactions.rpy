@@ -7,15 +7,15 @@ init python:
         Manages interactions with map icons during exploration.
 
         Two types of interactions:
-        1. Step-on triggers: gathering, event, teleporter, enemy
-        2. Adjacent triggers: stairs, doors (must be facing the icon)
+        1. Step-on triggers: gathering, event, enemy
+        2. Adjacent triggers: stairs, doors, teleporter (must be facing the icon)
         """
 
         # Icons that trigger when stepped on
-        STEP_ON_ICONS = ["gathering", "event", "teleporter", "enemy"]
+        STEP_ON_ICONS = ["gathering", "event", "enemy"]
 
         # Icons that trigger when adjacent and facing
-        ADJACENT_ICONS = ["stairs_up", "stairs_down", "door_closed", "door_open"]
+        ADJACENT_ICONS = ["stairs_up", "stairs_down", "door_closed", "door_open", "teleporter"]
 
         @staticmethod
         def check_step_on_trigger(floor, x, y):
@@ -41,6 +41,8 @@ init python:
             Check if there's an interactable icon adjacent to player and facing it.
             Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
 
+            For icons with prompt_facing property, only show prompt when facing the specified direction.
+
             Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
             """
             # Get adjacent position based on rotation
@@ -61,6 +63,17 @@ init python:
                 return (None, None, None, None)
 
             if icon.icon_type in InteractionHandler.ADJACENT_ICONS:
+                # Check if icon has prompt_facing requirement
+                if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
+                    required_facing = icon.metadata['prompt_facing'].lower()
+                    # Map rotation to direction letter
+                    rotation_to_dir = {0: 'n', 90: 'e', 180: 's', 270: 'w'}
+                    current_dir = rotation_to_dir.get(rotation, '')
+
+                    # Only show prompt if facing the required direction
+                    if current_dir != required_facing:
+                        return (None, None, None, None)
+
                 return (icon, "adjacent", adj_x, adj_y)
 
             return (None, None, None, None)
