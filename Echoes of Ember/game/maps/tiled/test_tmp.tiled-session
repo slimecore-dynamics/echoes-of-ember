@@ -1,0 +1,7 @@
+{
+    "last.imagePath": "D:/Ren'Py Projects/echoes-of-ember/Echoes of Ember/game/images/maps/tiles",
+    "map.lastUsedFormat": "tmx",
+    "property.type": "string",
+    "tileset.embedInMap": true,
+    "tileset.type": 1
+}

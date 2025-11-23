@@ -78,8 +78,8 @@ screen exploration_view():
 
                     # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
                     frame:
-                        xsize int(config.screen_width * 0.3)
-                        ysize int(config.screen_height * 0.4)  # 45% of screen height to show full 20x20 grid
+                        xsize int(config.screen_width * 0.2)
+                        ysize int(config.screen_height * 0.3)  # 45% of screen height to show full 20x20 grid
                         background "#000000"
                         padding (10, 10)
 

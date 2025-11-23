@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="1">
+ <properties>
+  <property name="ambient_sound" value=""/>
+  <property name="area_name" value="Prometheus"/>
+  <property name="auto_map_available" type="bool" value="true"/>
+  <property name="bgm" value=""/>
+  <property name="description" value="The mangled carcasses of two ships colliding..."/>
+  <property name="encounter_rate" type="float" value="0"/>
+  <property name="floor_id" value="prometheus_breach_1f"/>
+  <property name="floor_name" value="Breach - 1F"/>
+  <property name="lighting" value=""/>
+  <property name="starting_rotation" type="int" value="270"/>
+  <property name="starting_x" type="int" value="5"/>
+  <property name="starting_y" type="int" value="5"/>
+  <property name="sub_area_name" value="Breach"/>
+  <property name="view_distance" type="int" value="5"/>
+ </properties>
+ <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="16" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image source="../../images/maps/tiles/empty.png" width="32" height="32"/>
+  </tile>
+  <tile id="1">
+   <image source="../../images/maps/tiles/wall_wse.png" width="32" height="32"/>
+  </tile>
+  <tile id="2">
+   <image source="../../images/maps/tiles/wall_nws.png" width="32" height="32"/>
+  </tile>
+  <tile id="3">
+   <image source="../../images/maps/tiles/wall_wne.png" width="32" height="32"/>
+  </tile>
+  <tile id="4">
+   <image source="../../images/maps/tiles/wall_nes.png" width="32" height="32"/>
+  </tile>
+  <tile id="5">
+   <image source="../../images/maps/tiles/t_intersection_nes.png" width="32" height="32"/>
+  </tile>
+  <tile id="6">
+   <image source="../../images/maps/tiles/t_intersection_nws.png" width="32" height="32"/>
+  </tile>
+  <tile id="7">
+   <image source="../../images/maps/tiles/t_intersection_wne.png" width="32" height="32"/>
+  </tile>
+  <tile id="8">
+   <image source="../../images/maps/tiles/t_intersection_wse.png" width="32" height="32"/>
+  </tile>
+  <tile id="9">
+   <image source="../../images/maps/tiles/hallway_hor.png" width="32" height="32"/>
+  </tile>
+  <tile id="10">
+   <image source="../../images/maps/tiles/hallway_ver.png" width="32" height="32"/>
+  </tile>
+  <tile id="11">
+   <image source="../../images/maps/tiles/corner_es.png" width="32" height="32"/>
+  </tile>
+  <tile id="12">
+   <image source="../../images/maps/tiles/corner_ne.png" width="32" height="32"/>
+  </tile>
+  <tile id="13">
+   <image source="../../images/maps/tiles/corner_wn.png" width="32" height="32"/>
+  </tile>
+  <tile id="14">
+   <image source="../../images/maps/tiles/corner_ws.png" width="32" height="32"/>
+  </tile>
+  <tile id="15">
+   <image source="../../images/maps/tiles/cross.png" width="32" height="32"/>
+  </tile>
+ </tileset>
+ <layer id="1" name="dungeon" width="20" height="20">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,12,2,2,2,2,2,2,2,2,2,2,10,9,9,15,0,12,15,0,
+0,13,4,4,4,4,4,4,4,4,4,14,0,11,13,14,0,11,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,13,10,10,10,14,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,12,10,10,9,15,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,13,15,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,11,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,6,10,10,16,10,14,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,11,0,0,11,0,
+0,0,0,0,0,0,0,0,0,0,0,0,13,10,10,8,10,10,14,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>
