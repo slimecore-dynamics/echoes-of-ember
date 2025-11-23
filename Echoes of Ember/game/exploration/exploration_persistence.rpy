@@ -277,13 +277,10 @@ init -1 python:
             print("DEBUG FileActionWithMapData: __call__ for slot {} (is_load={})".format(self.slot, self.is_load))
 
             if self.is_load:
-                # Load: Write slot to temp file, then restore game state
+                # Load: Set slot for after_load to use, then restore game state
                 # Map data will be loaded in after_load AFTER FileLoad completes
-                print("DEBUG FileActionWithMapData: Writing slot {} to temp file".format(self.slot))
-                temp_file = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
-                with open(temp_file, 'w') as f:
-                    f.write(str(self.slot))
-                print("DEBUG FileActionWithMapData: Temp file written, calling FileLoad")
+                print("DEBUG FileActionWithMapData: Setting _pending_load_slot to {}".format(self.slot))
+                store._pending_load_slot = self.slot
                 result = FileLoad(self.slot)()
                 print("DEBUG FileActionWithMapData: FileLoad completed, map data will be loaded in after_load")
             else:
@@ -325,30 +322,11 @@ label save:
 # This runs AFTER FileLoad has restored all variables
 label after_load:
     python:
-        import os
-
-        # Read slot name from temporary file
-        temp_file = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
-        slot = None
-
-        if os.path.exists(temp_file):
-            print("DEBUG after_load: Temp file found, reading slot")
-            # Read slot name
-            with open(temp_file, 'r') as f:
-                slot = f.read().strip()
-            print("DEBUG after_load: Read slot {} from temp file".format(slot))
-
-            # Delete temp file (cleanup)
-            os.remove(temp_file)
-            print("DEBUG after_load: Temp file deleted")
-        else:
-            print("DEBUG after_load: No temp file found (probably new game)")
-
-        if slot:
-            # Load map data from JSON file
-            print("DEBUG after_load: Loading map data for slot {}".format(slot))
-            load_map_data_from_file(slot)
-            load_player_state_from_file(slot)
+        # Check if we have a pending map data load
+        if hasattr(store, '_pending_load_slot') and store._pending_load_slot:
+            print("DEBUG after_load: Loading map data for slot {}".format(store._pending_load_slot))
+            load_map_data_from_file(store._pending_load_slot)
+            load_player_state_from_file(store._pending_load_slot)
 
             # Verify it loaded
             if map_grid and map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
@@ -357,5 +335,10 @@ label after_load:
                 print("DEBUG after_load: After loading, tile at (0,0) = {} rotation {}".format(tile_debug.tile_type, tile_debug.rotation))
             else:
                 print("DEBUG after_load: After loading, map_grid has no floors")
+
+            # Clear the pending slot
+            store._pending_load_slot = None
+        else:
+            print("DEBUG after_load: No pending map data load")
     return
 
