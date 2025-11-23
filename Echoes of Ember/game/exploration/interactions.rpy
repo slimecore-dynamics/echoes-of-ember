@@ -6,16 +6,20 @@ init python:
         """
         Manages interactions with map icons during exploration.
 
-        Two types of interactions:
-        1. Step-on triggers: gathering, event, enemy
-        2. Adjacent triggers: stairs, doors, teleporter (must be facing the icon)
+        Three types of interactions:
+        1. Step-on triggers: gathering, event, enemy (automatic when stepping on tile)
+        2. On-tile interact: teleporter (must be on tile AND facing correct direction to interact)
+        3. Adjacent triggers: stairs, doors (must be adjacent and facing the icon)
         """
 
-        # Icons that trigger when stepped on
+        # Icons that trigger automatically when stepped on
         STEP_ON_ICONS = ["gathering", "event", "enemy"]
 
+        # Icons that require interaction while standing on them (with direction requirement)
+        ON_TILE_INTERACT_ICONS = ["teleporter"]
+
         # Icons that trigger when adjacent and facing
-        ADJACENT_ICONS = ["stairs_up", "stairs_down", "door_closed", "door_open", "teleporter"]
+        ADJACENT_ICONS = ["stairs_up", "stairs_down", "door_closed", "door_open"]
 
         @staticmethod
         def check_step_on_trigger(floor, x, y):
@@ -75,6 +79,35 @@ init python:
                         return (None, None, None, None)
 
                 return (icon, "adjacent", adj_x, adj_y)
+
+            return (None, None, None, None)
+
+        @staticmethod
+        def check_on_tile_interact(floor, x, y, rotation):
+            """
+            Check if there's an interactable icon on the current tile that requires facing a direction.
+            Used for teleporters - player must be on the tile AND facing the correct direction.
+
+            Returns: (icon, interaction_type, x, y) or (None, None, None, None)
+            """
+            # Get icon at current position from dungeon icons
+            icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
+            if not icon:
+                return (None, None, None, None)
+
+            if icon.icon_type in InteractionHandler.ON_TILE_INTERACT_ICONS:
+                # Check if icon has prompt_facing requirement
+                if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
+                    required_facing = icon.metadata['prompt_facing'].lower()
+                    # Map rotation to direction letter
+                    rotation_to_dir = {0: 'n', 90: 'e', 180: 's', 270: 'w'}
+                    current_dir = rotation_to_dir.get(rotation, '')
+
+                    # Only show prompt if facing the required direction
+                    if current_dir != required_facing:
+                        return (None, None, None, None)
+
+                return (icon, "on_tile", x, y)
 
             return (None, None, None, None)
 

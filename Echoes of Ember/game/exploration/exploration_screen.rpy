@@ -259,9 +259,18 @@ screen exploration_view():
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
+                        # Check for adjacent triggers (stairs, doors)
                         $ icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
                             floor, ps.x, ps.y, ps.rotation
                         )
+
+                        # If no adjacent trigger, check for on-tile interactions (teleporter)
+                        if not icon:
+                            $ icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
+                                floor, ps.x, ps.y, ps.rotation
+                            )
+                            if icon:
+                                $ adj_x, adj_y = tile_x, tile_y
 
                         if icon:
                             use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
@@ -813,7 +822,10 @@ init python:
             renpy.restart_interaction()
 
     def handle_teleporter_interaction(adj_x, adj_y):
-        """Handle teleporter interaction (teleport to paired teleporter)"""
+        """
+        Handle teleporter interaction (teleport to paired teleporter).
+        Player must be standing on teleporter and facing correct direction.
+        """
         global player_state, map_grid
 
         if not map_grid:
@@ -823,7 +835,8 @@ init python:
         if not floor:
             return
 
-        # Get icon at teleporter position from dungeon icons
+        # Get icon at current teleporter position from dungeon icons
+        # (adj_x, adj_y are actually the player's current position for on-tile interactions)
         icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
         if not icon or icon.icon_type != "teleporter":
             return
