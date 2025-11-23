@@ -100,6 +100,16 @@ screen exploration_view():
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
+                    # TOOLTIP DISPLAY for notes
+                    $ tooltip_text = GetTooltip()
+                    if tooltip_text:
+                        frame:
+                            xsize int(config.screen_width * 0.25)
+                            background "#000000CC"
+                            padding (5, 5)
+
+                            text tooltip_text size 12 color "#FFFFFF"
+
                     # PALETTE - 6x4 grid with tiles and icons
                     frame:
                         xsize int(config.screen_width * 0.314)
@@ -273,10 +283,28 @@ init python:
             renpy.restart_interaction()
 
         elif map_grid.current_mode == "edit_icons" and map_grid.selected_icon_type:
-            # Place selected icon
-            icon = MapIcon(map_grid.selected_icon_type, (x, y))
-            floor.place_icon(x, y, icon)
-            renpy.restart_interaction()
+            # Special handling for note icons - show input popup
+            if map_grid.selected_icon_type == "note":
+                renpy.show_screen("note_input_popup", x, y, floor, map_grid)
+            else:
+                # Place selected icon
+                icon = MapIcon(map_grid.selected_icon_type, (x, y))
+                floor.place_icon(x, y, icon)
+                renpy.restart_interaction()
+
+    def confirm_note_placement(x, y, floor, map_grid):
+        """Confirm note placement with text from input."""
+        # Get the note text from the input field
+        note_text = renpy.get_widget("note_input_popup", "note_input").get_text()
+
+        # Hide the popup
+        renpy.hide_screen("note_input_popup")
+
+        # Create note icon with text in metadata
+        icon = MapIcon("note", (x, y), metadata={"note_text": note_text})
+        floor.place_icon(x, y, icon)
+
+        renpy.restart_interaction()
 
     def select_tile_type(tile_type):
         """Select a tile type from the palette."""
@@ -387,6 +415,10 @@ screen map_grid_display(floor):
                     action Function(handle_map_click, x, y, floor, map_grid)
                     padding (0, 0)
 
+                    # Show tooltip for notes
+                    if icon and icon.icon_type == "note":
+                        tooltip icon.metadata.get("note_text", "")
+
                     # Tile (no rotation - causes offset issues)
                     if tile.tile_type != "empty":
                         add "images/maps/tiles/{}.png".format(tile.tile_type) xysize (cell_size, cell_size)
@@ -394,6 +426,46 @@ screen map_grid_display(floor):
                     # Icon on top
                     if icon:
                         add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
+
+
+screen note_input_popup(x, y, floor, map_grid):
+    """Popup for entering note text when placing a note icon."""
+
+    modal True
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+        xsize 400
+        ysize 200
+        background "#2A2A2A"
+        padding (20, 20)
+
+        vbox:
+            spacing 15
+
+            text "Enter Note (max 20 chars):" size 16 color "#FFFFFF"
+
+            input:
+                id "note_input"
+                length 20
+                color "#FFFFFF"
+                size 14
+                xsize 360
+
+            hbox:
+                spacing 10
+                xalign 0.5
+
+                textbutton "OK":
+                    action Function(confirm_note_placement, x, y, floor, map_grid)
+                    xsize 80
+                    ysize 35
+
+                textbutton "Cancel":
+                    action Hide("note_input_popup")
+                    xsize 80
+                    ysize 35
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
