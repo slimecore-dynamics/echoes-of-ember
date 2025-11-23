@@ -217,14 +217,24 @@ init python:
             Tiled properties are in array format: [{"name": "x", "type": "int", "value": 10}, ...]
             """
             props = {}
+            print("_extract_properties - Input type: {}".format(type(properties)))
+            print("_extract_properties - Is list? {}".format(isinstance(properties, list)))
+
             if isinstance(properties, list):
-                for prop in properties:
+                print("_extract_properties - Processing {} items".format(len(properties)))
+                for i, prop in enumerate(properties):
+                    print("_extract_properties - Item {}: type={} value={}".format(i, type(prop), prop))
                     name = prop.get("name")
                     value = prop.get("value")
+                    print("_extract_properties - Extracted: name='{}' value='{}'".format(name, value))
                     props[name] = value
+                print("_extract_properties - Final props dict: {}".format(props))
             elif isinstance(properties, dict):
                 # Some Tiled versions use dict format
+                print("_extract_properties - Using dict format")
                 props = properties
+            else:
+                print("_extract_properties - WARNING: Unknown type!")
             return props
 
         @staticmethod
