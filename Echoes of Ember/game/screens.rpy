@@ -637,7 +637,7 @@ screen file_slots(title):
                     $ slot = i + 1
 
                     button:
-                        action FileAction(slot)
+                        action FileActionWithMapData(slot)
 
                         has vbox
 
