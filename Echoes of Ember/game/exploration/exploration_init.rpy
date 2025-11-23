@@ -26,17 +26,38 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
     python:
         global map_grid, player_state
 
+        print("=" * 80)
+        print("DEBUG [LOAD_DUNGEON START] load_dungeon_floor('{}')".format(floor_filepath))
+
         # Ensure map_grid exists
         if not map_grid:
             map_grid = MapGrid()
+
+        # Check if floor already exists (from save load)
+        floor_id_to_check = floor_id if floor_id else "unknown"
+        if floor_id_to_check in map_grid.floors:
+            existing_floor = map_grid.floors[floor_id_to_check]
+            existing_tile = existing_floor.get_tile(0, 0)
+            print("DEBUG [LOAD_DUNGEON BEFORE] Floor '{}' already exists! tile(0,0) = '{}'".format(floor_id_to_check, existing_tile.tile_type))
+        else:
+            print("DEBUG [LOAD_DUNGEON BEFORE] Floor '{}' does not exist yet".format(floor_id_to_check))
 
         # Load floor using Tiled importer
         floor = TiledImporter.load_tiled_map(floor_filepath, floor_id=floor_id)
 
         if floor:
-            # Add floor to map grid
+            # Check tile in newly loaded floor
+            new_tile = floor.get_tile(0, 0)
+            print("DEBUG [LOAD_DUNGEON MIDDLE] Tiled importer returned floor '{}' with tile(0,0) = '{}'".format(floor.floor_id, new_tile.tile_type))
+
+            # Add floor to map grid (THIS OVERWRITES EXISTING FLOOR!)
             map_grid.floors[floor.floor_id] = floor
             map_grid.current_floor_id = floor.floor_id
+
+            # Verify after overwrite
+            final_tile = map_grid.floors[floor.floor_id].get_tile(0, 0)
+            print("DEBUG [LOAD_DUNGEON AFTER] Overwrote floor '{}', tile(0,0) now = '{}'".format(floor.floor_id, final_tile.tile_type))
+            print("=" * 80)
 
             # Initialize or reset player state for this floor
             if not player_state:
