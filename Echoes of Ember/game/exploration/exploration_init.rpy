@@ -1,21 +1,6 @@
 # exploration_init.rpy
 # Initialization and utility functions for dungeon exploration
 
-init python:
-    class MapGrid:
-        """Container for dungeon floors and map state."""
-        def __init__(self):
-            self.floors = {}  # Dict of floor_id -> FloorMap
-            self.current_floor_id = None
-            self.cell_size = 32
-            self.auto_map_enabled = False
-
-        def get_current_floor(self):
-            """Get the currently active floor."""
-            if self.current_floor_id and self.current_floor_id in self.floors:
-                return self.floors[self.current_floor_id]
-            return None
-
 label start_exploration_system:
     # Initialize the exploration system.
     # Call this after start_mapping_system to set up player state.
