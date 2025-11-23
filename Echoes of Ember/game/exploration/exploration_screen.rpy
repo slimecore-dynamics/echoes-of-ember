@@ -259,18 +259,19 @@ screen exploration_view():
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
-                        # Check for adjacent triggers (stairs, doors)
-                        $ icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
-                            floor, ps.x, ps.y, ps.rotation
-                        )
-
-                        # If no adjacent trigger, check for on-tile interactions (teleporter)
-                        if not icon:
-                            $ icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
+                        python:
+                            # Check for adjacent triggers (stairs, doors)
+                            icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
                                 floor, ps.x, ps.y, ps.rotation
                             )
-                            if icon:
-                                $ adj_x, adj_y = tile_x, tile_y
+
+                            # If no adjacent trigger, check for on-tile interactions (teleporter)
+                            if not icon:
+                                icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
+                                    floor, ps.x, ps.y, ps.rotation
+                                )
+                                if icon:
+                                    adj_x, adj_y = tile_x, tile_y
 
                         if icon:
                             use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
