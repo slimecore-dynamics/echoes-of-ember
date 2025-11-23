@@ -76,6 +76,11 @@ init -2 python:
             self.cell_size = 32
             self.auto_map_enabled = False
 
+            # Palette selection state
+            self.selected_tile_type = "empty"
+            self.selected_icon_type = None
+            self.current_mode = "edit_tiles"  # "edit_tiles" or "edit_icons"
+
         def get_current_floor(self):
             """Get the currently active floor."""
             if self.current_floor_id and self.current_floor_id in self.floors:
