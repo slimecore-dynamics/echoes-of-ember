@@ -318,15 +318,7 @@ label save:
 
 
 # After load label - called after loading
+# Map data is loaded in FileActionWithMapData.__call__, not here
 label after_load:
-    python:
-        # Get slot name from loaded save data
-        slot_name = store._map_slot if hasattr(store, "_map_slot") else None
-        if slot_name:
-            print("DEBUG after_load label: Loading map data for slot {}".format(slot_name))
-            load_map_data_from_file(slot_name)
-            load_player_state_from_file(slot_name)
-        else:
-            print("DEBUG after_load label: No _map_slot found in loaded save")
     return
 
