@@ -237,36 +237,8 @@ init -1 python:
     # Global to track current save slot
     current_save_slot = None
 
-    # Save callback - called when game is saved
-    def save_map_callback(save_data):
-        global current_save_slot
-        # Store slot name in save data so we can retrieve it on load
-        if current_save_slot:
-            save_data["_map_slot"] = current_save_slot
-            print("DEBUG save_map_callback: Saving map data for slot {}".format(current_save_slot))
-            save_map_data_to_file(current_save_slot)
-            save_player_state_to_file(current_save_slot)
-        else:
-            print("DEBUG save_map_callback: No current_save_slot set")
-
-    # Load callback - called after game is loaded
-    def load_map_callback():
-        # Get slot name from loaded save data
-        slot_name = store._map_slot if hasattr(store, "_map_slot") else None
-        if slot_name:
-            print("DEBUG load_map_callback: Loading map data for slot {}".format(slot_name))
-            load_map_data_from_file(slot_name)
-            load_player_state_from_file(slot_name)
-        else:
-            print("DEBUG load_map_callback: No _map_slot found in loaded save")
-
-    # Register callbacks with Ren'Py
-    config.save_callbacks.append(save_map_callback)
-    config.after_load_callbacks.append(load_map_callback)
-
     class FileActionWithMapData(Action):
-        # Sets current save slot and delegates to FileAction
-        # Actual save/load handled by callbacks
+        # Custom action that saves/loads map data alongside game state
 
         def __init__(self, slot):
             self.slot = slot
@@ -275,12 +247,46 @@ init -1 python:
         def __call__(self):
             global current_save_slot
             current_save_slot = self.slot
-            print("DEBUG FileActionWithMapData: Setting current_save_slot to {}".format(self.slot))
-            return self.file_action()
+
+            # Store slot in save data for retrieval on load
+            store._map_slot = self.slot
+
+            print("DEBUG FileActionWithMapData: Handling slot {}".format(self.slot))
+
+            # Delegate to FileAction
+            result = self.file_action()
+
+            return result
 
         def get_selected(self):
             return self.file_action.get_selected()
 
         def get_sensitive(self):
             return self.file_action.get_sensitive()
+
+
+# Save label - called before saving
+label save:
+    python:
+        if current_save_slot:
+            print("DEBUG save label: Saving map data for slot {}".format(current_save_slot))
+            save_map_data_to_file(current_save_slot)
+            save_player_state_to_file(current_save_slot)
+        else:
+            print("DEBUG save label: No current_save_slot set")
+    return
+
+
+# After load label - called after loading
+label after_load:
+    python:
+        # Get slot name from loaded save data
+        slot_name = store._map_slot if hasattr(store, "_map_slot") else None
+        if slot_name:
+            print("DEBUG after_load label: Loading map data for slot {}".format(slot_name))
+            load_map_data_from_file(slot_name)
+            load_player_state_from_file(slot_name)
+        else:
+            print("DEBUG after_load label: No _map_slot found in loaded save")
+    return
 
