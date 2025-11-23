@@ -134,6 +134,12 @@ init python:
             print("TiledImporter - Loaded map: {} ({}x{})".format(floor_name, width, height))
             print("TiledImporter - Dungeon tiles stored, drawn map cleared")
             print("TiledImporter - Dungeon icons: {}, Player icons: {}".format(len(floor.dungeon_icons), len(floor.icons)))
+
+            # DEBUG: Print all dungeon icon positions
+            print("DEBUG: Dungeon icon positions:")
+            for pos, icon in floor.dungeon_icons.items():
+                print("  pos={} type={}".format(pos, icon.icon_type))
+
             return floor
 
         @staticmethod
