@@ -146,9 +146,10 @@ screen exploration_view():
                                                 "wall_wne", "wall_nes", "cross", "empty"]:
                                     $ is_selected = (map_grid.selected_tile_variant == variant if map_grid and hasattr(map_grid, 'selected_tile_variant') else False)
                                     $ tile_image = "images/maps/tiles/{}.png".format(variant)
+                                    $ bg_color = "#FFFF0080" if is_selected else "#00000000"
                                     button:
                                         xysize (32, 32)
-                                        background "#FFFF0080" if is_selected else "#00000000"
+                                        background bg_color
                                         action Function(select_tile_variant, variant)
                                         add tile_image fit "contain"
 
@@ -167,9 +168,10 @@ screen exploration_view():
                                     # Map door variants to the single door icon
                                     $ icon_name = "door" if "door" in icon_type else icon_type
                                     $ icon_image = "images/maps/icons/{}.png".format(icon_name)
+                                    $ icon_bg_color = "#FFFF0080" if is_selected else "#00000000"
                                     button:
                                         xysize (32, 32)
-                                        background "#FFFF0080" if is_selected else "#00000000"
+                                        background icon_bg_color
                                         action Function(select_icon_for_placement, icon_type)
                                         add icon_image fit "contain"
 
