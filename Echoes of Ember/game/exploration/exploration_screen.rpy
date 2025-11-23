@@ -292,11 +292,8 @@ init python:
                 floor.place_icon(x, y, icon)
                 renpy.restart_interaction()
 
-    def confirm_note_placement(x, y, floor, map_grid):
+    def confirm_note_placement(x, y, floor, map_grid, note_text):
         """Confirm note placement with text from input."""
-        # Get the note text from the input field
-        note_text = renpy.get_widget("note_input_popup", "note_input").get_text()
-
         # Hide the popup
         renpy.hide_screen("note_input_popup")
 
@@ -433,6 +430,8 @@ screen note_input_popup(x, y, floor, map_grid):
 
     modal True
 
+    default note_text = ""
+
     frame:
         xalign 0.5
         yalign 0.5
@@ -447,7 +446,7 @@ screen note_input_popup(x, y, floor, map_grid):
             text "Enter Note (max 20 chars):" size 16 color "#FFFFFF"
 
             input:
-                id "note_input"
+                value ScreenVariableInputValue("note_text")
                 length 20
                 color "#FFFFFF"
                 size 14
@@ -458,7 +457,7 @@ screen note_input_popup(x, y, floor, map_grid):
                 xalign 0.5
 
                 textbutton "OK":
-                    action Function(confirm_note_placement, x, y, floor, map_grid)
+                    action Function(confirm_note_placement, x, y, floor, map_grid, note_text)
                     xsize 80
                     ysize 35
 
