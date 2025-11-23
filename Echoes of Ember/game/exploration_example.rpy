@@ -17,8 +17,8 @@ label start_dungeon_exploration_example:
     # Initialize exploration system
     call start_exploration_system
 
-    # Create test dungeon (or load from Tiled)
-    $ create_test_dungeon()
+    # Load dungeon from Tiled JSON
+    call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
 
     # Optional: Show intro message
     "Welcome to the dungeon!"
@@ -45,12 +45,10 @@ label start_custom_dungeon_example:
     3. Update the filepath below
     """
 
-    call start_mapping_system
     call start_exploration_system
 
     # Load dungeon from Tiled JSON file
-    # Replace "maps/your_dungeon.json" with your actual file path
-    call load_dungeon_floor("maps/dungeon_floor1.json", "floor_1")
+    call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
 
     "Welcome to [floor.floor_name]!" with dissolve
 
@@ -66,12 +64,11 @@ label multi_floor_dungeon_example:
     Example: Create a multi-floor dungeon with stairs.
     """
 
-    call start_mapping_system
     call start_exploration_system
 
     python:
         # Create Floor 1
-        floor1 = FloorMap("floor_1", "Entrance Hall", dimensions=(20, 20))
+        floor1 = FloorMap("prom_breach_1f", "Breach - 1F", dimensions=(20, 20))
         floor1.starting_x = 10
         floor1.starting_y = 10
         floor1.starting_rotation = 0
@@ -85,10 +82,10 @@ label multi_floor_dungeon_example:
         floor1.place_icon(12, 10, MapIcon("stairs_down", (12, 10)))
 
         # Add to map
-        map_grid.floors["floor_1"] = floor1
+        map_grid.floors["prom_breach_1f"] = floor1
 
         # Create Floor 2
-        floor2 = FloorMap("floor_2", "Lower Level", dimensions=(20, 20))
+        floor2 = FloorMap("prom_breach_2f", "Breach - 2F", dimensions=(20, 20))
         floor2.starting_x = 10
         floor2.starting_y = 10
         floor2.starting_rotation = 180  # Facing south
@@ -107,11 +104,11 @@ label multi_floor_dungeon_example:
             metadata={"damage": 10}))
 
         # Add to map
-        map_grid.floors["floor_2"] = floor2
+        map_grid.floors["prom_breach_2f"] = floor2
 
         # Start on floor 1
-        map_grid.current_floor_id = "floor_1"
-        player_state = PlayerState(x=10, y=10, rotation=0, floor_id="floor_1")
+        map_grid.current_floor_id = "prom_breach_1f"
+        player_state = PlayerState(x=10, y=10, rotation=0, floor_id="prom_breach_1f")
 
     "You enter the dungeon entrance..."
 
@@ -134,7 +131,6 @@ label gathering_example:
         "data": 0
     }
 
-    call start_mapping_system
     call start_exploration_system
 
     python:
@@ -214,7 +210,6 @@ label dialogue_during_exploration_example:
     - Returns to exploration after dialogue
     """
 
-    call start_mapping_system
     call start_exploration_system
 
     # Character definitions (if not already defined)

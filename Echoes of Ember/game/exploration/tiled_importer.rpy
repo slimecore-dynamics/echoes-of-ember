@@ -218,21 +218,23 @@ init python:
             """
             props = {}
             print("_extract_properties - Input type: {}".format(type(properties)))
-            print("_extract_properties - Is list? {}".format(isinstance(properties, list)))
 
-            if isinstance(properties, list):
-                print("_extract_properties - Processing {} items".format(len(properties)))
-                for i, prop in enumerate(properties):
-                    print("_extract_properties - Item {}: type={} value={}".format(i, type(prop), prop))
-                    name = prop.get("name")
-                    value = prop.get("value")
-                    print("_extract_properties - Extracted: name='{}' value='{}'".format(name, value))
-                    props[name] = value
-                print("_extract_properties - Final props dict: {}".format(props))
-            elif isinstance(properties, dict):
-                # Some Tiled versions use dict format
+            # Check if it's a dict first
+            if isinstance(properties, dict):
                 print("_extract_properties - Using dict format")
                 props = properties
+            # Use duck typing for list check (Ren'Py type compatibility)
+            elif hasattr(properties, '__iter__') and not isinstance(properties, str):
+                print("_extract_properties - Processing iterable with {} items".format(len(properties)))
+                for i, prop in enumerate(properties):
+                    if isinstance(prop, dict):
+                        name = prop.get("name")
+                        value = prop.get("value")
+                        print("_extract_properties - Item {}: name='{}' value='{}'".format(i, name, value))
+                        props[name] = value
+                    else:
+                        print("_extract_properties - WARNING: Item {} is not a dict: {}".format(i, prop))
+                print("_extract_properties - Final props dict: {}".format(props))
             else:
                 print("_extract_properties - WARNING: Unknown type!")
             return props

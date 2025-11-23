@@ -61,9 +61,8 @@ init -1 python:
 
             # Check if file exists
             if not os.path.exists(player_path):
-                print("ExplorationPersistence - No player state file found, creating new")
-                # Create default player state
-                player_state = PlayerState(x=10, y=10, rotation=0, floor_id="floor_1")
+                print("ExplorationPersistence - No player state file found")
+                # Don't create a default player state - let the dungeon load handle it
                 return False
 
             # Load JSON
@@ -78,8 +77,7 @@ init -1 python:
 
         except Exception as e:
             print("ExplorationPersistence - Error loading player state: {}".format(e))
-            # Create default player state on error
-            player_state = PlayerState(x=10, y=10, rotation=0, floor_id="floor_1")
+            # Don't create a default player state on error - let the dungeon load handle it
             return False
 
 
