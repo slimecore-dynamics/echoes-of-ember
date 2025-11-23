@@ -66,7 +66,9 @@ init python:
             # Check if there's a blocking icon at destination (from dungeon, not player-drawn)
             icon_at_dest = floor.dungeon_icons.get((to_x, to_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((to_x, to_y))
             if icon_at_dest:
+                print("DEBUG movement: dest=({},{}) has icon={}".format(to_x, to_y, icon_at_dest.icon_type))
                 if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
+                    print("DEBUG: Icon BLOCKS movement")
                     return (False, "Blocked by {}".format(icon_at_dest.icon_type))
 
             return (True, "OK")
