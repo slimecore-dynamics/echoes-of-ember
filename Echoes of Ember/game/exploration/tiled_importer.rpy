@@ -279,8 +279,9 @@ init python:
                 tile_height = obj.get("height", 32)
 
                 # Convert pixel to grid coordinates
+                # NOTE: Tiled y-coordinate is at BOTTOM of tile, so subtract height first
                 grid_x = int(pixel_x / 32)
-                grid_y = int(pixel_y / 32)
+                grid_y = int((pixel_y - tile_height) / 32)
 
                 # Get object type - try multiple sources
                 obj_type = obj.get("type", "").lower()
