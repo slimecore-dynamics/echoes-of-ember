@@ -16,7 +16,7 @@ label start_dungeon_exploration_example:
     call start_exploration_system
 
     # Load dungeon from Tiled JSON
-    call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
+    call load_dungeon_floor("maps/exports/prom_breach_1f.json")
 
     # Optional: Show intro message
     "Welcome to the dungeon!"
@@ -44,7 +44,7 @@ label start_custom_dungeon_example:
     call start_exploration_system
 
     # Load dungeon from Tiled JSON file
-    call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
+    call load_dungeon_floor("maps/exports/prom_breach_1f.json")
 
     "Welcome to [floor.floor_name]!" with dissolve
 

@@ -34,7 +34,7 @@ label start:
     call start_exploration_system
 
     # Load the Prometheus Breach dungeon from Tiled JSON
-    call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
+    call load_dungeon_floor("maps/exports/prom_breach_1f.json")
 
     # Show exploration screen
     call screen exploration_view

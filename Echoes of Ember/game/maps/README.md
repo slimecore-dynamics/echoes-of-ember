@@ -4,7 +4,8 @@ This directory contains Tiled map editor files for dungeon layouts in Echoes of 
 
 ## Directory Structure
 
-- **tiled/** - Dungeon layouts created in Tiled Map Editor (JSON format)
+- **source/** - Tiled source files (.tmx, .tsx, .tiled-project)
+- **exports/** - Exported JSON files loaded by the game
 
 ## File Format
 
@@ -29,10 +30,9 @@ Contains tile layers and object layers with dungeon layout and interaction point
 
 ## Creating Dungeons
 
-1. Design your dungeon in Tiled Map Editor
-2. Export as JSON format
-3. Place the file in `maps/tiled/`
-4. Load in game with: `call load_dungeon_floor("maps/tiled/your_dungeon.json")`
+1. Design your dungeon in Tiled Map Editor and save to `maps/source/`
+2. Export as JSON format to `maps/exports/`
+3. Load in game with: `call load_dungeon_floor("maps/exports/your_dungeon.json")`
 
 ## Map Data Persistence
 

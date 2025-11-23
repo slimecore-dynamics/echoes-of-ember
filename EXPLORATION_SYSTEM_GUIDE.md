@@ -21,7 +21,7 @@ label start:
     call start_exploration_system
 
     # Option A: Load a dungeon from Tiled JSON
-    call load_dungeon_floor("maps/dungeon_floor1.json", "floor_1")
+    call load_dungeon_floor("maps/exports/dungeon_floor1.json", "floor_1")
 
     # Option B: Create a test dungeon programmatically
     $ create_test_dungeon()
@@ -62,7 +62,7 @@ label start:
 
 6. Export as JSON (File → Export As → JSON)
 
-7. Place in `game/maps/` directory
+7. Place source `.tmx` files in `game/maps/source/` and exported JSON in `game/maps/exports/`
 
 ---
 
@@ -144,8 +144,10 @@ Echoes of Ember/game/
 │   ├── exploration_init.rpy         # Initialization & test dungeon
 │   └── player_marker.rpy            # Map marker overlay
 │
-├── maps/                            # Place Tiled JSON files here
-│   └── dungeon_floor1.json
+├── maps/                            # Map files
+│   ├── source/                      # Tiled source files (.tmx, .tsx)
+│   └── exports/                     # Exported JSON files
+│       └── dungeon_floor1.json
 │
 └── images/exploration/
     └── first_person/                # First-person view images
@@ -292,10 +294,10 @@ Enable debug output by checking console for:
 ## Next Steps
 
 1. **Create your dungeon in Tiled**
-   - Design layout with tile types and rotations
+   - Design layout with tile types and rotations in `maps/source/`
    - Place icons for interactions
    - Set custom properties (starting position, view distance)
-   - Export as JSON
+   - Export as JSON to `maps/exports/`
 
 2. **Add first-person graphics**
    - Create wall/floor/ceiling textures
