@@ -1,28 +1,28 @@
 # Directories that Ren'Py changes files in.
-/game/saves
-/game/cache
+Echoes of Ember/game/saves
+Echoes of Ember/game/cache
 
 # Compiled script files. These are important for saving, and so should
 # be preserved by developer and build systems after the game has been released.
-/game/**/*.rpyc
-/game/**/*.rpymc
+Echoes of Ember/game/**/*.rpyc
+Echoes of Ember/game/**/*.rpymc
 
 # Files Ren'Py can generate.
-/game/**/*.bak
-/game/**/*.new
-/game/**/*.old
+Echoes of Ember/game/**/*.bak
+Echoes of Ember/game/**/*.new
+Echoes of Ember/game/**/*.old
 
 # Error, log, and output files.
-/errors.txt
-/files.txt
-/image_cache.txt
-/log.txt
-/save_dump.txt
-/traceback.txt
+Echoes of Ember/errors.txt
+Echoes of Ember/files.txt
+Echoes of Ember/image_cache.txt
+Echoes of Ember/log.txt
+Echoes of Ember/save_dump.txt
+Echoes of Ember/traceback.txt
 
 # Launcher-generated files.
-/dialogue.tab
-/dialogue.txt
-/strings.json
+Echoes of Ember/dialogue.tab
+Echoes of Ember/dialogue.txt
+Echoes of Ember/strings.json
 *.rpyc
 *.rpyb
