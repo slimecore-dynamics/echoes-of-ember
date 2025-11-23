@@ -76,7 +76,7 @@ screen exploration_view():
                     # SPACER - move everything down 200 pixels
                     null height 100
 
-                    # MAP VIEW - inline display with proper sizing
+                    # MAP VIEW - inline display
                     frame:
                         xsize int(config.screen_width * 0.314)
                         ysize int(config.screen_width * 0.314)  # Square viewport
