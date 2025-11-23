@@ -461,8 +461,14 @@ screen map_grid_display(floor, cell_size, gridline_width):
     $ grid_w = floor.dimensions[0]
     $ grid_h = floor.dimensions[1]
 
-    # Dark grey container for gridlines
+    # Calculate exact grid size including gridlines
+    $ total_grid_w = cell_size * grid_w + gridline_width * (grid_w - 1)
+    $ total_grid_h = cell_size * grid_h + gridline_width * (grid_h - 1)
+
+    # Dark grey container for gridlines (explicitly sized)
     frame:
+        xsize total_grid_w
+        ysize total_grid_h
         background "#555555"  # Dark grey gridlines
         padding (0, 0)
 
