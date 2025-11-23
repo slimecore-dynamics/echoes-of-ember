@@ -260,16 +260,21 @@ screen exploration_view():
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
                         python:
+                            print("DEBUG exploration_screen: Checking interactions at pos=({},{}) rot={}".format(ps.x, ps.y, ps.rotation))
+
                             # Check for adjacent triggers (stairs, doors)
                             icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
                                 floor, ps.x, ps.y, ps.rotation
                             )
+                            print("DEBUG exploration_screen: Adjacent check returned icon={}".format(icon.icon_type if icon else None))
 
                             # If no adjacent trigger, check for on-tile interactions (teleporter)
                             if not icon:
+                                print("DEBUG exploration_screen: No adjacent icon, checking on-tile...")
                                 icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
                                     floor, ps.x, ps.y, ps.rotation
                                 )
+                                print("DEBUG exploration_screen: On-tile check returned icon={}".format(icon.icon_type if icon else None))
                                 if icon:
                                     adj_x, adj_y = tile_x, tile_y
 
