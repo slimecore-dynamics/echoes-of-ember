@@ -12,71 +12,21 @@ init python:
         Tiled Format: https://doc.mapeditor.org/en/stable/reference/json-map-format/
         """
 
-        # Tile type and rotation mappings based on image filenames
+        # Tile type parsing based on image filenames
         @staticmethod
         def parse_tile_from_image(image_path):
             """
-            Parse tile type and rotation from image filename.
+            Parse tile type from image filename.
+            Rotation is no longer used - always returns 0.
 
             Returns: (tile_type, rotation)
             """
             import os
             filename = os.path.basename(image_path).replace(".png", "")
 
-            # Handle different tile types
-            if filename == "empty":
-                return ("empty", 0)
-            elif filename == "cross":
-                return ("cross", 0)
-            elif filename.startswith("hallway_"):
-                # hallway_we/hor = horizontal (W-E) = 0 degrees
-                # hallway_ns/ver = vertical (N-S) = 90 degrees
-                if "we" in filename or "hor" in filename:
-                    return ("hallway", 0)
-                elif "ns" in filename or "ver" in filename:
-                    return ("hallway", 90)
-            elif filename.startswith("corner_"):
-                # corner_es = E+S openings = 0 degrees
-                # corner_ne = N+E openings = 270 degrees
-                # corner_wn = W+N openings = 180 degrees
-                # corner_ws = W+S openings = 90 degrees
-                if "es" in filename:
-                    return ("corner", 0)
-                elif "ne" in filename:
-                    return ("corner", 270)
-                elif "wn" in filename:
-                    return ("corner", 180)
-                elif "ws" in filename:
-                    return ("corner", 90)
-            elif filename.startswith("t_intersection_"):
-                # t_intersection_wse = W+S+E openings (blocks N) = 0 degrees
-                # t_intersection_nws = N+W+S openings (blocks E) = 90 degrees
-                # t_intersection_wne = W+N+E openings (blocks S) = 180 degrees
-                # t_intersection_nes = N+E+S openings (blocks W) = 270 degrees
-                if "wse" in filename:
-                    return ("t_intersection", 0)
-                elif "nws" in filename:
-                    return ("t_intersection", 90)
-                elif "wne" in filename:
-                    return ("t_intersection", 180)
-                elif "nes" in filename:
-                    return ("t_intersection", 270)
-            elif filename.startswith("wall_"):
-                # wall_wse = W+S+E openings (blocks N) = 0 degrees
-                # wall_nws = N+W+S openings (blocks E) = 90 degrees
-                # wall_wne = W+N+E openings (blocks S) = 180 degrees
-                # wall_nes = N+E+S openings (blocks W) = 270 degrees
-                if "wse" in filename:
-                    return ("wall", 0)
-                elif "nws" in filename:
-                    return ("wall", 90)
-                elif "wne" in filename:
-                    return ("wall", 180)
-                elif "nes" in filename:
-                    return ("wall", 270)
-
-            # Default fallback
-            return ("empty", 0)
+            # Return the full filename as tile_type (no suffix stripping)
+            # Examples: hallway_we, corner_ws, t_intersection_nws, wall_nes, cross, empty
+            return (filename, 0)
 
         # Mapping from Tiled object types to icon types
         OBJECT_TYPE_MAP = {
