@@ -282,19 +282,21 @@ label save(_save_name=None):
             # Fallback for unknown save types
             slot = "quick-1"
 
-        # Debug: Check what we're trying to save
-        # renpy.notify("Saving to slot: {} | map_grid: {} | player_state: {}".format(
-        #     slot,
-        #     "exists" if map_grid else "None",
-        #     "exists" if player_state else "None"
-        # ))
+        # Debug: Log what we're trying to save
+        import sys
+        print("=== SAVE DEBUG ===", file=sys.stderr)
+        print("Slot: {}".format(slot), file=sys.stderr)
+        print("map_grid exists: {}".format(map_grid is not None), file=sys.stderr)
+        print("player_state exists: {}".format(player_state is not None), file=sys.stderr)
 
         # Save map data and player state
         map_saved = save_map_data_to_file(slot)
         player_saved = save_player_state_to_file(slot)
 
-        # Debug: Show save results
-        renpy.notify("Map data save: {} | Player save: {}".format(map_saved, player_saved))
+        # Debug: Log save results
+        print("Map data saved: {}".format(map_saved), file=sys.stderr)
+        print("Player state saved: {}".format(player_saved), file=sys.stderr)
+        print("=================", file=sys.stderr)
     return
 
 
