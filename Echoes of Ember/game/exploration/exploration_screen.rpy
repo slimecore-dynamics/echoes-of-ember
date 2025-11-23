@@ -144,12 +144,12 @@ screen exploration_view():
                                                 "corner_wn", "corner_ws", "t_intersection_wse", "t_intersection_nws",
                                                 "t_intersection_wne", "t_intersection_nes", "wall_wse", "wall_nws",
                                                 "wall_wne", "wall_nes", "cross", "empty"]:
-                                    $ is_selected = (map_grid.selected_tile_variant == variant if map_grid and hasattr(map_grid, 'selected_tile_variant') else False)
                                     $ tile_image = "images/maps/tiles/{}.png".format(variant)
-                                    $ bg_color = "#FFFF0080" if is_selected else "#00000000"
                                     button:
                                         xysize (32, 32)
-                                        background bg_color
+                                        background "#00000000"
+                                        selected_background "#FFFF0080"
+                                        selected (map_grid.selected_tile_variant == variant if map_grid and hasattr(map_grid, 'selected_tile_variant') else False)
                                         action Function(select_tile_variant, variant)
                                         add tile_image fit "contain"
 
@@ -164,14 +164,14 @@ screen exploration_view():
                                 for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open",
                                                   # Row 2: other icons
                                                   "gathering", "enemy", "event", "teleporter"]:
-                                    $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
                                     # Map door variants to the single door icon
                                     $ icon_name = "door" if "door" in icon_type else icon_type
                                     $ icon_image = "images/maps/icons/{}.png".format(icon_name)
-                                    $ icon_bg_color = "#FFFF0080" if is_selected else "#00000000"
                                     button:
                                         xysize (32, 32)
-                                        background icon_bg_color
+                                        background "#00000000"
+                                        selected_background "#FFFF0080"
+                                        selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
                                         action Function(select_icon_for_placement, icon_type)
                                         add icon_image fit "contain"
 
