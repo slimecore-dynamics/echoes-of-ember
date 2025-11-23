@@ -254,6 +254,14 @@ init -1 python:
 
             print("DEBUG load_map_data_from_file: Successfully loaded map data! map_grid.floors has {} floors".format(len(map_grid.floors)))
             print("DEBUG load_map_data_from_file: map_grid.current_floor_id = {}".format(map_grid.current_floor_id))
+
+            # Final verification: check tile(0,0) in the loaded floor
+            if map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
+                final_floor = map_grid.floors[map_grid.current_floor_id]
+                final_tile = final_floor.get_tile(0, 0)
+                print("DEBUG [LOAD_MAP_DATA END] tile(0,0) = '{}' rotation {}".format(final_tile.tile_type, final_tile.rotation))
+            print("=" * 80)
+
             return True
 
         except Exception as e:
@@ -274,15 +282,30 @@ init -1 python:
             self.is_load = (screen_name == "load")
 
         def __call__(self):
-            print("DEBUG FileActionWithMapData: __call__ for slot {} (is_load={})".format(self.slot, self.is_load))
+            print("=" * 80)
+            print("DEBUG [LOAD START] FileActionWithMapData.__call__ for slot {} (is_load={})".format(self.slot, self.is_load))
 
             if self.is_load:
-                # Load: Set slot for after_load to use, then restore game state
-                # Map data will be loaded in after_load AFTER FileLoad completes
-                print("DEBUG FileActionWithMapData: Setting _pending_load_slot to {}".format(self.slot))
-                store._pending_load_slot = self.slot
+                # Load: Write slot to temp file, then restore game state
+                print("DEBUG [LOAD STEP 1] Writing temp file for slot {}".format(self.slot))
+                temp_file_path = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
+                print("DEBUG [LOAD STEP 1] Temp file path: {}".format(temp_file_path))
+
+                try:
+                    with open(temp_file_path, 'w') as f:
+                        f.write(str(self.slot))
+                    print("DEBUG [LOAD STEP 1] Temp file written successfully")
+
+                    # Verify it was written
+                    with open(temp_file_path, 'r') as f:
+                        content = f.read()
+                    print("DEBUG [LOAD STEP 1] Temp file contains: '{}'".format(content))
+                except Exception as e:
+                    print("DEBUG [LOAD STEP 1] ERROR writing temp file: {}".format(e))
+
+                print("DEBUG [LOAD STEP 2] Calling FileLoad({})".format(self.slot))
                 result = FileLoad(self.slot)()
-                print("DEBUG FileActionWithMapData: FileLoad completed, map data will be loaded in after_load")
+                print("DEBUG [LOAD STEP 3] FileLoad completed, after_load should run next")
             else:
                 # Save: First save map data, then save game state
                 print("DEBUG FileActionWithMapData: Saving map data before FileSave")
@@ -322,23 +345,47 @@ label save:
 # This runs AFTER FileLoad has restored all variables
 label after_load:
     python:
-        # Check if we have a pending map data load
-        if hasattr(store, '_pending_load_slot') and store._pending_load_slot:
-            print("DEBUG after_load: Loading map data for slot {}".format(store._pending_load_slot))
-            load_map_data_from_file(store._pending_load_slot)
-            load_player_state_from_file(store._pending_load_slot)
+        import os
+
+        print("=" * 80)
+        print("DEBUG [AFTER_LOAD START] after_load label running")
+
+        # Check for temp file
+        temp_file_path = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
+        print("DEBUG [AFTER_LOAD STEP 1] Looking for temp file: {}".format(temp_file_path))
+        print("DEBUG [AFTER_LOAD STEP 1] Temp file exists: {}".format(os.path.exists(temp_file_path)))
+
+        slot = None
+        if os.path.exists(temp_file_path):
+            try:
+                print("DEBUG [AFTER_LOAD STEP 2] Reading temp file")
+                with open(temp_file_path, 'r') as f:
+                    slot = f.read().strip()
+                print("DEBUG [AFTER_LOAD STEP 2] Read slot '{}' from temp file".format(slot))
+
+                print("DEBUG [AFTER_LOAD STEP 3] Deleting temp file")
+                os.remove(temp_file_path)
+                print("DEBUG [AFTER_LOAD STEP 3] Temp file deleted")
+            except Exception as e:
+                print("DEBUG [AFTER_LOAD ERROR] Exception reading/deleting temp file: {}".format(e))
+        else:
+            print("DEBUG [AFTER_LOAD STEP 2] No temp file found - skipping map load")
+
+        if slot:
+            print("DEBUG [AFTER_LOAD STEP 4] Calling load_map_data_from_file({})".format(slot))
+            load_map_data_from_file(slot)
+            load_player_state_from_file(slot)
+            print("DEBUG [AFTER_LOAD STEP 5] load_map_data_from_file completed")
 
             # Verify it loaded
             if map_grid and map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
                 floor_debug = map_grid.floors[map_grid.current_floor_id]
                 tile_debug = floor_debug.get_tile(0, 0)
-                print("DEBUG after_load: After loading, tile at (0,0) = {} rotation {}".format(tile_debug.tile_type, tile_debug.rotation))
+                print("DEBUG [AFTER_LOAD STEP 6] After loading, tile at (0,0) = '{}' rotation {}".format(tile_debug.tile_type, tile_debug.rotation))
             else:
-                print("DEBUG after_load: After loading, map_grid has no floors")
+                print("DEBUG [AFTER_LOAD STEP 6] After loading, map_grid has no floors!")
 
-            # Clear the pending slot
-            store._pending_load_slot = None
-        else:
-            print("DEBUG after_load: No pending map data load")
+        print("DEBUG [AFTER_LOAD END] after_load label complete")
+        print("=" * 80)
     return
 
