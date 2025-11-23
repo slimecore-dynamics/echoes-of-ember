@@ -43,6 +43,12 @@
                  "height":32,
                  "id":5,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"pair_id",
+                         "type":"string",
+                         "value":"tp1"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -55,6 +61,12 @@
                  "height":32,
                  "id":6,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"pair_id",
+                         "type":"string",
+                         "value":"tp1"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -67,6 +79,12 @@
                  "height":32,
                  "id":7,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"damage",
+                         "type":"int",
+                         "value":5
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -79,6 +97,12 @@
                  "height":32,
                  "id":8,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"damage",
+                         "type":"int",
+                         "value":5
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -115,6 +139,17 @@
                  "height":32,
                  "id":15,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"label",
+                         "type":"string",
+                         "value":"test_event_dialogue"
+                        }, 
+                        {
+                         "name":"message",
+                         "type":"string",
+                         "value":"Test event triggered successfully"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -127,6 +162,17 @@
                  "height":32,
                  "id":16,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"amount",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"scrap"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,

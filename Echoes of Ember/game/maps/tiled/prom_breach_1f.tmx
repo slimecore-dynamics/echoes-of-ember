@@ -121,14 +121,40 @@
 </data>
  </layer>
  <objectgroup id="2" name="events">
-  <object id="5" gid="17" x="64" y="608" width="32" height="32"/>
-  <object id="6" gid="17" x="480" y="64" width="32" height="32"/>
-  <object id="7" gid="18" x="384" y="384" width="32" height="32"/>
-  <object id="8" gid="18" x="480" y="384" width="32" height="32"/>
+  <object id="5" gid="17" x="64" y="608" width="32" height="32">
+   <properties>
+    <property name="pair_id" value="tp1"/>
+   </properties>
+  </object>
+  <object id="6" gid="17" x="480" y="64" width="32" height="32">
+   <properties>
+    <property name="pair_id" value="tp1"/>
+   </properties>
+  </object>
+  <object id="7" gid="18" x="384" y="384" width="32" height="32">
+   <properties>
+    <property name="damage" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="8" gid="18" x="480" y="384" width="32" height="32">
+   <properties>
+    <property name="damage" type="int" value="5"/>
+   </properties>
+  </object>
   <object id="13" gid="22" x="32" y="64" width="32" height="32"/>
   <object id="14" gid="21" x="160" y="608" width="32" height="32"/>
-  <object id="15" gid="19" x="96" y="288" width="32" height="32"/>
-  <object id="16" gid="20" x="384" y="160" width="32" height="32"/>
+  <object id="15" gid="19" x="96" y="288" width="32" height="32">
+   <properties>
+    <property name="label" value="test_event_dialogue"/>
+    <property name="message" value="Test event triggered successfully"/>
+   </properties>
+  </object>
+  <object id="16" gid="20" x="384" y="160" width="32" height="32">
+   <properties>
+    <property name="amount" type="int" value="1"/>
+    <property name="item" value="scrap"/>
+   </properties>
+  </object>
   <object id="17" gid="23" x="416" y="96" width="32" height="32"/>
  </objectgroup>
 </map>

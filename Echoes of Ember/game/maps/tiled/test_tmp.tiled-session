@@ -28,7 +28,7 @@
     "openFiles": [
     ],
     "project": "test_tmp.tiled-project",
-    "property.type": "int",
+    "property.type": "string",
     "recentFiles": [
         "test.tsx",
         "test.tmx"
