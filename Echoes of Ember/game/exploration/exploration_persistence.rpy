@@ -234,40 +234,53 @@ init -1 python:
             return False
 
 
+    # Global to track current save slot
+    current_save_slot = None
+
+    # Save callback - called when game is saved
+    def save_map_callback(save_data):
+        global current_save_slot
+        # Store slot name in save data so we can retrieve it on load
+        if current_save_slot:
+            save_data["_map_slot"] = current_save_slot
+            print("DEBUG save_map_callback: Saving map data for slot {}".format(current_save_slot))
+            save_map_data_to_file(current_save_slot)
+            save_player_state_to_file(current_save_slot)
+        else:
+            print("DEBUG save_map_callback: No current_save_slot set")
+
+    # Load callback - called after game is loaded
+    def load_map_callback():
+        # Get slot name from loaded save data
+        slot_name = store._map_slot if hasattr(store, "_map_slot") else None
+        if slot_name:
+            print("DEBUG load_map_callback: Loading map data for slot {}".format(slot_name))
+            load_map_data_from_file(slot_name)
+            load_player_state_from_file(slot_name)
+        else:
+            print("DEBUG load_map_callback: No _map_slot found in loaded save")
+
+    # Register callbacks with Ren'Py
+    config.save_callbacks.append(save_map_callback)
+    config.after_load_callbacks.append(load_map_callback)
+
     class FileActionWithMapData(Action):
-        # Ren'Py action that wraps FileAction and adds map data persistence
-        # Saves/loads both game state AND player-drawn map data
+        # Sets current save slot and delegates to FileAction
+        # Actual save/load handled by callbacks
 
         def __init__(self, slot):
             self.slot = slot
             self.file_action = FileAction(slot)
-            print("DEBUG FileActionWithMapData: Created for slot {}".format(slot))
 
         def __call__(self):
-            print("DEBUG FileActionWithMapData: __call__ invoked for slot {}".format(self.slot))
+            global current_save_slot
+            current_save_slot = self.slot
+            print("DEBUG FileActionWithMapData: Setting current_save_slot to {}".format(self.slot))
+            return self.file_action()
 
-            # Delegate to standard FileAction first (handles game state save/load)
-            result = self.file_action()
-            print("DEBUG FileActionWithMapData: FileAction result = {}".format(result))
+        def get_selected(self):
+            return self.file_action.get_selected()
 
-            # Then handle map data and player state
-            screen_name = renpy.current_screen().screen_name[0]
-            print("DEBUG FileActionWithMapData: screen_name = {}".format(screen_name))
-
-            if screen_name == "save":
-                print("DEBUG FileActionWithMapData: Saving map data and player state")
-                # On save: persist map data and player state
-                save_result = save_map_data_to_file(self.slot)
-                print("DEBUG FileActionWithMapData: save_map_data result = {}".format(save_result))
-                player_result = save_player_state_to_file(self.slot)
-                print("DEBUG FileActionWithMapData: save_player_state result = {}".format(player_result))
-            else:  # load
-                print("DEBUG FileActionWithMapData: Loading map data and player state")
-                # On load: restore map data and player state
-                load_result = load_map_data_from_file(self.slot)
-                print("DEBUG FileActionWithMapData: load_map_data result = {}".format(load_result))
-                player_result = load_player_state_from_file(self.slot)
-                print("DEBUG FileActionWithMapData: load_player_state result = {}".format(player_result))
-
-            return result
+        def get_sensitive(self):
+            return self.file_action.get_sensitive()
 
