@@ -97,6 +97,17 @@ screen exploration_view():
                                 # Add player marker (red triangle) at player's grid position
                                 if ps:
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
+
+                                # Display tooltip at note position (on top of everything)
+                                $ tooltip_data = GetTooltip()
+                                if tooltip_data:
+                                    $ note_x, note_y, note_text = tooltip_data
+                                    frame:
+                                        xpos (note_x * cell_size)
+                                        ypos (note_y * cell_size - 25)  # Above the note icon
+                                        background "#000000DD"
+                                        padding (5, 3)
+                                        text note_text size 10 color "#FFFFFF"
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -409,17 +420,6 @@ screen map_grid_display(floor, cell_size):
                     # Icon on top
                     if icon:
                         add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
-
-    # Display tooltip at note position
-    $ tooltip_data = GetTooltip()
-    if tooltip_data:
-        $ note_x, note_y, note_text = tooltip_data
-        frame:
-            xpos (note_x * cell_size)
-            ypos (note_y * cell_size - 25)  # Above the note icon
-            background "#000000DD"
-            padding (5, 3)
-            text note_text size 10 color "#FFFFFF"
 
 
 screen note_input_popup(x, y, floor, map_grid):
