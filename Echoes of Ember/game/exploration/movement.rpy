@@ -17,6 +17,7 @@ init python:
         def can_move_to(floor, from_x, from_y, to_x, to_y, player_rotation):
             """
             Check if player can move from (from_x, from_y) to (to_x, to_y).
+            Only checks if destination tile allows entry - doesn't check source tile.
 
             Returns: (can_move: bool, reason: str)
             """
@@ -28,31 +29,25 @@ init python:
             if to_x < 0 or to_x >= width or to_y < 0 or to_y >= height:
                 return (False, "Out of bounds")
 
-            # Get source tile from DUNGEON (real tiles), not drawn map
-            source_tile = MovementValidator._get_dungeon_tile(floor, from_x, from_y)
-            if not source_tile:
-                return (False, "Invalid source")
-
             # Calculate direction of movement
             dx = to_x - from_x
             dy = to_y - from_y
 
-            # Determine which direction we're trying to move
+            # Determine which direction we're moving (and entering from)
             if dx == 1 and dy == 0:
                 move_dir = "east"
+                entry_dir = "west"  # Entering from west
             elif dx == -1 and dy == 0:
                 move_dir = "west"
+                entry_dir = "east"  # Entering from east
             elif dx == 0 and dy == 1:
                 move_dir = "south"
+                entry_dir = "north"  # Entering from north
             elif dx == 0 and dy == -1:
                 move_dir = "north"
+                entry_dir = "south"  # Entering from south
             else:
                 return (False, "Invalid movement (diagonal or too far)")
-
-            # Check if source tile allows this direction of movement
-            allowed_dirs = MovementValidator._get_allowed_directions(source_tile)
-            if move_dir not in allowed_dirs:
-                return (False, "Current tile blocks {} movement".format(move_dir))
 
             # Get destination tile from DUNGEON (real tiles), not drawn map
             dest_tile = MovementValidator._get_dungeon_tile(floor, to_x, to_y)
@@ -63,11 +58,10 @@ init python:
             if dest_tile.tile_type == "empty":
                 return (False, "Empty void")
 
-            # Check if destination tile allows entry from opposite direction
-            opposite_dir = MovementValidator._get_opposite_direction(move_dir)
+            # Check if destination tile allows entry from the direction we're coming from
             dest_allowed_dirs = MovementValidator._get_allowed_directions(dest_tile)
-            if opposite_dir not in dest_allowed_dirs:
-                return (False, "Destination blocks entry from {}".format(opposite_dir))
+            if entry_dir not in dest_allowed_dirs:
+                return (False, "Cannot enter {} from {}".format(dest_tile.tile_type, entry_dir))
 
             # Check if there's a blocking icon at destination
             icon_at_dest = floor.icons.get((to_x, to_y))
