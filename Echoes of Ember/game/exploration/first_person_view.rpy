@@ -143,11 +143,8 @@ init python:
 
         @staticmethod
         def get_wall_configuration(floor, x, y):
-            """
-            Get information about walls around a tile for rendering.
-
-            Returns: dict with wall info for north/south/east/west
-            """
+            # Get information about walls around a tile for rendering.
+            # Returns: dict with wall info for north/south/east/west
             tile = floor.get_tile(x, y)
             if not tile:
                 return {"north": True, "south": True, "east": True, "west": True}

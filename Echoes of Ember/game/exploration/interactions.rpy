@@ -75,12 +75,9 @@ init python:
 
         @staticmethod
         def check_on_tile_interact(floor, x, y, rotation):
-            """
-            Check if there's an interactable icon on the current tile that requires facing a direction.
-            Used for teleporters - player must be on the tile AND facing the correct direction.
-
-            Returns: (icon, interaction_type, x, y) or (None, None, None, None)
-            """
+            # Check if there's an interactable icon on the current tile that requires facing a direction.
+            # Used for teleporters - player must be on the tile AND facing the correct direction.
+            # Returns: (icon, interaction_type, x, y) or (None, None, None, None)
             # Get icon at current position from dungeon icons
             icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
 
@@ -105,7 +102,7 @@ init python:
 
         @staticmethod
         def _get_adjacent_position(x, y, rotation):
-            """Get position adjacent to (x, y) based on rotation"""
+            # Get position adjacent to (x, y) based on rotation
             if rotation == 0:    # North
                 return (x, y - 1)
             elif rotation == 90:  # East
@@ -118,11 +115,8 @@ init python:
 
         @staticmethod
         def handle_interaction(icon, interaction_type, player_state, floor):
-            """
-            Handle an interaction and return the result.
-
-            Returns: dict with "type" and type-specific data
-            """
+            # Handle an interaction and return the result.
+            # Returns: dict with "type" and type-specific data
             if not icon:
                 return {"type": "none"}
 
