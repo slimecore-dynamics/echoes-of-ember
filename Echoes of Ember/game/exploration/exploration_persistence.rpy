@@ -206,8 +206,8 @@ init -1 python:
             with open(map_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
-            # Update existing map_grid instead of creating new one
-            # This preserves dungeon_tiles and any screen references
+            # Create new MapGrid
+            map_grid = MapGrid()
             map_grid.current_floor_id = data.get("current_floor_id")
             map_grid.auto_map_enabled = data.get("auto_map_enabled", False)
 
@@ -215,21 +215,11 @@ init -1 python:
             print("DEBUG load_map_data_from_file: Loading {} floors".format(len(data.get("floors", {}))))
             for floor_id, floor_data in data.get("floors", {}).items():
                 print("DEBUG load_map_data_from_file: Loading floor '{}'".format(floor_id))
-
-                # Check if floor exists in map_grid
-                if floor_id in map_grid.floors:
-                    # Update existing floor to preserve dungeon_tiles
-                    floor = map_grid.floors[floor_id]
-                    print("DEBUG load_map_data_from_file: Updating existing floor '{}'".format(floor_id))
-                else:
-                    # Create new floor if it doesn't exist
-                    floor = FloorMap(
-                        floor_data["floor_id"],
-                        floor_data["floor_name"],
-                        tuple(floor_data["dimensions"])
-                    )
-                    map_grid.floors[floor_id] = floor
-                    print("DEBUG load_map_data_from_file: Created new floor '{}'".format(floor_id))
+                floor = FloorMap(
+                    floor_data["floor_id"],
+                    floor_data["floor_name"],
+                    tuple(floor_data["dimensions"])
+                )
 
                 # Restore tiles (player-drawn)
                 non_empty_count = 0
@@ -250,7 +240,6 @@ init -1 python:
                         floor.tiles[0][0].tile_type, floor.tiles[0][0].rotation))
 
                 # Restore icons (player-placed)
-                floor.icons.clear()  # Clear existing icons first
                 for pos_str, icon_data in floor_data.get("icons", {}).items():
                     x, y = map(int, pos_str.split(","))
                     floor.icons[(x, y)] = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
@@ -259,6 +248,9 @@ init -1 python:
                 # Restore revealed tiles (auto-map)
                 floor.revealed_tiles = set(tuple(pos) for pos in floor_data.get("revealed_tiles", []))
                 print("DEBUG load_map_data_from_file: Loaded {} revealed tiles for floor '{}'".format(len(floor.revealed_tiles), floor_id))
+
+                map_grid.floors[floor_id] = floor
+                print("DEBUG load_map_data_from_file: Added floor '{}' to map_grid.floors".format(floor_id))
 
             print("DEBUG load_map_data_from_file: Successfully loaded map data! map_grid.floors has {} floors".format(len(map_grid.floors)))
             print("DEBUG load_map_data_from_file: map_grid.current_floor_id = {}".format(map_grid.current_floor_id))

@@ -315,6 +315,17 @@ screen exploration_view():
                                 hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
+                    # DEBUG BUTTON
+                    textbutton "Debug (0,0)":
+                        action Function(lambda: renpy.notify("Tile (0,0): {} rotation {}".format(
+                            floor.get_tile(0, 0).tile_type if floor else "no floor",
+                            floor.get_tile(0, 0).rotation if floor else 0
+                        )))
+                        padding (10, 5)
+                        background "#FF0000"
+                        hover_background "#DD0000"
+                        sensitive (not exploration_dialogue_active)
+
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
                         python:
