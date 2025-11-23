@@ -126,22 +126,24 @@ screen exploration_view():
                         padding (10, 10)
 
                         # 6 columns x 4 rows
-                        grid 6 4:
+                        grid 6 5:
                             spacing 3
                             xalign 0.5
 
-                            # Row 1: empty, corner_es, t_intersection_nes, wall_nes, door, stairs_up
-                            # Row 2: cross, corner_ne, t_intersection_nws, wall_nws, enemy, stairs_down
-                            # Row 3: hallway_ns, corner_wn, t_intersection_wne, wall_wne, event, teleporter
-                            # Row 4: hallway_we, corner_ws, t_intersection_wse, wall_wse, gathering, note
+                            # Row 1: empty, corner_es, t_intersection_nes, wall_nes, door_open, door_closed
+                            # Row 2: stairs_up, cross, corner_ne, t_intersection_nws, wall_nws, enemy
+                            # Row 3: stairs_down, hallway_ns, corner_wn, t_intersection_wne, wall_wne, event
+                            # Row 4: teleporter, hallway_we, corner_ws, t_intersection_wse, wall_wse, gathering
+                            # Row 5: note (+ empty spaces)
 
-                            for item in ["empty", "corner_es", "t_intersection_nes", "wall_nes", "door_open", "stairs_up",
-                                        "cross", "corner_ne", "t_intersection_nws", "wall_nws", "enemy", "stairs_down",
-                                        "hallway_ns", "corner_wn", "t_intersection_wne", "wall_wne", "event", "teleporter",
-                                        "hallway_we", "corner_ws", "t_intersection_wse", "wall_wse", "gathering", "note"]:
+                            for item in ["empty", "corner_es", "t_intersection_nes", "wall_nes", "door_open", "door_closed",
+                                        "stairs_up", "cross", "corner_ne", "t_intersection_nws", "wall_nws", "enemy",
+                                        "stairs_down", "hallway_ns", "corner_wn", "t_intersection_wne", "wall_wne", "event",
+                                        "teleporter", "hallway_we", "corner_ws", "t_intersection_wse", "wall_wse", "gathering",
+                                        "note"]:
 
                                 # Determine if it's a tile or icon
-                                $ is_icon = item in ["door_open", "stairs_up", "stairs_down", "enemy", "event", "teleporter", "gathering", "note"]
+                                $ is_icon = item in ["door_open", "door_closed", "stairs_up", "stairs_down", "enemy", "event", "teleporter", "gathering", "note"]
 
                                 if is_icon:
                                     # Icon button
