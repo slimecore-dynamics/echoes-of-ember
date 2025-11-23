@@ -125,8 +125,15 @@ init python:
                 for x in range(width):
                     floor.set_tile(x, y, MapTile("empty", rotation=0))
 
+            # CRITICAL: Separate dungeon icons from drawn icons
+            # floor.icons currently has the real icons from Tiled (for collision/interaction)
+            # Copy to dungeon_icons and clear icons (so they don't show on map)
+            floor.dungeon_icons = copy.deepcopy(floor.icons)
+            floor.icons = {}  # Player starts with no icons marked
+
             print("TiledImporter - Loaded map: {} ({}x{})".format(floor_name, width, height))
             print("TiledImporter - Dungeon tiles stored, drawn map cleared")
+            print("TiledImporter - Dungeon icons: {}, Player icons: {}".format(len(floor.dungeon_icons), len(floor.icons)))
             return floor
 
         @staticmethod

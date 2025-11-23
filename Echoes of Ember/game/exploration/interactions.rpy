@@ -21,10 +21,12 @@ init python:
         def check_step_on_trigger(floor, x, y):
             """
             Check if stepping on (x, y) triggers an interaction.
+            Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
 
             Returns: (icon, interaction_type) or (None, None)
             """
-            icon = floor.icons.get((x, y))
+            # Check dungeon icons for triggers, not player-drawn icons
+            icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
             if not icon:
                 return (None, None)
 
@@ -37,6 +39,7 @@ init python:
         def check_adjacent_trigger(floor, x, y, rotation):
             """
             Check if there's an interactable icon adjacent to player and facing it.
+            Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
 
             Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
             """
@@ -52,8 +55,8 @@ init python:
             if adj_x < 0 or adj_x >= width or adj_y < 0 or adj_y >= height:
                 return (None, None, None, None)
 
-            # Get icon at adjacent tile
-            icon = floor.icons.get((adj_x, adj_y))
+            # Get icon at adjacent tile (from dungeon, not player-drawn)
+            icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
             if not icon:
                 return (None, None, None, None)
 

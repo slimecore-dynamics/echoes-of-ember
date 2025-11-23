@@ -63,8 +63,8 @@ init python:
             if entry_dir not in dest_allowed_dirs:
                 return (False, "Cannot enter {} from {}".format(dest_tile.tile_type, entry_dir))
 
-            # Check if there's a blocking icon at destination
-            icon_at_dest = floor.icons.get((to_x, to_y))
+            # Check if there's a blocking icon at destination (from dungeon, not player-drawn)
+            icon_at_dest = floor.dungeon_icons.get((to_x, to_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((to_x, to_y))
             if icon_at_dest:
                 if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
                     return (False, "Blocked by {}".format(icon_at_dest.icon_type))
