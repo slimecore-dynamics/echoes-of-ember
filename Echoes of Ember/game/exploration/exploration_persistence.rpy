@@ -269,12 +269,20 @@ init -1 python:
 
 
 # Save label - called before saving
-label save:
+# Ren'Py passes the save name as _save_name
+label save(_save_name=None):
     python:
         # Determine which slot to save to
-        slot = current_save_slot if current_save_slot else "quick-1"
+        # Priority: explicit current_save_slot > _save_name parameter > fallback
+        if current_save_slot:
+            slot = current_save_slot
+        elif _save_name:
+            slot = _save_name
+        else:
+            # Fallback for unknown save types
+            slot = "quick-1"
 
-        # Always save map data (works for both regular saves and quick saves)
+        # Save map data and player state
         save_map_data_to_file(slot)
         save_player_state_to_file(slot)
     return
@@ -282,25 +290,28 @@ label save:
 
 # After load label - called after loading
 # This runs AFTER FileLoad has restored all variables
-label after_load:
+# Ren'Py passes the save name as _load_name
+label after_load(_load_name=None):
     python:
         import os
 
-        # Check for temp file
+        # Check for temp file (written by FileActionWithMapData for menu loads)
         temp_file_path = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
 
         slot = None
         if os.path.exists(temp_file_path):
+            # Load from menu - slot is in temp file
             try:
                 with open(temp_file_path, 'r') as f:
                     slot = f.read().strip()
                 os.remove(temp_file_path)
             except Exception as e:
                 pass
-        else:
-            # No temp file - assume this is a quick load
-            slot = "quick-1"
+        elif _load_name:
+            # Quick load or auto load - slot is in parameter
+            slot = _load_name
 
+        # Load map data if we have a slot
         if slot:
             load_map_data_from_file(slot)
             load_player_state_from_file(slot)
