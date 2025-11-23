@@ -147,11 +147,11 @@ init -1 python:
                     "dimensions": floor.dimensions,
                     # Serialize tiles (player-drawn)
                     "tiles": [[{"type": tile.tile_type, "rotation": tile.rotation}
-                              for tile in row] for row in floor.tiles],
+                            for tile in row] for row in floor.tiles],
                     # Serialize icons (player-placed)
                     "icons": {"{},{}".format(x, y): {"type": icon.icon_type,
-                                                      "metadata": icon.metadata}
-                             for (x, y), icon in floor.icons.items()},
+                                                    "metadata": icon.metadata}
+                            for (x, y), icon in floor.icons.items()},
                     # Serialize revealed tiles (auto-map)
                     "revealed_tiles": list(floor.revealed_tiles)
                 }
