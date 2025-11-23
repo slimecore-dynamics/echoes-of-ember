@@ -2,11 +2,8 @@
 # Initialization and utility functions for dungeon exploration
 
 label start_exploration_system:
-    """
-    Initialize the exploration system.
-
-    Call this after start_mapping_system to set up player state.
-    """
+    # Initialize the exploration system.
+    # Call this after start_mapping_system to set up player state.
 
     python:
         global player_state, map_grid
@@ -52,13 +49,11 @@ label start_exploration_system:
 
 
 label load_dungeon_floor(floor_filepath, floor_id=None):
-    """
-    Load a dungeon floor from a Tiled JSON file.
-
-    Args:
-        floor_filepath: Path to Tiled JSON file (relative to game directory)
-        floor_id: Optional floor ID (defaults to filename)
-    """
+    # Load a dungeon floor from a Tiled JSON file.
+    #
+    # Args:
+    #     floor_filepath: Path to Tiled JSON file (relative to game directory)
+    #     floor_id: Optional floor ID (defaults to filename)
 
     python:
         global map_grid, player_state
@@ -182,15 +177,13 @@ init python:
 
 # Entry/Exit labels for exploration mode
 label enter_exploration_mode(floor_id):
-    """
-    Enter exploration mode for a specific floor.
-
-    Args:
-        floor_id: ID of the floor to explore (must exist in map_grid)
-
-    Returns:
-        "exit_exploration" when player leaves
-    """
+    # Enter exploration mode for a specific floor.
+    #
+    # Args:
+    #     floor_id: ID of the floor to explore (must exist in map_grid)
+    #
+    # Returns:
+    #     "exit_exploration" when player leaves
 
     python:
         global map_grid, player_state

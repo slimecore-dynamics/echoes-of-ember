@@ -12,16 +12,71 @@ init python:
         Tiled Format: https://doc.mapeditor.org/en/stable/reference/json-map-format/
         """
 
-        # Mapping from Tiled tile IDs to our tile types
-        # These can be customized based on your Tiled tileset
-        TILE_ID_MAP = {
-            0: "empty",
-            1: "wall",
-            2: "hallway",
-            3: "corner",
-            4: "t_intersection",
-            5: "cross"
-        }
+        # Tile type and rotation mappings based on image filenames
+        @staticmethod
+        def parse_tile_from_image(image_path):
+            """
+            Parse tile type and rotation from image filename.
+
+            Returns: (tile_type, rotation)
+            """
+            import os
+            filename = os.path.basename(image_path).replace(".png", "")
+
+            # Handle different tile types
+            if filename == "empty":
+                return ("empty", 0)
+            elif filename == "cross":
+                return ("cross", 0)
+            elif filename.startswith("hallway_"):
+                # hallway_hor = horizontal (E-W) = 0 degrees
+                # hallway_ver = vertical (N-S) = 90 degrees
+                if "hor" in filename:
+                    return ("hallway", 0)
+                elif "ver" in filename:
+                    return ("hallway", 90)
+            elif filename.startswith("corner_"):
+                # corner_es = E+S openings = 0 degrees
+                # corner_ne = N+E openings = 270 degrees
+                # corner_wn = W+N openings = 180 degrees
+                # corner_ws = W+S openings = 90 degrees
+                if "es" in filename:
+                    return ("corner", 0)
+                elif "ne" in filename:
+                    return ("corner", 270)
+                elif "wn" in filename:
+                    return ("corner", 180)
+                elif "ws" in filename:
+                    return ("corner", 90)
+            elif filename.startswith("t_intersection_"):
+                # t_intersection_wne = W+N+E openings (no S) = 0 degrees
+                # t_intersection_nes = N+E+S openings (no W) = 270 degrees
+                # t_intersection_wse = W+S+E openings (no N) = 180 degrees
+                # t_intersection_nws = N+W+S openings (no E) = 90 degrees
+                if "wne" in filename:
+                    return ("t_intersection", 0)
+                elif "nes" in filename:
+                    return ("t_intersection", 270)
+                elif "wse" in filename:
+                    return ("t_intersection", 180)
+                elif "nws" in filename:
+                    return ("t_intersection", 90)
+            elif filename.startswith("wall_"):
+                # wall_wne = walls on W+N+E, opening S = 0 degrees
+                # wall_nes = walls on N+E+S, opening W = 90 degrees
+                # wall_wse = walls on W+S+E, opening N = 180 degrees
+                # wall_nws = walls on N+W+S, opening E = 270 degrees
+                if "wne" in filename:
+                    return ("wall", 0)
+                elif "nes" in filename:
+                    return ("wall", 90)
+                elif "wse" in filename:
+                    return ("wall", 180)
+                elif "nws" in filename:
+                    return ("wall", 270)
+
+            # Default fallback
+            return ("empty", 0)
 
         # Mapping from Tiled object types to icon types
         OBJECT_TYPE_MAP = {
@@ -68,36 +123,84 @@ init python:
             width = tiled_data.get("width", 20)
             height = tiled_data.get("height", 20)
 
-            # Use floor_id or derive from filename
-            if not floor_id:
-                floor_id = os.path.splitext(os.path.basename(filepath))[0]
+            # Extract custom properties for exploration
+            properties = TiledImporter._extract_properties(tiled_data.get("properties", []))
 
-            # Use floor_name or Tiled map name
+            # Use floor_id from properties, or parameter, or derive from filename
+            if not floor_id:
+                floor_id = properties.get("floor_id", os.path.splitext(os.path.basename(filepath))[0])
+
+            # Use floor_name from properties, or parameter
             if not floor_name:
-                floor_name = tiled_data.get("properties", {}).get("name", floor_id)
+                floor_name = properties.get("floor_name", floor_id)
 
             # Create FloorMap
             floor = FloorMap(floor_id, floor_name, (width, height))
 
-            # Extract custom properties for exploration
-            properties = TiledImporter._extract_properties(tiled_data.get("properties", []))
-
-            # Store exploration metadata on floor (extend FloorMap)
+            # Store exploration metadata on floor
             floor.starting_x = properties.get("starting_x", 10)
             floor.starting_y = properties.get("starting_y", 10)
             floor.starting_rotation = properties.get("starting_rotation", 0)
             floor.view_distance = properties.get("view_distance", 3)
+            floor.area_name = properties.get("area_name", "")
+            floor.sub_area_name = properties.get("sub_area_name", "")
+            floor.description = properties.get("description", "")
+
+            # Build tile ID mapping from tilesets
+            tile_id_map = TiledImporter._build_tile_id_map(tiled_data.get("tilesets", []))
 
             # Process tile layers
             layers = tiled_data.get("layers", [])
             for layer in layers:
                 if layer.get("type") == "tilelayer":
-                    TiledImporter._process_tile_layer(layer, floor)
+                    TiledImporter._process_tile_layer(layer, floor, tile_id_map)
                 elif layer.get("type") == "objectgroup":
                     TiledImporter._process_object_layer(layer, floor)
 
+            # CRITICAL: Separate dungeon from drawn map
+            # floor.tiles currently has the real dungeon from Tiled
+            # We need to copy it to dungeon_tiles and clear tiles
+            import copy
+            floor.dungeon_tiles = copy.deepcopy(floor.tiles)
+
+            # Clear the drawn map (player starts with blank map)
+            for y in range(height):
+                for x in range(width):
+                    floor.set_tile(x, y, MapTile("empty", rotation=0))
+
             print("TiledImporter - Loaded map: {} ({}x{})".format(floor_name, width, height))
+            print("TiledImporter - Dungeon tiles stored, drawn map cleared")
             return floor
+
+        @staticmethod
+        def _build_tile_id_map(tilesets):
+            """
+            Build mapping from Tiled tile IDs to (tile_type, rotation).
+
+            Args:
+                tilesets: List of tileset objects from Tiled JSON
+
+            Returns:
+                dict: {tiled_gid: (tile_type, rotation)}
+            """
+            tile_map = {}
+
+            for tileset in tilesets:
+                firstgid = tileset.get("firstgid", 1)
+                tiles = tileset.get("tiles", [])
+
+                for tile_data in tiles:
+                    tile_id = tile_data.get("id", 0)
+                    image_path = tile_data.get("image", "")
+
+                    # Parse tile type and rotation from image filename
+                    tile_type, rotation = TiledImporter.parse_tile_from_image(image_path)
+
+                    # Global tile ID = firstgid + tile_id
+                    gid = firstgid + tile_id
+                    tile_map[gid] = (tile_type, rotation)
+
+            return tile_map
 
         @staticmethod
         def _extract_properties(properties):
@@ -118,11 +221,14 @@ init python:
             return props
 
         @staticmethod
-        def _process_tile_layer(layer, floor):
+        def _process_tile_layer(layer, floor, tile_id_map):
             """
             Process a Tiled tile layer and populate FloorMap tiles.
 
-            Tiled data format: {"data": [tile_id, tile_id, ...], "width": w, "height": h}
+            Args:
+                layer: Tiled layer object
+                floor: FloorMap to populate
+                tile_id_map: Mapping from Tiled GID to (tile_type, rotation)
             """
             data = layer.get("data", [])
             width = layer.get("width", floor.dimensions[0])
@@ -134,33 +240,20 @@ init python:
                     if idx >= len(data):
                         continue
 
-                    tile_id = data[idx]
+                    gid = data[idx]
 
-                    # Handle rotation/flipping flags (Tiled encodes these in high bits)
-                    # Extract actual tile ID (lower 28 bits)
-                    FLIPPED_HORIZONTALLY_FLAG = 0x80000000
-                    FLIPPED_VERTICALLY_FLAG = 0x40000000
-                    FLIPPED_DIAGONALLY_FLAG = 0x20000000
-
-                    flipped_h = bool(tile_id & FLIPPED_HORIZONTALLY_FLAG)
-                    flipped_v = bool(tile_id & FLIPPED_VERTICALLY_FLAG)
-                    flipped_d = bool(tile_id & FLIPPED_DIAGONALLY_FLAG)
-
-                    # Clear flags to get actual tile ID
-                    tile_id = tile_id & ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG)
-
-                    # Convert Tiled tile ID to our tile type
-                    # Tiled uses 0 for "no tile", we use 1+ for actual tiles
-                    if tile_id == 0:
+                    # Tiled uses 0 for "no tile"
+                    if gid == 0:
                         tile_type = "empty"
                         rotation = 0
                     else:
-                        # Subtract 1 because Tiled uses 1-indexed tiles
-                        adjusted_id = tile_id - 1
-                        tile_type = TiledImporter.TILE_ID_MAP.get(adjusted_id, "empty")
-
-                        # Calculate rotation from flip flags
-                        rotation = TiledImporter._calculate_rotation(flipped_h, flipped_v, flipped_d)
+                        # Look up tile type and rotation from map
+                        if gid in tile_id_map:
+                            tile_type, rotation = tile_id_map[gid]
+                        else:
+                            print("TiledImporter - Warning: Unknown tile GID {} at ({}, {})".format(gid, x, y))
+                            tile_type = "empty"
+                            rotation = 0
 
                     # Create and set tile
                     tile = MapTile(tile_type, rotation)

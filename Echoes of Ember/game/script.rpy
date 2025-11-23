@@ -33,7 +33,11 @@ label start:
 
     e "The mapping system has been initialized. You can use it to create Etrian Odyssey-style dungeon maps!"
 
-    jump start_dungeon_exploration_example
+    # Load the Prometheus Breach dungeon from Tiled JSON
+    call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
+
+    # Enter exploration mode
+    call enter_exploration_mode("prometheus_breach_1f")
 
     # This ends the game.
 
