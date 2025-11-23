@@ -1,6 +1,7 @@
 {
     "last.exportedFilePath": "D:/Ren'Py Projects/echoes-of-ember/Echoes of Ember/game/maps/tiled",
     "last.imagePath": "D:/Ren'Py Projects/echoes-of-ember/Echoes of Ember/game/images/maps/tiles",
+    "lastUsedTilesetExportFilter": "All Files (*)",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "property.type": "int",
