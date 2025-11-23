@@ -73,8 +73,8 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
-                    # SPACER - move everything down 200 pixels
-                    null height 100
+                    # SPACER - reduced to fit everything on screen
+                    null height 20
 
                     # MAP VIEW - inline display
                     frame:
@@ -94,13 +94,21 @@ screen exploration_view():
                                 xalign 0.5
                                 yalign 0.5
 
-                                # Draw all tiles from drawn map (floor.tiles)
+                                # Draw all tiles from drawn map (floor.tiles) - with click handlers
                                 for y in range(grid_height):
                                     for x in range(grid_width):
                                         $ tile = floor.get_tile(x, y)
-                                        if tile and tile.tile_type != "empty":
-                                            $ tile_color = get_tile_color(tile.tile_type)
-                                            add Solid(tile_color, xysize=(cell_size-1, cell_size-1)) xpos x*cell_size ypos y*cell_size
+                                        $ tile_color = get_tile_color(tile.tile_type) if (tile and tile.tile_type != "empty") else "#222222"
+
+                                        # Make each cell clickable for manual tile placement
+                                        button:
+                                            xysize (cell_size-1, cell_size-1)
+                                            xpos x*cell_size
+                                            ypos y*cell_size
+                                            background tile_color
+                                            hover_background "#444444"
+                                            action Function(place_tile_on_map, x, y)
+                                            alternate Function(clear_tile_on_map, x, y)  # Right-click to clear
 
                                 # Draw icons (if visible)
                                 for (icon_x, icon_y), icon in floor.icons.items():
@@ -115,73 +123,55 @@ screen exploration_view():
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
-                    # PALETTE with custom layout
+                    # PALETTE - All tile variants in grid, then icons
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.15)
                         background "#2A2A2A"
-                        padding (10, 10)
+                        padding (8, 8)
 
                         vbox:
-                            spacing 8
+                            spacing 5
 
-                            # Row 1: Tiles (center aligned, no header)
-                            grid 6 1:
+                            # ALL TILE VARIANTS in one grid (4 columns x 4 rows)
+                            grid 4 4:
                                 spacing 3
                                 xalign 0.5
-                                # Map tile types to their default image variants
-                                $ tile_image_map = {
-                                    "hallway": "hallway_we",
-                                    "corner": "corner_es",
-                                    "t_intersection": "t_intersection_wse",
-                                    "cross": "cross",
-                                    "wall": "wall_wse",
-                                    "empty": "empty"
-                                }
-                                for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
-                                    $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
-                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_image_map[tile_type])
-                                    imagebutton:
-                                        idle tile_image
-                                        hover tile_image
-                                        action Function(select_tile_type, tile_type)
+
+                                # All variants listed: hallway_we, hallway_ns, corner_es, corner_ne, corner_wn, corner_ws,
+                                # t_intersection_wse, t_intersection_nws, t_intersection_wne, t_intersection_nes,
+                                # wall_wse, wall_nws, wall_wne, wall_nes, cross, empty
+                                for variant in ["hallway_we", "hallway_ns", "corner_es", "corner_ne",
+                                                "corner_wn", "corner_ws", "t_intersection_wse", "t_intersection_nws",
+                                                "t_intersection_wne", "t_intersection_nes", "wall_wse", "wall_nws",
+                                                "wall_wne", "wall_nes", "cross", "empty"]:
+                                    $ is_selected = (map_grid.selected_tile_variant == variant if map_grid and hasattr(map_grid, 'selected_tile_variant') else False)
+                                    $ tile_image = "images/maps/tiles/{}.png".format(variant)
+                                    button:
                                         xysize (32, 32)
-                                        if is_selected:
-                                            background "#FFFF0080"
+                                        background "#FFFF0080" if is_selected else "#00000000"
+                                        action Function(select_tile_variant, variant)
+                                        add tile_image fit "contain"
 
-                            # Row 2-3: Icon rows
-                            vbox:
-                                spacing 5
+                            null height 5
 
-                                # Icons row 1 (stairs, doors)
-                                grid 4 1:
-                                    spacing 3
-                                    for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
-                                        $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                        # Map door variants to the single door icon
-                                        $ icon_name = "door" if "door" in icon_type else icon_type
-                                        $ icon_image = "images/maps/icons/{}.png".format(icon_name)
-                                        imagebutton:
-                                            idle icon_image
-                                            hover icon_image
-                                            action Function(select_icon_for_placement, icon_type)
-                                            xysize (32, 32)
-                                            if is_selected:
-                                                background "#FFFF0080"
+                            # ICONS below tiles (2 rows)
+                            grid 4 2:
+                                spacing 3
+                                xalign 0.5
 
-                                # Icons row 2 (gathering, enemy, event, etc)
-                                grid 4 1:
-                                    spacing 3
-                                    for icon_type in ["gathering", "enemy", "event", "teleporter"]:
-                                        $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                        $ icon_image = "images/maps/icons/{}.png".format(icon_type)
-                                        imagebutton:
-                                            idle icon_image
-                                            hover icon_image
-                                            action Function(select_icon_for_placement, icon_type)
-                                            xysize (32, 32)
-                                            if is_selected:
-                                                background "#FFFF0080"
+                                # Row 1: stairs and doors
+                                for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open",
+                                                  # Row 2: other icons
+                                                  "gathering", "enemy", "event", "teleporter"]:
+                                    $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                    # Map door variants to the single door icon
+                                    $ icon_name = "door" if "door" in icon_type else icon_type
+                                    $ icon_image = "images/maps/icons/{}.png".format(icon_name)
+                                    button:
+                                        xysize (32, 32)
+                                        background "#FFFF0080" if is_selected else "#00000000"
+                                        action Function(select_icon_for_placement, icon_type)
+                                        add icon_image fit "contain"
 
                     # NAVIGATION CONTROLS
                     frame:
@@ -256,26 +246,28 @@ screen exploration_view():
                         background "#2A2A2A"
                         padding (10, 10)
 
-                        # Auto-Map on LEFT
-                        textbutton "Auto-Map":
-                            action ToggleField(map_grid, "auto_map_enabled")
-                            xalign 0.0
-                            xsize 200
-                            ysize 35
-                            selected_background "#FFFF00"
-                            selected_hover_background "#FFDD00"
-                            background "#444444"
-                            hover_background "#555555"
-                            selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
-                            sensitive (not exploration_dialogue_active)
+                        hbox:
+                            xfill True
+                            spacing 5
 
-                        # Leave on RIGHT
-                        textbutton "Leave":
-                            action Return("exit")
-                            xalign 1.0
-                            xsize 90
-                            ysize 35
-                            sensitive (not exploration_dialogue_active)
+                            # Auto-Map on LEFT
+                            textbutton "Auto-Map":
+                                action ToggleField(map_grid, "auto_map_enabled")
+                                xsize 150
+                                ysize 35
+                                selected_background "#FFFF00"
+                                selected_hover_background "#FFDD00"
+                                background "#444444"
+                                hover_background "#555555"
+                                selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
+                                sensitive (not exploration_dialogue_active)
+
+                            # Leave on RIGHT
+                            textbutton "Leave":
+                                action Return("exit")
+                                xsize 90
+                                ysize 35
+                                sensitive (not exploration_dialogue_active)
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
@@ -708,3 +700,93 @@ init python:
         if map_grid:
             map_grid.rotate_selected_tile()
             renpy.restart_interaction()
+
+    def select_tile_variant(variant):
+        """Select a specific tile variant for placement."""
+        global map_grid
+        if map_grid:
+            # Store the selected variant
+            map_grid.selected_tile_variant = variant
+            # Extract base tile type from variant (e.g., "hallway_we" -> "hallway")
+            tile_type = variant.split('_')[0] if '_' in variant else variant
+            map_grid.selected_tile_type = tile_type
+            map_grid.current_mode = "edit_tiles"
+            renpy.restart_interaction()
+
+    def place_tile_on_map(x, y):
+        """Place the selected tile variant on the map at position (x, y)."""
+        global map_grid
+
+        if not map_grid:
+            return
+
+        floor = map_grid.get_current_floor()
+        if not floor:
+            return
+
+        # Check if we have a tile variant selected
+        if hasattr(map_grid, 'selected_tile_variant') and map_grid.selected_tile_variant:
+            variant = map_grid.selected_tile_variant
+
+            # Extract tile type and rotation from variant name
+            # e.g., "corner_es" -> type="corner", rotation based on orientation
+            from exploration.map_tools import MapTile
+
+            # Parse the variant to determine rotation
+            rotation = 0
+            if 'we' in variant or 'ew' in variant:
+                rotation = 0  # West-East
+            elif 'ns' in variant or 'sn' in variant:
+                rotation = 90  # North-South
+            elif 'es' in variant:
+                rotation = 0
+            elif 'ne' in variant:
+                rotation = 90
+            elif 'wn' in variant or 'nw' in variant:
+                rotation = 180
+            elif 'ws' in variant or 'sw' in variant:
+                rotation = 270
+            elif 'wse' in variant:
+                rotation = 0
+            elif 'nws' in variant:
+                rotation = 90
+            elif 'wne' in variant or 'new' in variant:
+                rotation = 180
+            elif 'nes' in variant or 'nse' in variant:
+                rotation = 270
+
+            # Extract base type
+            tile_type = variant.split('_')[0] if '_' in variant else variant
+
+            # Create new tile with the variant
+            new_tile = MapTile(tile_type, rotation)
+            floor.set_tile(x, y, new_tile)
+            renpy.restart_interaction()
+        # Check if we have an icon selected
+        elif map_grid.current_mode == "edit_icons" and hasattr(map_grid, 'selected_icon_type'):
+            # Place icon instead
+            from exploration.map_tools import MapIcon
+            new_icon = MapIcon(map_grid.selected_icon_type)
+            floor.set_icon(x, y, new_icon)
+            renpy.restart_interaction()
+
+    def clear_tile_on_map(x, y):
+        """Clear the tile at position (x, y) from the map."""
+        global map_grid
+
+        if not map_grid:
+            return
+
+        floor = map_grid.get_current_floor()
+        if not floor:
+            return
+
+        # Clear tile
+        from exploration.map_tools import MapTile
+        floor.set_tile(x, y, MapTile("empty", 0))
+
+        # Clear icon if present
+        if (x, y) in floor.icons:
+            del floor.icons[(x, y)]
+
+        renpy.restart_interaction()
