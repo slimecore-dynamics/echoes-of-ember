@@ -115,12 +115,6 @@ init python:
                 if 'w' in suffix:
                     allowed.append("west")
 
-                # Handle special cases for hallway with hor/ver naming
-                if "hor" in suffix:
-                    return ["east", "west"]
-                elif "ver" in suffix:
-                    return ["north", "south"]
-
                 return allowed if allowed else []
 
         @staticmethod
