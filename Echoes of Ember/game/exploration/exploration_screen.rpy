@@ -750,7 +750,10 @@ init python:
         elif result["type"] == "gathering":
             # Mark as discovered
             icon.metadata["discovered"] = True
-            renpy.notify(result["message"])
+            # Show debug notification with item and amount
+            item = result.get("item", "unknown")
+            amount = result.get("amount", 1)
+            renpy.notify("DEBUG: Gathered {} x{} at ({}, {})".format(item, amount, x, y))
         elif result["type"] == "event":
             # Check if event has a dialogue label
             if "label" in result and result["label"]:
@@ -767,7 +770,42 @@ init python:
                 # No label, just show notification
                 renpy.notify(result["message"])
         elif result["type"] == "teleporter":
-            renpy.notify(result["message"])
+            # Get pair_id from teleporter metadata
+            pair_id = result.get("metadata", {}).get("pair_id")
+
+            if pair_id is not None:
+                # Find matching teleporter with same pair_id
+                target_teleporter = None
+                target_pos = None
+
+                # Search dungeon_icons for another teleporter with same pair_id
+                if hasattr(floor, 'dungeon_icons'):
+                    for pos, other_icon in floor.dungeon_icons.items():
+                        # Skip the current teleporter
+                        if pos == (x, y):
+                            continue
+
+                        # Check if it's a teleporter with matching pair_id
+                        if (other_icon.icon_type == "teleporter" and
+                            other_icon.metadata.get("pair_id") == pair_id):
+                            target_teleporter = other_icon
+                            target_pos = pos
+                            break
+
+                if target_pos:
+                    # Teleport player to target position
+                    player_state.x, player_state.y = target_pos
+                    renpy.notify("Teleported to ({}, {})".format(target_pos[0], target_pos[1]))
+
+                    # Trigger auto-map reveal at new location if enabled
+                    if getattr(player_state, 'auto_map_enabled', False):
+                        reveal_nearby_tiles(floor, target_pos[0], target_pos[1], player_state.rotation)
+
+                    renpy.restart_interaction()
+                else:
+                    renpy.notify("Teleporter pair not found (pair_id: {})".format(pair_id))
+            else:
+                renpy.notify("Teleporter has no pair_id")
 
     def handle_stairs_interaction(direction, adj_x, adj_y):
         """Handle stairs interaction (change floors)"""
