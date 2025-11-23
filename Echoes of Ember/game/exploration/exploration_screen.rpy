@@ -73,107 +73,93 @@ screen exploration_view():
                     spacing 10
                     xalign 0.5
 
-                    # SPACER - reduced to fit everything on screen
-                    null height 20
+                    # SPACER - move everything down 200 pixels
+                    null height 100
 
-                    # MAP VIEW - inline display
+                    # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
                     frame:
-                        xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_width * 0.314)  # Square viewport
+                        xsize int(config.screen_width * 0.2)
+                        ysize int(config.screen_height * 0.3)  # 45% of screen height to show full 20x20 grid
                         background "#000000"
                         padding (10, 10)
 
                         if floor:
-                            $ grid_width = floor.dimensions[0]
-                            $ grid_height = floor.dimensions[1]
-                            $ available_size = int(config.screen_width * 0.314) - 20  # Minus padding
-                            $ cell_size = min(available_size // grid_width, available_size // grid_height)
-
                             fixed:
-                                xysize (grid_width * cell_size, grid_height * cell_size)
-                                xalign 0.5
-                                yalign 0.5
-
-                                # Draw all tiles from drawn map (floor.tiles) - with click handlers
-                                for y in range(grid_height):
-                                    for x in range(grid_width):
-                                        $ tile = floor.get_tile(x, y)
-                                        $ tile_color = get_tile_color(tile.tile_type) if (tile and tile.tile_type != "empty") else "#222222"
-
-                                        # Make each cell clickable for manual tile placement
-                                        button:
-                                            xysize (cell_size-1, cell_size-1)
-                                            xpos x*cell_size
-                                            ypos y*cell_size
-                                            background tile_color
-                                            hover_background "#444444"
-                                            action Function(place_tile_on_map, x, y)
-                                            alternate Function(clear_tile_on_map, x, y)  # Right-click to clear
-
-                                # Draw icons (if visible)
-                                for (icon_x, icon_y), icon in floor.icons.items():
-                                    # Only show non-event icons (hide story events)
-                                    if icon.icon_type not in ["event"]:
-                                        $ icon_color = get_icon_color(icon.icon_type)
-                                        add Solid(icon_color, xysize=(cell_size//2, cell_size//2)) xpos icon_x*cell_size + cell_size//4 ypos icon_y*cell_size + cell_size//4
+                                # Show full map grid
+                                use map_grid_display(floor)
 
                                 # Add player marker (red triangle)
-                                if ps:
+                                if ps and map_grid:
+                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
-                    # PALETTE - All tile variants in grid, then icons
+                    # PALETTE with custom layout
                     frame:
                         xsize int(config.screen_width * 0.314)
+                        ysize int(config.screen_height * 0.15)
                         background "#2A2A2A"
-                        padding (8, 8)
+                        padding (10, 10)
 
                         vbox:
-                            spacing 5
+                            spacing 8
 
-                            # ALL TILE VARIANTS in one grid (4 columns x 4 rows)
-                            grid 4 4:
+                            # Row 1: Tiles (center aligned)
+                            text "Tiles" size 12 xalign 0.5
+                            grid 6 1:
                                 spacing 3
                                 xalign 0.5
+                                for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
+                                    $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
+                                    textbutton tile_type.replace("_", " ")[:7]:
+                                        action Function(select_tile_type, tile_type)
+                                        xsize 60
+                                        ysize 25
+                                        text_size 8
+                                        selected is_selected
 
-                                # All variants listed: hallway_we, hallway_ns, corner_es, corner_ne, corner_wn, corner_ws,
-                                # t_intersection_wse, t_intersection_nws, t_intersection_wne, t_intersection_nes,
-                                # wall_wse, wall_nws, wall_wne, wall_nes, cross, empty
-                                for variant in ["hallway_we", "hallway_ns", "corner_es", "corner_ne",
-                                                "corner_wn", "corner_ws", "t_intersection_wse", "t_intersection_nws",
-                                                "t_intersection_wne", "t_intersection_nes", "wall_wse", "wall_nws",
-                                                "wall_wne", "wall_nes", "cross", "empty"]:
-                                    $ tile_image = "images/maps/tiles/{}.png".format(variant)
-                                    button:
-                                        xysize (32, 32)
-                                        background "#00000000"
-                                        selected_background "#FFFF0080"
-                                        selected (map_grid.selected_tile_variant == variant if map_grid and hasattr(map_grid, 'selected_tile_variant') else False)
-                                        action Function(select_tile_variant, variant)
-                                        add tile_image fit "contain"
+                            # Rows 2-3: hbox with icons on left, rotate on right
+                            hbox:
+                                spacing 10
 
-                            null height 5
+                                # Left half: vbox with icon rows
+                                vbox:
+                                    spacing 5
 
-                            # ICONS below tiles (2 rows)
-                            grid 4 2:
-                                spacing 3
-                                xalign 0.5
+                                    # Icons row 1 (stairs, doors)
+                                    text "Icons" size 12
+                                    grid 4 1:
+                                        spacing 3
+                                        for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
+                                            $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                            textbutton icon_type.replace("_", " ")[:7]:
+                                                action Function(select_icon_for_placement, icon_type)
+                                                xsize 60
+                                                ysize 25
+                                                text_size 7
+                                                selected is_selected
 
-                                # Row 1: stairs and doors
-                                for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open",
-                                                  # Row 2: other icons
-                                                  "gathering", "enemy", "event", "teleporter"]:
-                                    # Map door variants to the single door icon
-                                    $ icon_name = "door" if "door" in icon_type else icon_type
-                                    $ icon_image = "images/maps/icons/{}.png".format(icon_name)
-                                    button:
-                                        xysize (32, 32)
-                                        background "#00000000"
-                                        selected_background "#FFFF0080"
-                                        selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                        action Function(select_icon_for_placement, icon_type)
-                                        add icon_image fit "contain"
+                                    # Icons row 2 (gathering, enemy, event, etc)
+                                    grid 4 1:
+                                        spacing 3
+                                        for icon_type in ["gathering", "enemy", "event", "teleporter"]:
+                                            $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                            textbutton icon_type.replace("_", " ")[:7]:
+                                                action Function(select_icon_for_placement, icon_type)
+                                                xsize 60
+                                                ysize 25
+                                                text_size 7
+                                                selected is_selected
+
+                                # Right half: Rotate button
+                                textbutton "Rotate":
+                                    action Function(rotate_selected_tile)
+                                    xalign 1.0
+                                    yalign 1.0
+                                    xsize 60
+                                    ysize 55
+                                    sensitive (not exploration_dialogue_active)
 
                     # NAVIGATION CONTROLS
                     frame:
@@ -204,7 +190,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                text_xalign 0.5
+                                text_align 0.5
                                 sensitive (can_move and not exploration_dialogue_active)
 
                             # Empty line
@@ -239,7 +225,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                text_xalign 0.5
+                                text_align 0.5
                                 sensitive (not exploration_dialogue_active)
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
@@ -248,28 +234,26 @@ screen exploration_view():
                         background "#2A2A2A"
                         padding (10, 10)
 
-                        hbox:
-                            xfill True
-                            spacing 5
+                        # Auto-Map on LEFT
+                        textbutton "Auto-Map":
+                            action ToggleField(map_grid, "auto_map_enabled")
+                            xalign 0.0
+                            xsize 200
+                            ysize 35
+                            selected_background "#FFFF00"
+                            selected_hover_background "#FFDD00"
+                            background "#444444"
+                            hover_background "#555555"
+                            selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
+                            sensitive (not exploration_dialogue_active)
 
-                            # Auto-Map on LEFT
-                            textbutton "Auto-Map":
-                                action ToggleField(map_grid, "auto_map_enabled")
-                                xsize 150
-                                ysize 35
-                                selected_background "#FFFF00"
-                                selected_hover_background "#FFDD00"
-                                background "#444444"
-                                hover_background "#555555"
-                                selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
-                                sensitive (not exploration_dialogue_active)
-
-                            # Leave on RIGHT
-                            textbutton "Leave":
-                                action Return("exit")
-                                xsize 90
-                                ysize 35
-                                sensitive (not exploration_dialogue_active)
+                        # Leave on RIGHT
+                        textbutton "Leave":
+                            action Return("exit")
+                            xalign 1.0
+                            xsize 90
+                            ysize 35
+                            sensitive (not exploration_dialogue_active)
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
@@ -694,9 +678,6 @@ init python:
         if map_grid:
             map_grid.selected_icon_type = icon_type
             map_grid.current_mode = "edit_icons"
-            # Clear tile selection (mutually exclusive)
-            map_grid.selected_tile_variant = None
-            map_grid.selected_tile_type = None
             renpy.restart_interaction()
 
     def rotate_selected_tile():
@@ -705,89 +686,3 @@ init python:
         if map_grid:
             map_grid.rotate_selected_tile()
             renpy.restart_interaction()
-
-    def select_tile_variant(variant):
-        """Select a specific tile variant for placement."""
-        global map_grid
-        if map_grid:
-            # Store the selected variant
-            map_grid.selected_tile_variant = variant
-            # Extract base tile type from variant (e.g., "hallway_we" -> "hallway")
-            tile_type = variant.split('_')[0] if '_' in variant else variant
-            map_grid.selected_tile_type = tile_type
-            map_grid.current_mode = "edit_tiles"
-            # Clear icon selection (mutually exclusive)
-            map_grid.selected_icon_type = None
-            renpy.restart_interaction()
-
-    def place_tile_on_map(x, y):
-        """Place the selected tile variant on the map at position (x, y)."""
-        global map_grid
-
-        if not map_grid:
-            return
-
-        floor = map_grid.get_current_floor()
-        if not floor:
-            return
-
-        # Check if we have a tile variant selected
-        if hasattr(map_grid, 'selected_tile_variant') and map_grid.selected_tile_variant:
-            variant = map_grid.selected_tile_variant
-
-            # Parse the variant to determine rotation
-            rotation = 0
-            if 'we' in variant or 'ew' in variant:
-                rotation = 0  # West-East
-            elif 'ns' in variant or 'sn' in variant:
-                rotation = 90  # North-South
-            elif 'es' in variant:
-                rotation = 0
-            elif 'ne' in variant:
-                rotation = 90
-            elif 'wn' in variant or 'nw' in variant:
-                rotation = 180
-            elif 'ws' in variant or 'sw' in variant:
-                rotation = 270
-            elif 'wse' in variant:
-                rotation = 0
-            elif 'nws' in variant:
-                rotation = 90
-            elif 'wne' in variant or 'new' in variant:
-                rotation = 180
-            elif 'nes' in variant or 'nse' in variant:
-                rotation = 270
-
-            # Extract base type
-            tile_type = variant.split('_')[0] if '_' in variant else variant
-
-            # Create new tile with the variant
-            new_tile = MapTile(tile_type, rotation)
-            floor.set_tile(x, y, new_tile)
-            renpy.restart_interaction()
-        # Check if we have an icon selected
-        elif map_grid.current_mode == "edit_icons" and hasattr(map_grid, 'selected_icon_type'):
-            # Place icon instead
-            new_icon = MapIcon(map_grid.selected_icon_type)
-            floor.set_icon(x, y, new_icon)
-            renpy.restart_interaction()
-
-    def clear_tile_on_map(x, y):
-        """Clear the tile at position (x, y) from the map."""
-        global map_grid
-
-        if not map_grid:
-            return
-
-        floor = map_grid.get_current_floor()
-        if not floor:
-            return
-
-        # Clear tile
-        floor.set_tile(x, y, MapTile("empty", 0))
-
-        # Clear icon if present
-        if (x, y) in floor.icons:
-            del floor.icons[(x, y)]
-
-        renpy.restart_interaction()
