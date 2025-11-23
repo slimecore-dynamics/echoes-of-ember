@@ -24,6 +24,15 @@ init python:
             import os
             filename = os.path.basename(image_path).replace(".png", "")
 
+            # Map old filenames to new convention
+            old_to_new = {
+                "hallway_ver": "hallway_ns",
+                "hallway_hor": "hallway_we"
+            }
+
+            if filename in old_to_new:
+                filename = old_to_new[filename]
+
             # Return the full filename as tile_type (no suffix stripping)
             # Examples: hallway_we, corner_ws, t_intersection_nws, wall_nes, cross, empty
             return (filename, 0)
