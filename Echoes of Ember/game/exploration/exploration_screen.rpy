@@ -184,17 +184,17 @@ screen exploration_view():
                                     $ tile_image = "images/maps/tiles/{}.png".format(tile_type)
                                     button:
                                         xysize (36, 36)
-                                        padding (0, 0)
+                                        padding (2, 2)
                                         action Function(select_tile_type, tile_type)
                                         selected (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
                                         selected_background "#FFFF00"
                                         background "#00000000"
                                         hover_background "#FFFFFF40"
 
-                                        add tile_image:
-                                            xalign 0.5
-                                            yalign 0.5
-                                            xysize (32, 32)
+                                        # Use fixed container to prevent image from blocking clicks
+                                        fixed:
+                                            fit_first True
+                                            add tile_image xysize (32, 32)
 
                             # ICONS GRID (right-aligned): 5 columns x 2 rows
                             grid 5 2:
@@ -208,17 +208,17 @@ screen exploration_view():
                                     $ icon_image = "images/maps/icons/{}.png".format(icon_type)
                                     button:
                                         xysize (36, 36)
-                                        padding (0, 0)
+                                        padding (2, 2)
                                         action Function(select_icon_for_placement, icon_type)
                                         selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
                                         selected_background "#FFFF00"
                                         background "#00000000"
                                         hover_background "#FFFFFF40"
 
-                                        add icon_image:
-                                            xalign 0.5
-                                            yalign 0.5
-                                            xysize (32, 32)
+                                        # Use fixed container to prevent image from blocking clicks
+                                        fixed:
+                                            fit_first True
+                                            add icon_image xysize (32, 32)
 
                                 # Empty slot for grid layout
                                 null xysize (36, 36)
