@@ -268,6 +268,50 @@ init -1 python:
                 return FileSave(self.slot).get_sensitive()
 
 
+    class QuickSaveWithMapData(Action):
+        # Custom Quick Save action that saves map data alongside game state
+
+        def __call__(self):
+            # Determine quick save slot name
+            slot = "quick-1"
+
+            # Save map data first
+            save_map_data_to_file(slot)
+            save_player_state_to_file(slot)
+
+            # Then perform quick save
+            result = QuickSave()()
+            return result
+
+        def get_sensitive(self):
+            return QuickSave().get_sensitive()
+
+
+    class QuickLoadWithMapData(Action):
+        # Custom Quick Load action that loads map data alongside game state
+
+        def __call__(self):
+            # Determine quick save slot name
+            slot = "quick-1"
+
+            # Write slot to temp file so after_load knows which slot to load
+            import os
+            temp_file_path = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
+
+            try:
+                with open(temp_file_path, 'w') as f:
+                    f.write(str(slot))
+            except Exception as e:
+                pass
+
+            # Then perform quick load
+            result = QuickLoad()()
+            return result
+
+        def get_sensitive(self):
+            return QuickLoad().get_sensitive()
+
+
 # Save label - called before saving
 label save:
     python:
@@ -300,4 +344,21 @@ label after_load:
             load_player_state_from_file(slot)
 
     return
+
+
+# Override Quick Save/Load keybindings to use custom actions
+init python:
+    # Override default Quick Save/Load keybindings
+    config.keymap['quicksave'] = []
+    config.keymap['quickload'] = []
+
+    # Set custom Quick Save/Load actions
+    config.underlay.append(renpy.Keymap(
+        quicksave=QuickSaveWithMapData(),
+        quickload=QuickLoadWithMapData()
+    ))
+
+    # Bind to standard keys (Q for save, Shift+Q for load)
+    config.keymap['quicksave'].append('K_q')
+    config.keymap['quickload'].append('shift_K_q')
 
