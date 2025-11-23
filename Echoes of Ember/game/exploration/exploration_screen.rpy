@@ -101,7 +101,7 @@ screen exploration_view():
                         $ grid_h = floor.dimensions[1]
 
                         # Calculate sizes accounting for gridlines
-                        $ gridline_width = 1
+                        $ gridline_width = 2
                         $ border_thickness = 3
                         $ available_size = int(config.screen_width * 0.25) - 20 - (border_thickness * 2)
 
