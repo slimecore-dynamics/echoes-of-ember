@@ -84,13 +84,18 @@ screen exploration_view():
                         padding (10, 10)
 
                         if floor:
+                            # Calculate cell size to match grid display
+                            $ grid_w = floor.dimensions[0]
+                            $ grid_h = floor.dimensions[1]
+                            $ available_size = int(config.screen_width * 0.25) - 20
+                            $ cell_size = min(available_size // grid_w, available_size // grid_h)
+
                             fixed:
                                 # Show full map grid
                                 use map_grid_display(floor)
 
                                 # Add player marker (red triangle) at player's grid position
-                                if ps and map_grid:
-                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
+                                if ps:
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
@@ -361,37 +366,34 @@ screen map_grid_display(floor):
     Display the map grid with clickable tiles for drawing.
     This is the main map display that shows tiles, icons, and allows editing.
     """
-    $ cell_size = map_grid.cell_size if (map_grid and hasattr(map_grid, 'cell_size')) else 32
     $ grid_w = floor.dimensions[0]
     $ grid_h = floor.dimensions[1]
 
-    # Viewport to handle scrolling if grid is larger than available space
-    viewport:
-        scrollbars "both"
-        mousewheel True
-        draggable True
+    # Calculate cell size to fit entire grid in viewport (subtract padding)
+    $ available_size = int(config.screen_width * 0.25) - 20  # Subtract frame padding
+    $ cell_size = min(available_size // grid_w, available_size // grid_h)
 
-        # Grid with tiles
-        grid grid_w grid_h:
-            spacing 0
-            for y in range(grid_h):
-                for x in range(grid_w):
-                    $ tile = floor.get_tile(x, y)
-                    $ icon = floor.icons.get((x, y))
+    # Grid with tiles
+    grid grid_w grid_h:
+        spacing 0
+        for y in range(grid_h):
+            for x in range(grid_w):
+                $ tile = floor.get_tile(x, y)
+                $ icon = floor.icons.get((x, y))
 
-                    button:
-                        xysize (cell_size, cell_size)
-                        background "#444444"  # Grey cell background
-                        action Function(handle_map_click, x, y, floor, map_grid)
-                        padding (0, 0)
+                button:
+                    xysize (cell_size, cell_size)
+                    background "#444444"  # Grey cell background
+                    action Function(handle_map_click, x, y, floor, map_grid)
+                    padding (0, 0)
 
-                        # Tile
-                        if tile.tile_type != "empty":
-                            add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation, fit="contain", xysize=(cell_size, cell_size)) xalign 0.0 yalign 0.0
+                    # Tile (no rotation - causes offset issues)
+                    if tile.tile_type != "empty":
+                        add "images/maps/tiles/{}.png".format(tile.tile_type) xysize (cell_size, cell_size)
 
-                        # Icon on top
-                        if icon:
-                            add Transform("images/maps/icons/{}.png".format(icon.icon_type), fit="contain", xysize=(cell_size, cell_size)) xalign 0.0 yalign 0.0
+                    # Icon on top
+                    if icon:
+                        add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):

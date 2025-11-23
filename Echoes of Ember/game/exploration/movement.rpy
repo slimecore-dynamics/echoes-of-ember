@@ -80,77 +80,48 @@ init python:
         @staticmethod
         def _get_allowed_directions(tile):
             """
-            Get list of directions player can move FROM this tile.
+            Get list of directions player can move FROM/TO this tile.
+            Parse tile name suffix to get allowed directions (e.g., corner_ws = west/south).
 
             Returns: list of strings: ["north", "south", "east", "west"]
             """
             tile_type = tile.tile_type
-            rotation = tile.rotation
 
             if tile_type == "empty":
-                return []  # Empty is void
-
-            elif tile_type == "wall":
-                # Wall blocks one direction based on rotation
-                # Rotation 0 = wall faces North (blocks north)
-                # Rotation 90 = wall faces East (blocks east)
-                # Rotation 180 = wall faces South (blocks south)
-                # Rotation 270 = wall faces West (blocks west)
-                all_dirs = ["north", "south", "east", "west"]
-                if rotation == 0:
-                    all_dirs.remove("north")
-                elif rotation == 90:
-                    all_dirs.remove("east")
-                elif rotation == 180:
-                    all_dirs.remove("south")
-                elif rotation == 270:
-                    all_dirs.remove("west")
-                return all_dirs
-
-            elif tile_type == "hallway":
-                # Hallway allows 2 directions based on rotation
-                # Rotation 0 = horizontal (east/west only)
-                # Rotation 90 = vertical (north/south only)
-                if rotation == 0 or rotation == 180:
-                    return ["east", "west"]
-                else:  # 90 or 270
-                    return ["north", "south"]
-
-            elif tile_type == "corner":
-                # Corner allows 2 perpendicular directions based on rotation
-                # Rotation 0 = allows East and South
-                # Rotation 90 = allows South and West
-                # Rotation 180 = allows West and North
-                # Rotation 270 = allows North and East
-                if rotation == 0:
-                    return ["east", "south"]
-                elif rotation == 90:
-                    return ["south", "west"]
-                elif rotation == 180:
-                    return ["west", "north"]
-                elif rotation == 270:
-                    return ["north", "east"]
-
-            elif tile_type == "t_intersection":
-                # T-intersection allows 3 directions based on rotation
-                # Rotation 0 = wall at top (blocks north, allows S/E/W)
-                # Rotation 90 = wall at right (blocks east, allows N/S/W)
-                # Rotation 180 = wall at bottom (blocks south, allows N/E/W)
-                # Rotation 270 = wall at left (blocks west, allows N/S/E)
-                if rotation == 0:
-                    return ["south", "east", "west"]
-                elif rotation == 90:
-                    return ["north", "south", "west"]
-                elif rotation == 180:
-                    return ["north", "east", "west"]
-                elif rotation == 270:
-                    return ["north", "south", "east"]
+                return []  # Empty is void - no movement allowed
 
             elif tile_type == "cross":
                 # Cross allows all 4 directions
                 return ["north", "south", "east", "west"]
 
-            return []  # Unknown tile type
+            else:
+                # Parse suffix letters from tile name (e.g., "corner_ws" -> "ws")
+                # Letters indicate passable directions: n=north, s=south, e=east, w=west
+                parts = tile_type.split("_")
+                if len(parts) < 2:
+                    # No suffix, assume all directions for unknown types
+                    return ["north", "south", "east", "west"]
+
+                suffix = parts[-1]  # Get last part (e.g., "ws", "nes", "we")
+                allowed = []
+
+                # Map letters to directions
+                if 'n' in suffix:
+                    allowed.append("north")
+                if 's' in suffix:
+                    allowed.append("south")
+                if 'e' in suffix:
+                    allowed.append("east")
+                if 'w' in suffix:
+                    allowed.append("west")
+
+                # Handle special cases for hallway with hor/ver naming
+                if "hor" in suffix:
+                    return ["east", "west"]
+                elif "ver" in suffix:
+                    return ["north", "south"]
+
+                return allowed if allowed else []
 
         @staticmethod
         def _get_opposite_direction(direction):
