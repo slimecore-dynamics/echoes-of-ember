@@ -246,27 +246,43 @@ init -1 python:
 
         def __init__(self, slot):
             self.slot = slot
-            self.file_action = FileAction(slot)
+            # Determine if this is save or load based on current screen
+            screen_name = renpy.current_screen().screen_name[0]
+            self.is_load = (screen_name == "load")
+            print("DEBUG FileActionWithMapData: Init for slot {} (is_load={})".format(slot, self.is_load))
 
         def __call__(self):
-            global current_save_slot
-            current_save_slot = self.slot
+            print("DEBUG FileActionWithMapData: __call__ for slot {} (is_load={})".format(self.slot, self.is_load))
 
-            # Store slot in save data for retrieval on load
-            store._map_slot = self.slot
-
-            print("DEBUG FileActionWithMapData: Handling slot {}".format(self.slot))
-
-            # Delegate to FileAction
-            result = self.file_action()
+            if self.is_load:
+                # Load: First load game state, then load map data
+                result = FileLoad(self.slot)()
+                print("DEBUG FileActionWithMapData: FileLoad completed, now loading map data")
+                load_map_data_from_file(self.slot)
+                load_player_state_from_file(self.slot)
+            else:
+                # Save: First save map data, then save game state
+                print("DEBUG FileActionWithMapData: Saving map data before FileSave")
+                save_map_data_to_file(self.slot)
+                save_player_state_to_file(self.slot)
+                # Store slot for after_load to use
+                store._map_slot = self.slot
+                result = FileSave(self.slot)()
+                print("DEBUG FileActionWithMapData: FileSave completed")
 
             return result
 
         def get_selected(self):
-            return self.file_action.get_selected()
+            if self.is_load:
+                return FileLoad(self.slot).get_selected()
+            else:
+                return FileSave(self.slot).get_selected()
 
         def get_sensitive(self):
-            return self.file_action.get_sensitive()
+            if self.is_load:
+                return FileLoad(self.slot).get_sensitive()
+            else:
+                return FileSave(self.slot).get_sensitive()
 
 
 # Save label - called before saving
