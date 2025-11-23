@@ -97,18 +97,20 @@ screen exploration_view():
                                 # Add player marker (red triangle) at player's grid position
                                 if ps:
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
+
+                                # TOOLTIP DISPLAY for notes (overlay on map)
+                                $ tooltip_text = GetTooltip()
+                                if tooltip_text:
+                                    nearrect:
+                                        focus "tooltip"
+                                        prefer_top True
+
+                                        frame:
+                                            background "#000000DD"
+                                            padding (8, 5)
+                                            text tooltip_text size 11 color "#FFFFFF"
                         else:
                             text "No map" xalign 0.5 yalign 0.5
-
-                    # TOOLTIP DISPLAY for notes
-                    $ tooltip_text = GetTooltip()
-                    if tooltip_text:
-                        frame:
-                            xsize int(config.screen_width * 0.25)
-                            background "#000000CC"
-                            padding (5, 5)
-
-                            text tooltip_text size 12 color "#FFFFFF"
 
                     # PALETTE - 6x4 grid with tiles and icons
                     frame:
