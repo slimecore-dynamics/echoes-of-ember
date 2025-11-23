@@ -50,7 +50,6 @@ init -1 python:
             return True
 
         except Exception as e:
-            print("Error saving player state: {}".format(e))
             return False
 
 
@@ -87,7 +86,6 @@ init -1 python:
             return True
 
         except Exception as e:
-            print("Error loading player state: {}".format(e))
             # Don't create a default player state on error - let the dungeon load handle it
             return False
 
@@ -148,7 +146,6 @@ init -1 python:
             return True
 
         except Exception as e:
-            print("Error saving map data: {}".format(e))
             return False
 
 
@@ -219,7 +216,6 @@ init -1 python:
             return True
 
         except Exception as e:
-            print("Error loading map data: {}".format(e))
             return False
 
 
@@ -244,7 +240,7 @@ init -1 python:
                     with open(temp_file_path, 'w') as f:
                         f.write(str(self.slot))
                 except Exception as e:
-                    print("Error writing temp file: {}".format(e))
+                    pass
 
                 result = FileLoad(self.slot)()
             else:
@@ -293,7 +289,7 @@ label after_load:
                     slot = f.read().strip()
                 os.remove(temp_file_path)
             except Exception as e:
-                print("Error reading/deleting temp file: {}".format(e))
+                pass
 
         if slot:
             load_map_data_from_file(slot)

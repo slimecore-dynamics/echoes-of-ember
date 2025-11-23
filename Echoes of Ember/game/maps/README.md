@@ -1,55 +1,47 @@
 # Map Files Directory
 
-This directory contains map data files for the Etrian Odyssey-style mapping system in Echoes of Ember.
+This directory contains Tiled map editor files for dungeon layouts in Echoes of Ember.
 
 ## Directory Structure
 
-- **exports/** - Maps exported by the player (JSON format)
-- **imports/** - Place JSON map files here to import them into the game
-- **backups/** - Automatic backups of map data
+- **tiled/** - Dungeon layouts created in Tiled Map Editor (JSON format)
 
 ## File Format
 
-All map files use JSON format for human readability and easy sharing between players.
+Dungeon layouts use Tiled JSON format. These define the actual dungeon structure, not player-drawn maps.
 
-### Full Map Export
-Contains all floors and complete map grid data.
+### Tiled JSON Maps
+Contains tile layers and object layers with dungeon layout and interaction points.
 ```json
 {
-  "version": "1.0",
-  "floors": {...},
-  "current_floor": "floor_1",
-  ...
+  "width": 20,
+  "height": 20,
+  "layers": [...],
+  "tilesets": [...],
+  "properties": {
+    "floor_id": "floor_1",
+    "starting_x": 10,
+    "starting_y": 10,
+    ...
+  }
 }
 ```
 
-### Single Floor Export
-Contains data for one floor only.
-```json
-{
-  "floor_id": "floor_1",
-  "floor_name": "Entrance Hall",
-  "dimensions": [20, 20],
-  "tiles": [...],
-  "icons": {...},
-  "notes": {...}
-}
-```
+## Creating Dungeons
 
-## Importing Maps
+1. Design your dungeon in Tiled Map Editor
+2. Export as JSON format
+3. Place the file in `maps/tiled/`
+4. Load in game with: `call load_dungeon_floor("maps/tiled/your_dungeon.json")`
 
-1. Place a JSON map file in the `imports/` directory
-2. Use the in-game import function to load the map
-3. The map will be merged with or replace your current map data
+## Map Data Persistence
 
-## Exporting Maps
+Player-drawn map data (not dungeon layouts) is automatically saved with game saves in:
+`<savedir>/map_data/<slot>_mapgrid.json`
 
-Use the in-game export function to save your maps as JSON files. These will appear in the `exports/` directory.
+This includes:
+- Player-drawn tiles
+- Player-placed icons and notes
+- Revealed tiles (auto-map)
 
-## Sharing Maps
-
-You can share exported JSON files with other players. Simply copy the file from your `exports/` directory and send it to others, who can place it in their `imports/` directory.
-
-## Backups
-
-Automatic backups are created in the `backups/` directory. These can be used to restore your map if something goes wrong.
+These files are managed automatically by the save/load system.

@@ -169,7 +169,7 @@ init python:
                 # Save the updated map grid (without the deleted floor)
                 save_map_data_to_file(slot_name)
             except Exception as e:
-                print("Error updating save: {}".format(e))
+                pass
 
         return True
 

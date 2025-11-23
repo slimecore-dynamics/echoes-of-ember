@@ -36,13 +36,15 @@ label start:
 
 1. Open Tiled Map Editor
 2. Create a new map (20×20 tiles recommended)
-3. Create a tileset with tiles numbered:
-   - Tile 0: Empty (void)
-   - Tile 1: Wall
-   - Tile 2: Hallway
-   - Tile 3: Corner
-   - Tile 4: T-Intersection
-   - Tile 5: Cross Intersection
+3. Create a tileset with PNG images for each tile type:
+   - `empty.png` - Empty/void tiles
+   - `hallway_ns.png`, `hallway_we.png` - Hallways
+   - `corner_ne.png`, `corner_es.png`, `corner_ws.png`, `corner_wn.png` - Corners
+   - `t_intersection_nes.png`, `t_intersection_wne.png`, `t_intersection_nws.png`, `t_intersection_wse.png` - T-intersections
+   - `cross.png` - Cross intersections
+   - `wall_nes.png`, `wall_wne.png`, `wall_nws.png`, `wall_wse.png` - Walls
+
+   (Tile type is parsed from the PNG filename - see `tiled_importer.rpy`)
 
 4. Add custom properties to the map:
    - `starting_x` (int): Player starting X coordinate
@@ -212,9 +214,9 @@ def create_my_dungeon():
 
 ### Custom Tile Types
 
-1. Add to `MapTile.VALID_TYPES` in mapping.rpy
-2. Add movement rules in `MovementValidator._get_allowed_directions()`
-3. Create tile image in `game/images/maps/tiles/`
+1. Movement rules are determined by tile name suffix (e.g., `hallway_we` = west/east)
+2. Modify `MovementValidator._get_allowed_directions()` in `movement.rpy` if needed
+3. Create tile image in `game/images/maps/tiles/` with appropriate filename
 
 ### Custom Icon Types
 

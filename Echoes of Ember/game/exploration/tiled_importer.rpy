@@ -51,14 +51,12 @@ init python:
             full_path = os.path.join(renpy.config.gamedir, filepath)
 
             if not os.path.exists(full_path):
-                print("TiledImporter - File not found: {}".format(full_path))
                 return None
 
             try:
                 with open(full_path, 'r', encoding='utf-8') as f:
                     tiled_data = json.load(f)
             except Exception as e:
-                print("TiledImporter - Failed to load JSON: {}".format(e))
                 return None
 
             # Extract map properties
@@ -195,7 +193,6 @@ init python:
                         if gid in tile_id_map:
                             tile_type, rotation = tile_id_map[gid]
                         else:
-                            print("TiledImporter - Warning: Unknown tile GID {} at ({}, {})".format(gid, x, y))
                             tile_type = "empty"
                             rotation = 0
 
@@ -256,9 +253,6 @@ init python:
                 # Map to our icon type
                 icon_type = TiledImporter.OBJECT_TYPE_MAP.get(obj_type)
                 if not icon_type:
-                    print("TiledImporter - Unknown object type: '{}' (gid: {})".format(
-                        obj_type, obj.get("gid", "none")
-                    ))
                     continue
 
                 # Extract custom properties
