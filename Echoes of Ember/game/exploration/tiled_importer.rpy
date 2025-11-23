@@ -112,7 +112,7 @@ init python:
                 if layer.get("type") == "tilelayer":
                     TiledImporter._process_tile_layer(layer, floor, tile_id_map)
                 elif layer.get("type") == "objectgroup":
-                    TiledImporter._process_object_layer(layer, floor)
+                    TiledImporter._process_object_layer(layer, floor, tile_id_map)
 
             # CRITICAL: Separate dungeon from drawn map
             # floor.tiles currently has the real dungeon from Tiled
@@ -257,7 +257,7 @@ init python:
                 return 0
 
         @staticmethod
-        def _process_object_layer(layer, floor):
+        def _process_object_layer(layer, floor, tile_id_map):
             """
             Process a Tiled object layer and populate FloorMap icons.
 
@@ -276,16 +276,26 @@ init python:
                 grid_x = int(pixel_x / 32)
                 grid_y = int(pixel_y / 32)
 
-                # Get object type
+                # Get object type - try multiple sources
                 obj_type = obj.get("type", "").lower()
                 if not obj_type:
                     obj_name = obj.get("name", "").lower()
                     obj_type = obj_name
 
+                # If still no type, check if object has a gid (tile object)
+                if not obj_type and "gid" in obj:
+                    gid = obj.get("gid")
+                    if gid in tile_id_map:
+                        # Get tile name from gid
+                        tile_name, _ = tile_id_map[gid]
+                        obj_type = tile_name.lower()
+
                 # Map to our icon type
                 icon_type = TiledImporter.OBJECT_TYPE_MAP.get(obj_type)
                 if not icon_type:
-                    print("TiledImporter - Unknown object type: {}".format(obj_type))
+                    print("TiledImporter - Unknown object type: '{}' (gid: {})".format(
+                        obj_type, obj.get("gid", "none")
+                    ))
                     continue
 
                 # Extract custom properties

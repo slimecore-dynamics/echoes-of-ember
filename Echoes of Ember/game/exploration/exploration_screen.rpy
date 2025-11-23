@@ -17,13 +17,11 @@ screen exploration_view():
     Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
     """
 
-    # Show area/floor popup when first entering
+    # Show floor notification when first entering
     on "show":
         action If(map_grid and map_grid.get_current_floor(),
-            [Show("area_entry_popup",
-                  area_name=getattr(map_grid.get_current_floor(), 'area_name', ''),
-                  floor_name=getattr(map_grid.get_current_floor(), 'floor_name',
-                                     map_grid.get_current_floor().floor_id if map_grid.get_current_floor() else ''))],
+            Function(renpy.notify, "Loaded floor: {}".format(
+                map_grid.get_current_floor().floor_id if map_grid.get_current_floor() else '')),
             None)
 
     # Get current floor and player state
@@ -137,19 +135,18 @@ screen exploration_view():
                             # Row 3: hallway_ns, corner_wn, t_intersection_wne, wall_wne, event, teleporter
                             # Row 4: hallway_we, corner_ws, t_intersection_wse, wall_wse, gathering, note
 
-                            for item in ["empty", "corner_es", "t_intersection_nes", "wall_nes", "door", "stairs_up",
+                            for item in ["empty", "corner_es", "t_intersection_nes", "wall_nes", "door_open", "stairs_up",
                                         "cross", "corner_ne", "t_intersection_nws", "wall_nws", "enemy", "stairs_down",
                                         "hallway_ns", "corner_wn", "t_intersection_wne", "wall_wne", "event", "teleporter",
                                         "hallway_we", "corner_ws", "t_intersection_wse", "wall_wse", "gathering", "note"]:
 
                                 # Determine if it's a tile or icon
-                                $ is_icon = item in ["door", "stairs_up", "stairs_down", "enemy", "event", "teleporter", "gathering", "note"]
+                                $ is_icon = item in ["door_open", "stairs_up", "stairs_down", "enemy", "event", "teleporter", "gathering", "note"]
 
                                 if is_icon:
                                     # Icon button
-                                    $ icon_name = "door" if item == "door" else item
-                                    $ icon_image = "images/maps/icons/{}.png".format(icon_name)
-                                    $ icon_type = "door_closed" if item == "door" else item
+                                    $ icon_image = "images/maps/icons/{}.png".format(item)
+                                    $ icon_type = item
                                     imagebutton:
                                         idle icon_image
                                         hover icon_image
@@ -416,47 +413,6 @@ screen map_grid_display(floor, cell_size):
                     # Icon on top
                     if icon:
                         add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
-
-
-screen area_entry_popup(area_name, floor_name):
-    """Display area and floor name when entering exploration."""
-
-    modal True
-    zorder 100
-
-    frame:
-        xalign 0.5
-        yalign 0.3
-        xsize 500
-        background "#000000DD"
-        padding (30, 30)
-
-        vbox:
-            spacing 20
-            xalign 0.5
-
-            # Area name (larger)
-            if area_name:
-                text area_name:
-                    size 28
-                    color "#FFFFFF"
-                    xalign 0.5
-                    text_align 0.5
-
-            # Floor name
-            if floor_name:
-                text floor_name:
-                    size 20
-                    color "#CCCCCC"
-                    xalign 0.5
-                    text_align 0.5
-
-            # Dismiss button
-            textbutton "Continue":
-                action Hide("area_entry_popup")
-                xalign 0.5
-                xsize 120
-                ysize 40
 
 
 screen note_input_popup(x, y, floor, map_grid):
