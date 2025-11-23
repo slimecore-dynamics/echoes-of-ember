@@ -46,17 +46,38 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
         floor = TiledImporter.load_tiled_map(floor_filepath, floor_id=floor_id)
 
         if floor:
-            # Check tile in newly loaded floor
-            new_tile = floor.get_tile(0, 0)
-            print("DEBUG [LOAD_DUNGEON MIDDLE] Tiled importer returned floor '{}' with tile(0,0) = '{}'".format(floor.floor_id, new_tile.tile_type))
+            print("DEBUG [LOAD_DUNGEON MIDDLE] Tiled importer returned floor '{}'".format(floor.floor_id))
 
-            # Add floor to map grid (THIS OVERWRITES EXISTING FLOOR!)
-            map_grid.floors[floor.floor_id] = floor
+            # Check if floor already exists (need actual floor_id from Tiled, not parameter)
+            if floor.floor_id in map_grid.floors:
+                print("DEBUG [LOAD_DUNGEON] Floor '{}' exists - preserving player data".format(floor.floor_id))
+                existing_floor = map_grid.floors[floor.floor_id]
+
+                # Preserve player-drawn data before overwriting
+                existing_tile = existing_floor.get_tile(0, 0)
+                print("DEBUG [LOAD_DUNGEON] Saving player tile(0,0) = '{}'".format(existing_tile.tile_type))
+
+                saved_tiles = existing_floor.tiles
+                saved_icons = existing_floor.icons
+                saved_revealed = existing_floor.revealed_tiles
+
+                # Update floor with new dungeon layout from Tiled
+                map_grid.floors[floor.floor_id] = floor
+
+                # Restore player-drawn data
+                floor.tiles = saved_tiles
+                floor.icons = saved_icons
+                floor.revealed_tiles = saved_revealed
+
+                restored_tile = floor.get_tile(0, 0)
+                print("DEBUG [LOAD_DUNGEON] Restored player tile(0,0) = '{}'".format(restored_tile.tile_type))
+            else:
+                print("DEBUG [LOAD_DUNGEON] Floor '{}' is new - adding normally".format(floor.floor_id))
+                map_grid.floors[floor.floor_id] = floor
+                new_tile = floor.get_tile(0, 0)
+                print("DEBUG [LOAD_DUNGEON] New floor tile(0,0) = '{}'".format(new_tile.tile_type))
+
             map_grid.current_floor_id = floor.floor_id
-
-            # Verify after overwrite
-            final_tile = map_grid.floors[floor.floor_id].get_tile(0, 0)
-            print("DEBUG [LOAD_DUNGEON AFTER] Overwrote floor '{}', tile(0,0) now = '{}'".format(floor.floor_id, final_tile.tile_type))
             print("=" * 80)
 
             # Initialize or reset player state for this floor
