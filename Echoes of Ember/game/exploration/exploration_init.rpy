@@ -8,42 +8,11 @@ label start_exploration_system:
     python:
         global player_state, map_grid
 
-        # Only initialize if player_state is None (new game)
-        if player_state is None:
-            # Get current floor
-            if map_grid and map_grid.floors:
-                floor = map_grid.get_current_floor()
-
-                if floor:
-                    # Use floor's starting position if available
-                    start_x = getattr(floor, 'starting_x', 10)
-                    start_y = getattr(floor, 'starting_y', 10)
-                    start_rot = getattr(floor, 'starting_rotation', 0)
-                    floor_id = floor.floor_id
-                else:
-                    # Default position
-                    start_x, start_y = 10, 10
-                    start_rot = 0
-                    floor_id = None
-
-                # Create player state
-                player_state = PlayerState(
-                    x=start_x,
-                    y=start_y,
-                    rotation=start_rot,
-                    floor_id=floor_id
-                )
-
-                print("ExplorationInit - Created new player state at ({}, {}) facing {}".format(
-                    start_x, start_y, player_state.get_facing_direction_name()
-                ))
-            else:
-                # No map grid, create default player state
-                player_state = PlayerState(x=10, y=10, rotation=0)
-                print("ExplorationInit - Created default player state (no map grid)")
-        else:
-            # Player state already exists (loaded from save)
-            print("ExplorationInit - Player state already exists (loaded from save)")
+        # Ensure map_grid exists (will be populated by load_dungeon_floor)
+        # Player state is created by load_dungeon_floor, not here
+        if not map_grid:
+            map_grid = MapGrid()
+            print("ExplorationInit - Created new MapGrid")
 
     return
 
