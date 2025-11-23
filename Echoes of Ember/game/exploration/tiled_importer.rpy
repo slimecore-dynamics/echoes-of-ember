@@ -227,13 +227,14 @@ init python:
             elif hasattr(properties, '__iter__') and not isinstance(properties, str):
                 print("_extract_properties - Processing iterable with {} items".format(len(properties)))
                 for i, prop in enumerate(properties):
-                    if isinstance(prop, dict):
+                    # Use duck typing for dict check too (isinstance doesn't work in Ren'Py)
+                    if hasattr(prop, 'get'):
                         name = prop.get("name")
                         value = prop.get("value")
                         print("_extract_properties - Item {}: name='{}' value='{}'".format(i, name, value))
                         props[name] = value
                     else:
-                        print("_extract_properties - WARNING: Item {} is not a dict: {}".format(i, prop))
+                        print("_extract_properties - WARNING: Item {} has no get method: {}".format(i, prop))
                 print("_extract_properties - Final props dict: {}".format(props))
             else:
                 print("_extract_properties - WARNING: Unknown type!")
