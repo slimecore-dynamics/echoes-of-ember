@@ -2,6 +2,26 @@
 # Extends map save/load system to include player state
 
 init -1 python:
+    import os
+    import json
+
+    def get_map_data_dir():
+        # Get the directory where map data files are stored
+        # Returns: path to <savedir>/map_data/
+        # Creates the directory if it doesn't exist
+
+        # Get Ren'Py's save directory
+        save_dir = renpy.config.savedir
+
+        # Create map_data subdirectory
+        map_dir = os.path.join(save_dir, "map_data")
+
+        # Ensure directory exists
+        if not os.path.exists(map_dir):
+            os.makedirs(map_dir)
+
+        return map_dir
+
     def save_player_state_to_file(slot_name):
         """
         Save player_state to external JSON file (same location as map data).
