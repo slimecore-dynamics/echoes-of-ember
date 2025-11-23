@@ -180,7 +180,7 @@ screen exploration_view():
                                 # Row 1: empty | corner_es | corner_wn | hallway_ns | t_intersection_nes | t_intersection_wne | wall_nes | wall_wne
                                 # Row 2: cross | corner_ne | corner_ws | hallway_we | t_intersection_nws | t_intersection_wse | wall_nws | wall_wse
                                 for tile_type in ["empty", "corner_es", "corner_wn", "hallway_ns", "t_intersection_nes", "t_intersection_wne", "wall_nes", "wall_wne",
-                                                 "cross", "corner_ne", "corner_ws", "hallway_we", "t_intersection_nws", "t_intersection_wse", "wall_nws", "wall_wse"]:
+                                                "cross", "corner_ne", "corner_ws", "hallway_we", "t_intersection_nws", "t_intersection_wse", "wall_nws", "wall_wse"]:
                                     $ tile_image = "images/maps/tiles/{}.png".format(tile_type)
                                     button:
                                         xysize (36, 36)
@@ -204,7 +204,7 @@ screen exploration_view():
                                 # Row 1: door_open | enemy | gathering | stairs_down | note
                                 # Row 2: door_closed | event | teleporter | stairs_up | (empty slot)
                                 for icon_type in ["door_open", "enemy", "gathering", "stairs_down", "note",
-                                                 "door_closed", "event", "teleporter", "stairs_up"]:
+                                                "door_closed", "event", "teleporter", "stairs_up"]:
                                     $ icon_image = "images/maps/icons/{}.png".format(icon_type)
                                     button:
                                         xysize (36, 36)
