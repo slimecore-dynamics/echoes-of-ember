@@ -93,14 +93,10 @@ init python:
             # Get icon at current position from dungeon icons
             icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
 
-            if icon:
-                print("DEBUG check_on_tile: pos=({},{}) rot={} icon_type={}".format(x, y, rotation, icon.icon_type))
-
             if not icon:
                 return (None, None, None, None)
 
             if icon.icon_type in InteractionHandler.ON_TILE_INTERACT_ICONS:
-                print("DEBUG: Icon IS on-tile interact type")
                 # Check if icon has prompt_facing requirement
                 if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
                     required_facing = icon.metadata['prompt_facing'].lower()
@@ -108,14 +104,10 @@ init python:
                     rotation_to_dir = {0: 'n', 90: 'e', 180: 's', 270: 'w'}
                     current_dir = rotation_to_dir.get(rotation, '')
 
-                    print("DEBUG: req_facing='{}' curr='{}' match={}".format(
-                        required_facing, current_dir, current_dir == required_facing))
-
                     # Only show prompt if facing the required direction
                     if current_dir != required_facing:
                         return (None, None, None, None)
 
-                print("DEBUG: RETURNING on-tile interaction")
                 return (icon, "on_tile", x, y)
 
             return (None, None, None, None)

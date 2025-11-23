@@ -98,94 +98,117 @@ screen exploration_view():
                     frame:
                         xsize int(config.screen_width * 0.25)
                         ysize int(config.screen_width * 0.25)  # Square viewport
-                        background "#0066CC"  # Blue background
-                        padding (10, 10)
+                        xalign 0.5  # Center horizontally in right third
+                        background Solid("#333333")  # Dark grey border
+                        padding (2, 2)  # Border thickness
 
-                        if floor:
-                            # Calculate cell size to match grid display
-                            $ grid_w = floor.dimensions[0]
-                            $ grid_h = floor.dimensions[1]
-                            $ available_size = int(config.screen_width * 0.25) - 20
-                            $ cell_size = min(available_size // grid_w, available_size // grid_h)
+                        # Inner frame for blue background
+                        frame:
+                            xfill True
+                            yfill True
+                            background "#0066CC"  # Blue background
+                            padding (10, 10)
 
-                            fixed:
-                                # Show full map grid with tooltip info
-                                use map_grid_display(floor, cell_size)
+                            if floor:
+                                # Calculate cell size to match grid display
+                                $ grid_w = floor.dimensions[0]
+                                $ grid_h = floor.dimensions[1]
+                                $ available_size = int(config.screen_width * 0.25) - 20
+                                $ cell_size = min(available_size // grid_w, available_size // grid_h)
 
-                                # Add player marker (red triangle) at player's grid position
-                                if ps:
-                                    add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
+                                fixed:
+                                    # Show full map grid with tooltip info
+                                    use map_grid_display(floor, cell_size)
 
-                                # Display tooltip at note position (on top of everything)
-                                $ tooltip_data = GetTooltip()
-                                if tooltip_data:
-                                    $ note_x, note_y, note_text = tooltip_data
-                                    frame:
-                                        xpos (note_x * cell_size)
-                                        ypos (note_y * cell_size - 25)  # Above the note icon
-                                        background "#000000DD"
-                                        padding (5, 3)
-                                        text note_text size 10 color "#FFFFFF"
-                        else:
-                            text "No map" xalign 0.5 yalign 0.5
+                                    # Add player marker (red triangle) at player's grid position
+                                    if ps:
+                                        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
 
-                    # PALETTE - 6x4 grid with tiles and icons
+                                    # Display tooltip at note position (on top of everything)
+                                    $ tooltip_data = GetTooltip()
+                                    if tooltip_data:
+                                        $ note_x, note_y, note_text = tooltip_data
+                                        frame:
+                                            xpos (note_x * cell_size)
+                                            ypos (note_y * cell_size - 25)  # Above the note icon
+                                            background "#000000DD"
+                                            padding (5, 3)
+                                            text note_text size 10 color "#FFFFFF"
+                            else:
+                                text "No map" xalign 0.5 yalign 0.5
+
+                    # PALETTE - Two grids: tiles (left) and icons (right)
                     frame:
                         xsize int(config.screen_width * 0.314)
-                        ysize int(config.screen_height * 0.15)
                         background "#2A2A2A"
                         padding (10, 10)
+                        yfit True
 
-                        # 6 columns x 4 rows
-                        grid 6 5:
-                            spacing 3
-                            xalign 0.5
+                        hbox:
+                            spacing 10
+                            xfill True
 
-                            # Row 1: empty, corner_es, t_intersection_nes, wall_nes, door_open, door_closed
-                            # Row 2: stairs_up, cross, corner_ne, t_intersection_nws, wall_nws, enemy
-                            # Row 3: stairs_down, hallway_ns, corner_wn, t_intersection_wne, wall_wne, event
-                            # Row 4: teleporter, hallway_we, corner_ws, t_intersection_wse, wall_wse, gathering
-                            # Row 5: note (+ empty spaces)
+                            # TILES GRID (left-aligned): 8 columns x 2 rows
+                            grid 8 2:
+                                spacing 6
+                                xalign 0.0
 
-                            for item in ["empty", "corner_es", "t_intersection_nes", "wall_nes", "door_open", "door_closed",
-                                        "stairs_up", "cross", "corner_ne", "t_intersection_nws", "wall_nws", "enemy",
-                                        "stairs_down", "hallway_ns", "corner_wn", "t_intersection_wne", "wall_wne", "event",
-                                        "teleporter", "hallway_we", "corner_ws", "t_intersection_wse", "wall_wse", "gathering",
-                                        "note"]:
+                                # Row 1: empty | corner_es | corner_wn | hallway_ns | t_intersection_nes | t_intersection_wne | wall_nes | wall_wne
+                                # Row 2: cross | corner_ne | corner_ws | hallway_we | t_intersection_nws | t_intersection_wse | wall_nws | wall_wse
+                                for tile_type in ["empty", "corner_es", "corner_wn", "hallway_ns", "t_intersection_nes", "t_intersection_wne", "wall_nes", "wall_wne",
+                                                 "cross", "corner_ne", "corner_ws", "hallway_we", "t_intersection_nws", "t_intersection_wse", "wall_nws", "wall_wse"]:
+                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_type)
+                                    button:
+                                        xysize (36, 36)
+                                        padding (0, 0)
+                                        action Function(select_tile_type, tile_type)
+                                        selected (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
+                                        selected_background "#FFFF00"
+                                        background "#00000000"
+                                        hover_background "#FFFFFF40"
 
-                                # Determine if it's a tile or icon
-                                $ is_icon = item in ["door_open", "door_closed", "stairs_up", "stairs_down", "enemy", "event", "teleporter", "gathering", "note"]
+                                        add tile_image:
+                                            xalign 0.5
+                                            yalign 0.5
+                                            xysize (32, 32)
 
-                                if is_icon:
-                                    # Icon button
-                                    $ icon_image = "images/maps/icons/{}.png".format(item)
-                                    $ icon_type = item
-                                    imagebutton:
-                                        idle icon_image
-                                        hover icon_image
+                            # ICONS GRID (right-aligned): 5 columns x 2 rows
+                            grid 5 2:
+                                spacing 6
+                                xalign 1.0
+
+                                # Row 1: door_open | enemy | gathering | stairs_down | note
+                                # Row 2: door_closed | event | teleporter | stairs_up | (empty slot)
+                                for icon_type in ["door_open", "enemy", "gathering", "stairs_down", "note",
+                                                 "door_closed", "event", "teleporter", "stairs_up"]:
+                                    $ icon_image = "images/maps/icons/{}.png".format(icon_type)
+                                    button:
+                                        xysize (36, 36)
+                                        padding (0, 0)
                                         action Function(select_icon_for_placement, icon_type)
-                                        xysize (32, 32)
                                         selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                        selected_background "#FFFF0080"
-                                else:
-                                    # Tile button
-                                    $ tile_image = "images/maps/tiles/{}.png".format(item)
-                                    imagebutton:
-                                        idle tile_image
-                                        hover tile_image
-                                        action Function(select_tile_type, item)
-                                        xysize (32, 32)
-                                        selected (map_grid.selected_tile_type == item and map_grid.current_mode == "edit_tiles" if map_grid else False)
-                                        selected_background "#FFFF0080"
+                                        selected_background "#FFFF00"
+                                        background "#00000000"
+                                        hover_background "#FFFFFF40"
+
+                                        add icon_image:
+                                            xalign 0.5
+                                            yalign 0.5
+                                            xysize (32, 32)
+
+                                # Empty slot for grid layout
+                                null xysize (36, 36)
 
                     # NAVIGATION CONTROLS
                     frame:
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
+                        yfit True
 
                         vbox:
-                            spacing 8
+                            spacing 4
+                            xfill True
 
                             # Calculate can_move for button sensitivity
                             if floor and ps:
@@ -200,13 +223,12 @@ screen exploration_view():
                             textbutton "Forward":
                                 action Function(handle_move_forward)
                                 xalign 0.5
-                                xsize 100
-                                ysize 40
+                                xfit True
+                                padding (20, 8)
                                 text_xalign 0.5
+                                background "#444444"
+                                hover_background "#555555"
                                 sensitive (can_move and not exploration_dialogue_active)
-
-                            # Empty line
-                            null height 8
 
                             # Left and Right buttons (on same line, left and right aligned)
                             hbox:
@@ -215,8 +237,10 @@ screen exploration_view():
                                 textbutton "Left":
                                     action Function(handle_turn_left)
                                     xalign 0.0
-                                    xsize 100
-                                    ysize 40
+                                    xfit True
+                                    padding (20, 8)
+                                    background "#444444"
+                                    hover_background "#555555"
                                     sensitive (not exploration_dialogue_active)
 
                                 null  # Spacer
@@ -224,20 +248,21 @@ screen exploration_view():
                                 textbutton "Right":
                                     action Function(handle_turn_right)
                                     xalign 1.0
-                                    xsize 100
-                                    ysize 40
+                                    xfit True
+                                    padding (20, 8)
+                                    background "#444444"
+                                    hover_background "#555555"
                                     sensitive (not exploration_dialogue_active)
-
-                            # Empty line
-                            null height 8
 
                             # Back button (text centered)
                             textbutton "Back":
                                 action Function(handle_move_backward)
                                 xalign 0.5
-                                xsize 100
-                                ysize 40
+                                xfit True
+                                padding (20, 8)
                                 text_xalign 0.5
+                                background "#444444"
+                                hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
@@ -245,56 +270,50 @@ screen exploration_view():
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
+                        yfit True
 
-                        # Auto-Map on LEFT
-                        textbutton "Auto-Map":
-                            action ToggleField(map_grid, "auto_map_enabled")
-                            xalign 0.0
-                            xsize 200
-                            ysize 35
-                            selected_background "#FFFF00"
-                            selected_hover_background "#FFDD00"
-                            background "#444444"
-                            hover_background "#555555"
-                            selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
-                            sensitive (not exploration_dialogue_active)
+                        hbox:
+                            spacing 10
+                            xfill True
 
-                        # Leave on RIGHT
-                        textbutton "Leave":
-                            action Return("exit")
-                            xalign 1.0
-                            xsize 90
-                            ysize 35
-                            sensitive (not exploration_dialogue_active)
+                            # Auto-Map on LEFT
+                            textbutton "Auto-Map":
+                                action ToggleField(map_grid, "auto_map_enabled")
+                                xalign 0.0
+                                xfit True
+                                padding (20, 8)
+                                selected_background "#FFFF00"
+                                selected_hover_background "#FFDD00"
+                                background "#444444"
+                                hover_background "#555555"
+                                selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
+                                sensitive (not exploration_dialogue_active)
+
+                            # Leave on RIGHT
+                            textbutton "Leave":
+                                action Return("exit")
+                                xalign 1.0
+                                xfit True
+                                padding (20, 8)
+                                background "#444444"
+                                hover_background "#555555"
+                                sensitive (not exploration_dialogue_active)
 
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
                         python:
-                            print("DEBUG exploration_screen: Checking interactions at pos=({},{}) rot={}".format(ps.x, ps.y, ps.rotation))
-
                             # Check for adjacent triggers (stairs, doors)
                             icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
                                 floor, ps.x, ps.y, ps.rotation
                             )
-                            print("DEBUG exploration_screen: Adjacent check returned icon={}".format(icon.icon_type if icon else None))
 
                             # If no adjacent trigger, check for on-tile interactions (teleporter)
                             if not icon:
-                                print("DEBUG exploration_screen: No adjacent icon, checking on-tile...")
                                 icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
                                     floor, ps.x, ps.y, ps.rotation
                                 )
-                                print("DEBUG exploration_screen: On-tile check returned icon={}".format(icon.icon_type if icon else None))
                                 if icon:
                                     adj_x, adj_y = tile_x, tile_y
-
-                            # Debug: print final values
-                            print("DEBUG exploration_screen: After checks - icon={}, int_type={}, adj_x={}, adj_y={}".format(
-                                icon.icon_type if icon else None, int_type, adj_x, adj_y))
-
-                            if icon:
-                                print("DEBUG exploration_screen: About to display prompt for icon={} at ({},{})".format(
-                                    icon.icon_type, adj_x, adj_y))
 
                         if icon:
                             use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
@@ -417,16 +436,14 @@ init python:
 
 
 screen map_grid_display(floor, cell_size):
-    """
-    Display the map grid with clickable tiles for drawing.
-    This is the main map display that shows tiles, icons, and allows editing.
-    """
+    # Display the map grid with clickable tiles for drawing.
+    # This is the main map display that shows tiles, icons, and allows editing.
     $ grid_w = floor.dimensions[0]
     $ grid_h = floor.dimensions[1]
 
-    # Grid with tiles
+    # Grid with tiles and gridlines
     grid grid_w grid_h:
-        spacing 0
+        spacing 1  # Gridline spacing
         for y in range(grid_h):
             for x in range(grid_w):
                 $ tile = floor.get_tile(x, y)
@@ -434,21 +451,28 @@ screen map_grid_display(floor, cell_size):
 
                 button:
                     xysize (cell_size, cell_size)
-                    background "#444444"  # Grey cell background
+                    background "#0066CC"  # Match blue background
                     action Function(handle_map_click, x, y, floor, map_grid)
-                    padding (0, 0)
+                    padding (1, 1)  # Inner padding for gridline effect
 
                     # Show tooltip for notes
                     if icon and icon.icon_type == "note":
                         tooltip (x, y, icon.metadata.get("note_text", ""))
 
-                    # Tile (no rotation - causes offset issues)
-                    if tile.tile_type != "empty":
-                        add "images/maps/tiles/{}.png".format(tile.tile_type) xysize (cell_size, cell_size)
+                    # Cell content frame with lighter border
+                    frame:
+                        xfill True
+                        yfill True
+                        background Solid("#0066CC")  # Blue cell background
+                        padding (0, 0)
 
-                    # Icon on top
-                    if icon:
-                        add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
+                        # Tile (no rotation - causes offset issues)
+                        if tile.tile_type != "empty":
+                            add "images/maps/tiles/{}.png".format(tile.tile_type) fit "contain"
+
+                        # Icon on top
+                        if icon:
+                            add "images/maps/icons/{}.png".format(icon.icon_type) fit "contain"
 
 
 screen note_input_popup(x, y, floor, map_grid):
@@ -495,10 +519,6 @@ screen note_input_popup(x, y, floor, map_grid):
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
     """Compact interaction prompt in right panel."""
-
-    python:
-        print("DEBUG compact_interaction_prompt: Called with icon={}, type={}, pos=({},{})".format(
-            icon.icon_type if icon else None, interaction_type, adj_x, adj_y))
 
     frame:
         xsize int(config.screen_width * 0.314)
@@ -755,10 +775,9 @@ init python:
         elif result["type"] == "gathering":
             # Mark as discovered
             icon.metadata["discovered"] = True
-            # Show debug notification with item and amount
             item = result.get("item", "unknown")
             amount = result.get("amount", 1)
-            renpy.notify("DEBUG: Gathered {} x{} at ({}, {})".format(item, amount, x, y))
+            renpy.notify("Gathered {} x{}".format(item, amount))
         elif result["type"] == "event":
             # Check if event has a dialogue label
             if "label" in result and result["label"]:

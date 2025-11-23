@@ -3,16 +3,14 @@
 
 # This label shows how to start exploration with a test dungeon
 label start_dungeon_exploration_example:
-    """
-    Example: Start dungeon exploration with test dungeon.
-
-    To use this example, call this label from your script.rpy:
-
-    label start:
-        call start_mapping_system
-        call start_dungeon_exploration_example
-        return
-    """
+    # Example: Start dungeon exploration with test dungeon.
+    #
+    # To use this example, call this label from your script.rpy:
+    #
+    # label start:
+    #     call start_mapping_system
+    #     call start_dungeon_exploration_example
+    #     return
 
     # Initialize exploration system
     call start_exploration_system
@@ -36,14 +34,12 @@ label start_dungeon_exploration_example:
 
 # This label shows how to load a custom dungeon from Tiled JSON
 label start_custom_dungeon_example:
-    """
-    Example: Load a custom dungeon from Tiled JSON file.
-
-    Prerequisites:
-    1. Create a dungeon in Tiled Map Editor
-    2. Export as JSON to game/maps/your_dungeon.json
-    3. Update the filepath below
-    """
+    # Example: Load a custom dungeon from Tiled JSON file.
+    #
+    # Prerequisites:
+    # 1. Create a dungeon in Tiled Map Editor
+    # 2. Export as JSON to game/maps/your_dungeon.json
+    # 3. Update the filepath below
 
     call start_exploration_system
 
@@ -60,9 +56,7 @@ label start_custom_dungeon_example:
 
 # This label shows how to create a multi-floor dungeon
 label multi_floor_dungeon_example:
-    """
-    Example: Create a multi-floor dungeon with stairs.
-    """
+    # Example: Create a multi-floor dungeon with stairs.
 
     call start_exploration_system
 
@@ -119,9 +113,7 @@ label multi_floor_dungeon_example:
 
 # This label shows how to use gathering items
 label gathering_example:
-    """
-    Example: Gathering system with inventory.
-    """
+    # Example: Gathering system with inventory.
 
     # Initialize inventory
     $ inventory = {
@@ -200,15 +192,13 @@ label gathering_example:
 
 # This label shows VN dialogue DURING exploration
 label dialogue_during_exploration_example:
-    """
-    Example: Show VN dialogue during exploration (overlays exploration screen).
-
-    Demonstrates:
-    - Event triggers dialogue label
-    - Dialogue appears over exploration UI
-    - Choices affect variables
-    - Returns to exploration after dialogue
-    """
+    # Example: Show VN dialogue during exploration (overlays exploration screen).
+    #
+    # Demonstrates:
+    # - Event triggers dialogue label
+    # - Dialogue appears over exploration UI
+    # - Choices affect variables
+    # - Returns to exploration after dialogue
 
     call start_exploration_system
 
@@ -273,7 +263,7 @@ label dialogue_during_exploration_example:
 # Dialogue labels that get called during exploration
 
 label found_survivor:
-    """Triggered when stepping on survivor event icon."""
+    # Triggered when stepping on survivor event icon.
 
     # This dialogue appears OVER the exploration screen
     # Map interaction is disabled during dialogue
@@ -302,7 +292,7 @@ label found_survivor:
 
 
 label ai_console:
-    """Triggered when stepping on AI console event icon."""
+    # Triggered when stepping on AI console event icon.
 
     show screen console_screen
 

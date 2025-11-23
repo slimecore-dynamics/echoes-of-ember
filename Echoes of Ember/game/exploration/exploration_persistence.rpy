@@ -30,11 +30,10 @@ init -1 python:
             with open(player_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
-            print("ExplorationPersistence - Saved player state to: {}".format(player_path))
             return True
 
         except Exception as e:
-            print("ExplorationPersistence - Error saving player state: {}".format(e))
+            print("Error saving player state: {}".format(e))
             return False
 
 
@@ -61,7 +60,6 @@ init -1 python:
 
             # Check if file exists
             if not os.path.exists(player_path):
-                print("ExplorationPersistence - No player state file found")
                 # Don't create a default player state - let the dungeon load handle it
                 return False
 
@@ -72,11 +70,10 @@ init -1 python:
             # Deserialize player state
             player_state = PlayerState.from_dict(data)
 
-            print("ExplorationPersistence - Loaded player state from: {}".format(player_path))
             return True
 
         except Exception as e:
-            print("ExplorationPersistence - Error loading player state: {}".format(e))
+            print("Error loading player state: {}".format(e))
             # Don't create a default player state on error - let the dungeon load handle it
             return False
 

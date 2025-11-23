@@ -75,9 +75,7 @@ init python:
 
             # Extract custom properties for exploration
             raw_props = tiled_data.get("properties", [])
-            print("TiledImporter - Raw properties from JSON: {}".format(raw_props))
             properties = TiledImporter._extract_properties(raw_props)
-            print("TiledImporter - Extracted properties dict: {}".format(properties))
 
             # Use floor_id from properties, or parameter, or derive from filename
             if not floor_id:
@@ -98,10 +96,6 @@ init python:
             floor.area_name = properties.get("area_name", "")
             floor.sub_area_name = properties.get("sub_area_name", "")
             floor.description = properties.get("description", "")
-
-            print("TiledImporter - Floor properties set: start=({},{}) rot={} view_dist={}".format(
-                floor.starting_x, floor.starting_y, floor.starting_rotation, floor.view_distance
-            ))
 
             # Build tile ID mapping from tilesets
             tile_id_map = TiledImporter._build_tile_id_map(tiled_data.get("tilesets", []))
@@ -130,15 +124,6 @@ init python:
             # Copy to dungeon_icons and clear icons (so they don't show on map)
             floor.dungeon_icons = copy.deepcopy(floor.icons)
             floor.icons = {}  # Player starts with no icons marked
-
-            print("TiledImporter - Loaded map: {} ({}x{})".format(floor_name, width, height))
-            print("TiledImporter - Dungeon tiles stored, drawn map cleared")
-            print("TiledImporter - Dungeon icons: {}, Player icons: {}".format(len(floor.dungeon_icons), len(floor.icons)))
-
-            # DEBUG: Print all dungeon icon positions
-            print("DEBUG: Dungeon icon positions:")
-            for pos, icon in floor.dungeon_icons.items():
-                print("  pos={} type={}".format(pos, icon.icon_type))
 
             return floor
 
@@ -180,27 +165,18 @@ init python:
             Tiled properties are in array format: [{"name": "x", "type": "int", "value": 10}, ...]
             """
             props = {}
-            print("_extract_properties - Input type: {}".format(type(properties)))
 
             # Check if it's a dict first
             if isinstance(properties, dict):
-                print("_extract_properties - Using dict format")
                 props = properties
             # Use duck typing for list check (Ren'Py type compatibility)
             elif hasattr(properties, '__iter__') and not isinstance(properties, str):
-                print("_extract_properties - Processing iterable with {} items".format(len(properties)))
                 for i, prop in enumerate(properties):
                     # Use duck typing for dict check too (isinstance doesn't work in Ren'Py)
                     if hasattr(prop, 'get'):
                         name = prop.get("name")
                         value = prop.get("value")
-                        print("_extract_properties - Item {}: name='{}' value='{}'".format(i, name, value))
                         props[name] = value
-                    else:
-                        print("_extract_properties - WARNING: Item {} has no get method: {}".format(i, prop))
-                print("_extract_properties - Final props dict: {}".format(props))
-            else:
-                print("_extract_properties - WARNING: Unknown type!")
             return props
 
         @staticmethod

@@ -46,7 +46,7 @@ label start:
 
 # Event dialogue labels
 label test_event_dialogue:
-    """Test event dialogue for object layer testing."""
+    # Test event dialogue for object layer testing.
 
     # Get the message from the event metadata (passed via icon)
     "Test event triggered successfully"
