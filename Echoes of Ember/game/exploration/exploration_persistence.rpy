@@ -1,10 +1,6 @@
 # exploration_persistence.rpy
 # Extends map save/load system to include player state
 
-# Default variable to track which slot is being saved/loaded
-# Must be declared here so Ren'Py includes it in saves
-default _map_slot = None
-
 init -1 python:
     import os
     import json
@@ -276,24 +272,21 @@ init -1 python:
             # Determine if this is save or load based on current screen
             screen_name = renpy.current_screen().screen_name[0]
             self.is_load = (screen_name == "load")
-            print("DEBUG FileActionWithMapData: Init for slot {} (is_load={})".format(slot, self.is_load))
 
         def __call__(self):
             print("DEBUG FileActionWithMapData: __call__ for slot {} (is_load={})".format(self.slot, self.is_load))
 
             if self.is_load:
-                # Load: Set slot BEFORE FileLoad so after_load can use it
-                print("DEBUG FileActionWithMapData: Setting _map_slot to {} before FileLoad".format(self.slot))
-                store._map_slot = self.slot
+                # Load: First restore game state, then load map data
                 result = FileLoad(self.slot)()
-                print("DEBUG FileActionWithMapData: FileLoad completed, map data will be loaded in after_load")
+                print("DEBUG FileActionWithMapData: FileLoad completed, now loading map data from slot {}".format(self.slot))
+                load_map_data_from_file(self.slot)
+                load_player_state_from_file(self.slot)
             else:
                 # Save: First save map data, then save game state
                 print("DEBUG FileActionWithMapData: Saving map data before FileSave")
                 save_map_data_to_file(self.slot)
                 save_player_state_to_file(self.slot)
-                # Store slot for after_load to use
-                store._map_slot = self.slot
                 result = FileSave(self.slot)()
                 print("DEBUG FileActionWithMapData: FileSave completed")
 
