@@ -91,9 +91,6 @@ screen exploration_view():
                     spacing 10
                     xpos 10  # Move right by 10 pixels
 
-                    # SPACER - move everything down
-                    null height 75
-
                     # MAP VIEW - Three layers: black border, blue background, grid with gridlines
                     if floor:
                         # Grid dimensions from floor
@@ -103,7 +100,7 @@ screen exploration_view():
                         # Calculate sizes accounting for gridlines
                         $ gridline_width = 2
                         $ border_thickness = 3
-                        $ available_size = int(config.screen_width * 0.25) - 20 - (border_thickness * 2)
+                        $ available_size = int(config.screen_width * 0.30) - 20 - (border_thickness * 2)
 
                         # Cell size accounting for gridlines between cells
                         $ cell_size = min(
@@ -158,8 +155,8 @@ screen exploration_view():
                     else:
                         # No floor loaded placeholder
                         frame:
-                            xsize int(config.screen_width * 0.25)
-                            ysize int(config.screen_width * 0.25)
+                            xsize int(config.screen_width * 0.30)
+                            ysize int(config.screen_width * 0.30)
                             xalign 0.5
                             background "#000000"
                             padding (10, 10)
