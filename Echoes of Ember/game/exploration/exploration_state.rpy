@@ -110,7 +110,9 @@ init -1 python:
             return player
 
 
-# Initialize global variables (not persistent - loaded from external JSON)
-init python:
-    store.player_state = None
-    store.map_grid = None
+# Global variables (not saved in Ren'Py saves - managed externally)
+init -10 python:
+    if not hasattr(store, 'player_state'):
+        store.player_state = None
+    if not hasattr(store, 'map_grid'):
+        store.map_grid = None
