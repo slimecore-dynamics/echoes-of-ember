@@ -42,3 +42,15 @@ label start:
     # This ends the game.
 
     return
+
+
+# Event dialogue labels
+label test_event_dialogue:
+    """Test event dialogue for object layer testing."""
+
+    # Get the message from the event metadata (passed via icon)
+    "Test event triggered successfully"
+
+    "Moving on from test event now."
+
+    return

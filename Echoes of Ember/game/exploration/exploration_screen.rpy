@@ -20,8 +20,9 @@ screen exploration_view():
     # Show floor notification when first entering
     on "show":
         action If(map_grid and map_grid.get_current_floor(),
-            Function(renpy.notify, "Loaded floor: {}".format(
-                map_grid.get_current_floor().floor_id if map_grid.get_current_floor() else '')),
+            Function(renpy.notify, "{}\n{}".format(
+                getattr(map_grid.get_current_floor(), 'area_name', 'Unknown Area'),
+                getattr(map_grid.get_current_floor(), 'floor_name', map_grid.get_current_floor().floor_id if map_grid.get_current_floor() else ''))),
             None)
 
     # Get current floor and player state
@@ -776,37 +777,12 @@ init python:
         if not current_floor:
             return
 
-        # Get current floor ID and calculate target floor
-        current_id = current_floor.floor_id
-
-        # Extract numeric part of floor ID (e.g., "floor_1" -> 1)
-        try:
-            floor_num = int(current_id.split("_")[-1])
-            if direction == "up":
-                target_num = floor_num - 1
-            else:  # down
-                target_num = floor_num + 1
-
-            target_id = "floor_{}".format(target_num)
-
-            # Check if target floor exists
-            if target_id in map_grid.floors:
-                # Switch floor
-                map_grid.switch_floor(target_id)
-                player_state.current_floor_id = target_id
-
-                # Get starting position for new floor
-                new_floor = map_grid.get_floor(target_id)
-                player_state.x = getattr(new_floor, 'starting_x', 10)
-                player_state.y = getattr(new_floor, 'starting_y', 10)
-                player_state.rotation = getattr(new_floor, 'starting_rotation', 0)
-
-                renpy.notify("Moved to {}".format(new_floor.floor_name))
-                renpy.restart_interaction()
-            else:
-                renpy.notify("No floor {} exists".format(target_id))
-        except:
-            renpy.notify("Cannot determine target floor")
+        # For now, just show a notification (only one floor exists)
+        # TODO: Implement multi-floor navigation when more floors are added
+        if direction == "up":
+            renpy.notify("Stairs up (no destination floor)")
+        else:
+            renpy.notify("Stairs down (no destination floor)")
 
     def handle_door_interaction(adj_x, adj_y):
         """Handle door interaction (open door)"""
@@ -819,8 +795,8 @@ init python:
         if not floor:
             return
 
-        # Get icon at door position
-        icon = floor.icons.get((adj_x, adj_y))
+        # Get icon at door position from dungeon icons
+        icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
         if icon and icon.icon_type == "door_closed":
             # Change door to open
             icon.icon_type = "door_open"
