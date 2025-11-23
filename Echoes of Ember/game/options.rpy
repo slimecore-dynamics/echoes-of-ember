@@ -153,6 +153,13 @@ define config.save_directory = "EchoesofEmber-1763001024"
 define config.window_icon = "gui/window_icon.png"
 
 
+## Display configuration #######################################################
+
+## Prevent screen from adjusting viewport size when hover effects trigger
+## This fixes the "black line at bottom" issue in windowed mode
+define config.adjust_view_size = None
+
+
 ## Build configuration #########################################################
 ##
 ## This section controls how Ren'Py turns your project into distribution files.
