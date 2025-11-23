@@ -12,13 +12,18 @@ init -1 python:
 
         # Get Ren'Py's save directory
         save_dir = renpy.config.savedir
+        print("DEBUG get_map_data_dir: save_dir = {}".format(save_dir))
 
         # Create map_data subdirectory
         map_dir = os.path.join(save_dir, "map_data")
+        print("DEBUG get_map_data_dir: map_dir = {}".format(map_dir))
 
         # Ensure directory exists
         if not os.path.exists(map_dir):
+            print("DEBUG get_map_data_dir: Creating directory")
             os.makedirs(map_dir)
+        else:
+            print("DEBUG get_map_data_dir: Directory already exists")
 
         return map_dir
 
@@ -236,21 +241,33 @@ init -1 python:
         def __init__(self, slot):
             self.slot = slot
             self.file_action = FileAction(slot)
+            print("DEBUG FileActionWithMapData: Created for slot {}".format(slot))
 
         def __call__(self):
+            print("DEBUG FileActionWithMapData: __call__ invoked for slot {}".format(self.slot))
+
             # Delegate to standard FileAction first (handles game state save/load)
             result = self.file_action()
+            print("DEBUG FileActionWithMapData: FileAction result = {}".format(result))
 
             # Then handle map data and player state
             screen_name = renpy.current_screen().screen_name[0]
+            print("DEBUG FileActionWithMapData: screen_name = {}".format(screen_name))
+
             if screen_name == "save":
+                print("DEBUG FileActionWithMapData: Saving map data and player state")
                 # On save: persist map data and player state
-                save_map_data_to_file(self.slot)
-                save_player_state_to_file(self.slot)
+                save_result = save_map_data_to_file(self.slot)
+                print("DEBUG FileActionWithMapData: save_map_data result = {}".format(save_result))
+                player_result = save_player_state_to_file(self.slot)
+                print("DEBUG FileActionWithMapData: save_player_state result = {}".format(player_result))
             else:  # load
+                print("DEBUG FileActionWithMapData: Loading map data and player state")
                 # On load: restore map data and player state
-                load_map_data_from_file(self.slot)
-                load_player_state_from_file(self.slot)
+                load_result = load_map_data_from_file(self.slot)
+                print("DEBUG FileActionWithMapData: load_map_data result = {}".format(load_result))
+                player_result = load_player_state_from_file(self.slot)
+                print("DEBUG FileActionWithMapData: load_player_state result = {}".format(player_result))
 
             return result
 
