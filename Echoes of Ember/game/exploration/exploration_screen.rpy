@@ -76,42 +76,43 @@ screen exploration_view():
                     # SPACER - move everything down
                     null height 75
 
-                    # MAP VIEW (using existing map_grid_display screen)
+                    # MAP VIEW
                     frame:
                         xsize int(config.screen_width * 0.25)
                         ysize int(config.screen_width * 0.25)  # Square viewport
-                        background "#000000"
+                        background "#0066CC"  # Blue background
                         padding (10, 10)
 
                         if floor:
                             $ cell_size = 32
-                            $ map_width = floor.dimensions[0] * cell_size
-                            $ map_height = floor.dimensions[1] * cell_size
+                            $ grid_w = floor.dimensions[0]
+                            $ grid_h = floor.dimensions[1]
 
-                            viewport:
-                                xsize int(config.screen_width * 0.25)
-                                ysize int(config.screen_width * 0.25)
-                                draggable True
-                                mousewheel True
+                            # Grid with tiles
+                            grid grid_w grid_h:
+                                spacing 0
+                                for y in range(grid_h):
+                                    for x in range(grid_w):
+                                        $ tile = floor.get_tile(x, y)
+                                        $ icon = floor.icons.get((x, y))
+                                        $ is_player = (ps and ps.x == x and ps.y == y)
 
-                                fixed:
-                                    xsize map_width
-                                    ysize map_height
+                                        button:
+                                            xysize (cell_size, cell_size)
+                                            background "#444444"  # Grey cell background
+                                            action Function(handle_map_click, x, y, floor, map_grid)
 
-                                    # Draw tiles
-                                    for y in range(floor.dimensions[1]):
-                                        for x in range(floor.dimensions[0]):
-                                            $ tile = floor.get_tile(x, y)
+                                            # Tile
                                             if tile.tile_type != "empty":
-                                                add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation) xpos x*cell_size ypos y*cell_size
+                                                add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation, xysize=(cell_size, cell_size))
 
-                                    # Draw icons
-                                    for (icon_x, icon_y), icon in floor.icons.items():
-                                        add "images/maps/icons/{}.png".format(icon.icon_type) xpos icon_x*cell_size ypos icon_y*cell_size
+                                            # Icon on top
+                                            if icon:
+                                                add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
 
-                                    # Add player marker
-                                    if ps:
-                                        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
+                                            # Player marker on top
+                                            if is_player:
+                                                add PlayerTriangleMarker(x, y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -276,6 +277,39 @@ screen exploration_view():
 
 
 init python:
+    def handle_map_click(x, y, floor, map_grid):
+        """Handle clicking on a map cell to place tiles or icons."""
+        if not map_grid:
+            return
+
+        if map_grid.current_mode == "edit_tiles" and map_grid.selected_tile_type:
+            # Place selected tile
+            tile = MapTile(map_grid.selected_tile_type, rotation=0)
+            floor.set_tile(x, y, tile)
+            renpy.restart_interaction()
+
+        elif map_grid.current_mode == "edit_icons" and map_grid.selected_icon_type:
+            # Place selected icon
+            icon = MapIcon(map_grid.selected_icon_type, (x, y))
+            floor.place_icon(x, y, icon)
+            renpy.restart_interaction()
+
+    def select_tile_type(tile_type):
+        """Select a tile type from the palette."""
+        if map_grid:
+            map_grid.selected_tile_type = tile_type
+            map_grid.selected_icon_type = None
+            map_grid.current_mode = "edit_tiles"
+            renpy.restart_interaction()
+
+    def select_icon_for_placement(icon_type):
+        """Select an icon type from the palette."""
+        if map_grid:
+            map_grid.selected_icon_type = icon_type
+            map_grid.selected_tile_type = None
+            map_grid.current_mode = "edit_icons"
+            renpy.restart_interaction()
+
     class PlayerTriangleMarker(renpy.Displayable):
         """Red triangle showing player position and facing direction."""
 
