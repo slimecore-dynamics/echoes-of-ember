@@ -76,10 +76,10 @@ screen exploration_view():
                     # SPACER - move everything down 200 pixels
                     null height 100
 
-                    # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
+                    # MAP VIEW (using existing map_grid_display screen)
                     frame:
-                        xsize int(config.screen_width * 0.2)
-                        ysize int(config.screen_height * 0.3)  # 45% of screen height to show full 20x20 grid
+                        xsize int(config.screen_width * 0.28)
+                        ysize int(config.screen_width * 0.28)  # Square viewport for 20x20 grid
                         background "#000000"
                         padding (10, 10)
 
@@ -105,29 +105,23 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # Row 1: Tiles (center aligned, no header)
-                            grid 6 1:
+                            # All 16 tile variants (4 rows x 4 columns)
+                            grid 4 4:
                                 spacing 3
                                 xalign 0.5
-                                # Map tile types to their default image variants
-                                $ tile_image_map = {
-                                    "hallway": "hallway_we",
-                                    "corner": "corner_es",
-                                    "t_intersection": "t_intersection_wse",
-                                    "cross": "cross",
-                                    "wall": "wall_wse",
-                                    "empty": "empty"
-                                }
-                                for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
-                                    $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
-                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_image_map[tile_type])
+                                # All tile variants
+                                for tile_variant in ["hallway_we", "hallway_ns", "corner_es", "corner_ne",
+                                                     "corner_wn", "corner_ws", "t_intersection_wse", "t_intersection_nws",
+                                                     "t_intersection_wne", "t_intersection_nes", "wall_wse", "wall_nws",
+                                                     "wall_wne", "wall_nes", "cross", "empty"]:
+                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_variant)
                                     imagebutton:
                                         idle tile_image
                                         hover tile_image
-                                        action Function(select_tile_type, tile_type)
+                                        action Function(select_tile_type, tile_variant)
                                         xysize (32, 32)
-                                        if is_selected:
-                                            background "#FFFF0080"
+                                        selected (map_grid.selected_tile_type == tile_variant and map_grid.current_mode == "edit_tiles" if map_grid else False)
+                                        selected_background "#FFFF0080"
 
                             # Row 2-3: Icon rows
                             vbox:
@@ -137,7 +131,6 @@ screen exploration_view():
                                 grid 4 1:
                                     spacing 3
                                     for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
-                                        $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
                                         # Map door variants to the single door icon
                                         $ icon_name = "door" if "door" in icon_type else icon_type
                                         $ icon_image = "images/maps/icons/{}.png".format(icon_name)
@@ -146,22 +139,21 @@ screen exploration_view():
                                             hover icon_image
                                             action Function(select_icon_for_placement, icon_type)
                                             xysize (32, 32)
-                                            if is_selected:
-                                                background "#FFFF0080"
+                                            selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                            selected_background "#FFFF0080"
 
                                 # Icons row 2 (gathering, enemy, event, etc)
                                 grid 4 1:
                                     spacing 3
                                     for icon_type in ["gathering", "enemy", "event", "teleporter"]:
-                                        $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
                                         $ icon_image = "images/maps/icons/{}.png".format(icon_type)
                                         imagebutton:
                                             idle icon_image
                                             hover icon_image
                                             action Function(select_icon_for_placement, icon_type)
                                             xysize (32, 32)
-                                            if is_selected:
-                                                background "#FFFF0080"
+                                            selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                            selected_background "#FFFF0080"
 
                     # NAVIGATION CONTROLS
                     frame:
