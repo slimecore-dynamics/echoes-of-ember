@@ -271,9 +271,12 @@ init -1 python:
 # Save label - called before saving
 label save:
     python:
-        if current_save_slot:
-            save_map_data_to_file(current_save_slot)
-            save_player_state_to_file(current_save_slot)
+        # Determine which slot to save to
+        slot = current_save_slot if current_save_slot else "quick-1"
+
+        # Always save map data (works for both regular saves and quick saves)
+        save_map_data_to_file(slot)
+        save_player_state_to_file(slot)
     return
 
 
@@ -294,6 +297,9 @@ label after_load:
                 os.remove(temp_file_path)
             except Exception as e:
                 pass
+        else:
+            # No temp file - assume this is a quick load
+            slot = "quick-1"
 
         if slot:
             load_map_data_from_file(slot)
