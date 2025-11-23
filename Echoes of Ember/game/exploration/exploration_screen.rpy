@@ -278,7 +278,13 @@ screen exploration_view():
                                 if icon:
                                     adj_x, adj_y = tile_x, tile_y
 
+                        # Debug: print final values
+                        print("DEBUG exploration_screen: After checks - icon={}, int_type={}, adj_x={}, adj_y={}".format(
+                            icon.icon_type if icon else None, int_type, adj_x, adj_y))
+
                         if icon:
+                            print("DEBUG exploration_screen: About to display prompt for icon={} at ({},{})".format(
+                                icon.icon_type, adj_x, adj_y))
                             use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
 
 
@@ -477,6 +483,10 @@ screen note_input_popup(x, y, floor, map_grid):
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
     """Compact interaction prompt in right panel."""
+
+    python:
+        print("DEBUG compact_interaction_prompt: Called with icon={}, type={}, pos=({},{})".format(
+            icon.icon_type if icon else None, interaction_type, adj_x, adj_y))
 
     frame:
         xsize int(config.screen_width * 0.314)
