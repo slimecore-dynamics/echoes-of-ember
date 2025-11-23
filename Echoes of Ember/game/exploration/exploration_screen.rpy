@@ -730,10 +730,6 @@ init python:
         if hasattr(map_grid, 'selected_tile_variant') and map_grid.selected_tile_variant:
             variant = map_grid.selected_tile_variant
 
-            # Extract tile type and rotation from variant name
-            # e.g., "corner_es" -> type="corner", rotation based on orientation
-            from exploration.map_tools import MapTile
-
             # Parse the variant to determine rotation
             rotation = 0
             if 'we' in variant or 'ew' in variant:
@@ -760,15 +756,14 @@ init python:
             # Extract base type
             tile_type = variant.split('_')[0] if '_' in variant else variant
 
-            # Create new tile with the variant
-            new_tile = MapTile(tile_type, rotation)
+            # Create new tile with the variant (MapTile is in the store namespace)
+            new_tile = store.MapTile(tile_type, rotation)
             floor.set_tile(x, y, new_tile)
             renpy.restart_interaction()
         # Check if we have an icon selected
         elif map_grid.current_mode == "edit_icons" and hasattr(map_grid, 'selected_icon_type'):
-            # Place icon instead
-            from exploration.map_tools import MapIcon
-            new_icon = MapIcon(map_grid.selected_icon_type)
+            # Place icon instead (MapIcon is in the store namespace)
+            new_icon = store.MapIcon(map_grid.selected_icon_type)
             floor.set_icon(x, y, new_icon)
             renpy.restart_interaction()
 
@@ -783,9 +778,8 @@ init python:
         if not floor:
             return
 
-        # Clear tile
-        from exploration.map_tools import MapTile
-        floor.set_tile(x, y, MapTile("empty", 0))
+        # Clear tile (MapTile is in the store namespace)
+        floor.set_tile(x, y, store.MapTile("empty", 0))
 
         # Clear icon if present
         if (x, y) in floor.icons:
