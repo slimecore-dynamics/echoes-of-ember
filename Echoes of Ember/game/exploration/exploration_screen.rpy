@@ -316,10 +316,11 @@ screen exploration_view():
                                 sensitive (not exploration_dialogue_active)
 
                     # DEBUG BUTTON
-                    textbutton "Debug (0,0)":
-                        action Function(lambda: renpy.notify("Tile (0,0): {} rotation {}".format(
-                            floor.get_tile(0, 0).tile_type if floor else "no floor",
-                            floor.get_tile(0, 0).rotation if floor else 0
+                    textbutton "Debug map_grid":
+                        action Function(lambda: renpy.notify("store.map_grid: {} | floors: {} | id: {}".format(
+                            "exists" if store.map_grid else "None",
+                            len(store.map_grid.floors) if store.map_grid else 0,
+                            id(store.map_grid) if store.map_grid else "N/A"
                         )))
                         padding (10, 5)
                         background "#FF0000"
