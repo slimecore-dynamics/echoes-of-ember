@@ -168,25 +168,12 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # DEBUG: Show movement info (using DUNGEON tiles) + Floor info
+                            # Calculate can_move for button sensitivity
                             if floor and ps:
-                                text "Floor: {} | Pos: ({},{}) | Rot: {}".format(
-                                    floor.floor_id if floor else "None",
-                                    ps.x, ps.y, ps.rotation
-                                ) size 9 color "#AAAAAA"
-
                                 $ new_x, new_y = ps.get_forward_position()
                                 $ can_move, reason = MovementValidator.can_move_to(
                                     floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
-                                $ dest_tile = MovementValidator._get_dungeon_tile(floor, new_x, new_y)
-                                $ tile_info = "{}@{}".format(dest_tile.tile_type, dest_tile.rotation) if dest_tile else "None"
-                                $ has_dungeon = "YES" if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles else "NO"
-                                $ debug_msg = "Fwd to ({},{}): {} [{}] Dungeon:{}".format(
-                                    new_x, new_y, "OK" if can_move else reason, tile_info, has_dungeon
-                                )
-                                $ debug_color = "#00FF00" if can_move else "#FF0000"
-                                text "[debug_msg]" size 9 color debug_color
                             else:
                                 $ can_move = False
 
@@ -420,6 +407,47 @@ screen map_grid_display(floor, cell_size):
                     # Icon on top
                     if icon:
                         add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
+
+
+screen area_entry_popup(area_name, floor_name):
+    """Display area and floor name when entering exploration."""
+
+    modal True
+    zorder 100
+
+    frame:
+        xalign 0.5
+        yalign 0.3
+        xsize 500
+        background "#000000DD"
+        padding (30, 30)
+
+        vbox:
+            spacing 20
+            xalign 0.5
+
+            # Area name (larger)
+            if area_name:
+                text area_name:
+                    size 28
+                    color "#FFFFFF"
+                    xalign 0.5
+                    text_align 0.5
+
+            # Floor name
+            if floor_name:
+                text floor_name:
+                    size 20
+                    color "#CCCCCC"
+                    xalign 0.5
+                    text_align 0.5
+
+            # Dismiss button
+            textbutton "Continue":
+                action Hide("area_entry_popup")
+                xalign 0.5
+                xsize 120
+                ysize 40
 
 
 screen note_input_popup(x, y, floor, map_grid):

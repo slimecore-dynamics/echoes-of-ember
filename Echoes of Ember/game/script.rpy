@@ -36,6 +36,15 @@ label start:
     # Load the Prometheus Breach dungeon from Tiled JSON
     call load_dungeon_floor("maps/tiled/prom_breach_1f.json")
 
+    # Show area/floor entry popup
+    python:
+        floor = map_grid.get_current_floor() if map_grid else None
+        if floor:
+            area_name = getattr(floor, 'area_name', '')
+            floor_name = getattr(floor, 'floor_name', floor.floor_id)
+            renpy.show_screen("area_entry_popup", area_name, floor_name)
+            renpy.pause(hard=True)
+
     # Show exploration screen
     call screen exploration_view
 
