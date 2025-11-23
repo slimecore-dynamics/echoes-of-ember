@@ -17,6 +17,15 @@ screen exploration_view():
     Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
     """
 
+    # Show area/floor popup when first entering
+    on "show":
+        action If(map_grid and map_grid.get_current_floor(),
+            [Show("area_entry_popup",
+                  area_name=getattr(map_grid.get_current_floor(), 'area_name', ''),
+                  floor_name=getattr(map_grid.get_current_floor(), 'floor_name',
+                                     map_grid.get_current_floor().floor_id if map_grid.get_current_floor() else ''))],
+            None)
+
     # Get current floor and player state
     $ floor = map_grid.get_current_floor() if map_grid else None
     $ ps = player_state
