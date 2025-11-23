@@ -51,10 +51,10 @@
    <image source="../../images/maps/tiles/t_intersection_wse.png" width="32" height="32"/>
   </tile>
   <tile id="9">
-   <image source="../../images/maps/tiles/hallway_hor.png" width="32" height="32"/>
+   <image source="../../images/maps/tiles/hallway_we.png" width="32" height="32"/>
   </tile>
   <tile id="10">
-   <image source="../../images/maps/tiles/hallway_ver.png" width="32" height="32"/>
+   <image source="../../images/maps/tiles/hallway_ns.png" width="32" height="32"/>
   </tile>
   <tile id="11">
    <image source="../../images/maps/tiles/corner_es.png" width="32" height="32"/>
