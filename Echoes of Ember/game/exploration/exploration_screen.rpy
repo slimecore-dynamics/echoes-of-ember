@@ -12,6 +12,8 @@ define color_interact = "#FFFF00"
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False
 
+default map_grid = None
+
 screen exploration_view():
     """
     Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
@@ -317,10 +319,11 @@ screen exploration_view():
 
                     # DEBUG BUTTON
                     textbutton "Debug map_grid":
-                        action Function(lambda: renpy.notify("map_grid: {} | floors: {} | tile(0,0): {}".format(
+                        action Function(lambda: renpy.notify("map_grid: {} | floors: {} | tile(0,0): {} | floor_id: {}".format(
                             "exists" if store.map_grid else "None",
                             len(store.map_grid.floors) if store.map_grid else 0,
-                            floor.tiles[0][0].tile_type if floor and floor.tiles else "no tiles"
+                            floor.tiles[0][0].tile_type if floor and floor.tiles else "no tiles",
+                            list(store.map_grid.floors.keys()) if store.map_grid else []
                         )))
                         padding (10, 5)
                         background "#FF0000"
