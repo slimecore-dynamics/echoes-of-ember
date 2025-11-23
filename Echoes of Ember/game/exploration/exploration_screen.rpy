@@ -76,21 +76,41 @@ screen exploration_view():
                     # SPACER - move everything down 200 pixels
                     null height 100
 
-                    # MAP VIEW (using existing map_grid_display screen - larger to show full grid)
+                    # MAP VIEW - inline display with proper sizing
                     frame:
-                        xsize int(config.screen_width * 0.2)
-                        ysize int(config.screen_height * 0.3)  # 45% of screen height to show full 20x20 grid
+                        xsize int(config.screen_width * 0.314)
+                        ysize int(config.screen_width * 0.314)  # Square viewport
                         background "#000000"
                         padding (10, 10)
 
                         if floor:
+                            $ grid_width = floor.dimensions[0]
+                            $ grid_height = floor.dimensions[1]
+                            $ available_size = int(config.screen_width * 0.314) - 20  # Minus padding
+                            $ cell_size = min(available_size // grid_width, available_size // grid_height)
+
                             fixed:
-                                # Show full map grid
-                                use map_grid_display(floor)
+                                xysize (grid_width * cell_size, grid_height * cell_size)
+                                xalign 0.5
+                                yalign 0.5
+
+                                # Draw all tiles from drawn map (floor.tiles)
+                                for y in range(grid_height):
+                                    for x in range(grid_width):
+                                        $ tile = floor.get_tile(x, y)
+                                        if tile and tile.tile_type != "empty":
+                                            $ tile_color = get_tile_color(tile.tile_type)
+                                            add Solid(tile_color, xysize=(cell_size-1, cell_size-1)) xpos x*cell_size ypos y*cell_size
+
+                                # Draw icons (if visible)
+                                for (icon_x, icon_y), icon in floor.icons.items():
+                                    # Only show non-event icons (hide story events)
+                                    if icon.icon_type not in ["event"]:
+                                        $ icon_color = get_icon_color(icon.icon_type)
+                                        add Solid(icon_color, xysize=(cell_size//2, cell_size//2)) xpos icon_x*cell_size + cell_size//4 ypos icon_y*cell_size + cell_size//4
 
                                 # Add player marker (red triangle)
-                                if ps and map_grid:
-                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
+                                if ps:
                                     add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
