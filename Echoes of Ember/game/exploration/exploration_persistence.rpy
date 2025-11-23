@@ -327,5 +327,12 @@ label save:
 # After load label - called after loading
 # Map data is loaded in FileActionWithMapData.__call__, not here
 label after_load:
+    python:
+        if map_grid and map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
+            floor_debug = map_grid.floors[map_grid.current_floor_id]
+            tile_debug = floor_debug.get_tile(0, 0)
+            print("DEBUG after_load: tile at (0,0) = {} rotation {}".format(tile_debug.tile_type, tile_debug.rotation))
+        else:
+            print("DEBUG after_load: map_grid has no floors")
     return
 
