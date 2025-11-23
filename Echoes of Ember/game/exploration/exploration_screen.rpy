@@ -76,7 +76,7 @@ screen exploration_view():
                     # SPACER - move everything down
                     null height 75
 
-                    # MAP VIEW
+                    # MAP VIEW (using existing map_grid_display screen)
                     frame:
                         xsize int(config.screen_width * 0.25)
                         ysize int(config.screen_width * 0.25)  # Square viewport
@@ -84,35 +84,14 @@ screen exploration_view():
                         padding (10, 10)
 
                         if floor:
-                            $ cell_size = 32
-                            $ grid_w = floor.dimensions[0]
-                            $ grid_h = floor.dimensions[1]
+                            fixed:
+                                # Show full map grid
+                                use map_grid_display(floor)
 
-                            # Grid with tiles
-                            grid grid_w grid_h:
-                                spacing 0
-                                for y in range(grid_h):
-                                    for x in range(grid_w):
-                                        $ tile = floor.get_tile(x, y)
-                                        $ icon = floor.icons.get((x, y))
-                                        $ is_player = (ps and ps.x == x and ps.y == y)
-
-                                        button:
-                                            xysize (cell_size, cell_size)
-                                            background "#444444"  # Grey cell background
-                                            action Function(handle_map_click, x, y, floor, map_grid)
-
-                                            # Tile
-                                            if tile.tile_type != "empty":
-                                                add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation, xysize=(cell_size, cell_size))
-
-                                            # Icon on top
-                                            if icon:
-                                                add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
-
-                                            # Player marker on top
-                                            if is_player:
-                                                add PlayerTriangleMarker(x, y, ps.rotation, cell_size)
+                                # Add player marker (red triangle)
+                                if ps and map_grid:
+                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
+                                    add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
@@ -375,6 +354,37 @@ init python:
             "note": "#FFFFFF"
         }
         return colors.get(icon_type, "#FFFFFF")
+
+
+screen map_grid_display(floor):
+    """
+    Display the map grid with clickable tiles for drawing.
+    This is the main map display that shows tiles, icons, and allows editing.
+    """
+    $ cell_size = map_grid.cell_size if (map_grid and hasattr(map_grid, 'cell_size')) else 32
+    $ grid_w = floor.dimensions[0]
+    $ grid_h = floor.dimensions[1]
+
+    # Grid with tiles
+    grid grid_w grid_h:
+        spacing 0
+        for y in range(grid_h):
+            for x in range(grid_w):
+                $ tile = floor.get_tile(x, y)
+                $ icon = floor.icons.get((x, y))
+
+                button:
+                    xysize (cell_size, cell_size)
+                    background "#444444"  # Grey cell background
+                    action Function(handle_map_click, x, y, floor, map_grid)
+
+                    # Tile
+                    if tile.tile_type != "empty":
+                        add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation, xysize=(cell_size, cell_size))
+
+                    # Icon on top
+                    if icon:
+                        add "images/maps/icons/{}.png".format(icon.icon_type) xysize (cell_size, cell_size)
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
