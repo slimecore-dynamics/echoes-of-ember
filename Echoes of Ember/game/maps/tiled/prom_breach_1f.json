@@ -1,0 +1,231 @@
+{ "compressionlevel":-1,
+ "height":20,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 12, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 10, 9, 9, 15, 1, 12, 15, 1,
+            1, 13, 4, 4, 4, 4, 4, 4, 4, 4, 4, 14, 1, 11, 13, 14, 1, 11, 11, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 10, 10, 10, 14, 11, 1,
+            1, 1, 1, 12, 10, 15, 1, 1, 1, 1, 1, 1, 12, 10, 10, 9, 15, 1, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 13, 15, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 11, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 6, 10, 10, 16, 10, 14, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 11, 12, 14, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 13, 16, 10, 10, 10, 10, 10, 10, 10, 7, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 12, 2, 16, 15, 1, 1, 1, 1, 1, 1, 11, 1, 1, 11, 1, 1, 11, 1,
+            1, 1, 13, 4, 4, 14, 1, 1, 1, 1, 1, 1, 13, 10, 10, 8, 10, 10, 14, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         "height":20,
+         "id":1,
+         "name":"dungeon",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":20,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":2,
+ "nextobjectid":1,
+ "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"ambient_sound",
+         "type":"string",
+         "value":""
+        }, 
+        {
+         "name":"area_name",
+         "type":"string",
+         "value":"Prometheus"
+        }, 
+        {
+         "name":"auto_map_available",
+         "type":"bool",
+         "value":true
+        }, 
+        {
+         "name":"bgm",
+         "type":"string",
+         "value":""
+        }, 
+        {
+         "name":"description",
+         "type":"string",
+         "value":"The mangled carcasses of two ships colliding..."
+        }, 
+        {
+         "name":"encounter_rate",
+         "type":"float",
+         "value":0
+        }, 
+        {
+         "name":"floor_id",
+         "type":"string",
+         "value":"prometheus_breach_1f"
+        }, 
+        {
+         "name":"floor_name",
+         "type":"string",
+         "value":"Breach - 1F"
+        }, 
+        {
+         "name":"lighting",
+         "type":"string",
+         "value":""
+        }, 
+        {
+         "name":"starting_rotation",
+         "type":"int",
+         "value":270
+        }, 
+        {
+         "name":"starting_x",
+         "type":"int",
+         "value":5
+        }, 
+        {
+         "name":"starting_y",
+         "type":"int",
+         "value":5
+        }, 
+        {
+         "name":"sub_area_name",
+         "type":"string",
+         "value":"Breach"
+        }, 
+        {
+         "name":"view_distance",
+         "type":"int",
+         "value":5
+        }],
+ "renderorder":"right-down",
+ "tiledversion":"1.11.2",
+ "tileheight":32,
+ "tilesets":[
+        {
+         "columns":0,
+         "firstgid":1,
+         "grid":
+            {
+             "height":1,
+             "orientation":"orthogonal",
+             "width":1
+            },
+         "margin":0,
+         "name":"tiles",
+         "spacing":0,
+         "tilecount":16,
+         "tileheight":32,
+         "tiles":[
+                {
+                 "id":0,
+                 "image":"..\/..\/images\/maps\/tiles\/empty.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":1,
+                 "image":"..\/..\/images\/maps\/tiles\/wall_wse.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":2,
+                 "image":"..\/..\/images\/maps\/tiles\/wall_nws.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":3,
+                 "image":"..\/..\/images\/maps\/tiles\/wall_wne.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":4,
+                 "image":"..\/..\/images\/maps\/tiles\/wall_nes.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":5,
+                 "image":"..\/..\/images\/maps\/tiles\/t_intersection_nes.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":6,
+                 "image":"..\/..\/images\/maps\/tiles\/t_intersection_nws.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":7,
+                 "image":"..\/..\/images\/maps\/tiles\/t_intersection_wne.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":8,
+                 "image":"..\/..\/images\/maps\/tiles\/t_intersection_wse.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":9,
+                 "image":"..\/..\/images\/maps\/tiles\/hallway_hor.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":10,
+                 "image":"..\/..\/images\/maps\/tiles\/hallway_ver.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":11,
+                 "image":"..\/..\/images\/maps\/tiles\/corner_es.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":12,
+                 "image":"..\/..\/images\/maps\/tiles\/corner_ne.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":13,
+                 "image":"..\/..\/images\/maps\/tiles\/corner_wn.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":14,
+                 "image":"..\/..\/images\/maps\/tiles\/corner_ws.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }, 
+                {
+                 "id":15,
+                 "image":"..\/..\/images\/maps\/tiles\/cross.png",
+                 "imageheight":32,
+                 "imagewidth":32
+                }],
+         "tilewidth":32
+        }],
+ "tilewidth":32,
+ "type":"map",
+ "version":"1.10",
+ "width":20
+}

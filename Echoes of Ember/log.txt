@@ -1,36 +1,35 @@
-2025-11-22 23:28:08 UTC
+2025-11-23 00:08:37 UTC
 Windows-11-10.0.22631-SP0
 Ren'Py 8.4.1.25072401
 
-Early init took 35 ms
-Loading error handling took 28 ms
-Loading script took 521 ms
+Early init took 36 ms
+Loading error handling took 19 ms
+Loading script took 103 ms
 Loading save slot metadata took 21 ms
-Loading persistent took 0 ms
+Loading persistent took 1 ms
 MapPersistence - File I/O persistence system initialized
 MapPersistence - Wrapped FileAction to add map data save/load
-Running init code took 50 ms
-Loading analysis data took 2 ms
+Running init code took 42 ms
+Loading analysis data took 11 ms
 Analyze and compile ATL took 1 ms
 Reloading save slot metadata took 13 ms
-Backing up script files to 'C:\\Users\\david.robson\\AppData\\Roaming/RenPy/backups\\Echoes of Ember':
-Dump and make backups took 29 ms
+Dump and make backups took 27 ms
 Cleaning cache took 0 ms
-Making clean stores took 1 ms
-Initial gc took 33 ms
+Making clean stores took 0 ms
+Initial gc took 39 ms
 DPI scale factor: 1.000000
 nvdrs: Loaded, about to disable thread optimizations.
 nvdrs: Disabled thread optimizations.
-Creating interface object took 229 ms
+Creating interface object took 216 ms
 Init translation took 1 ms
 Cleaning stores took 0 ms
-Load screen analysis took 0 ms
-Analyze screens took 11 ms
-Save screen analysis took 14 ms
+Load screen analysis took 14 ms
+Analyze screens took 1 ms
+Save screen analysis took 0 ms
 Save pyanalysis took 0 ms
-Save bytecode took 19 ms
-Running _start took 1 ms
-Interface start took 614 ms
+Save bytecode took 0 ms
+Running _start took 0 ms
+Interface start took 590 ms
 
 Initializing gl2 renderer:
 primary display bounds: (0, 0, 1920, 1080)
