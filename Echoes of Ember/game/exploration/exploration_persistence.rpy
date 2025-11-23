@@ -1,6 +1,10 @@
 # exploration_persistence.rpy
 # Extends map save/load system to include player state
 
+# Default variable to track which slot is being saved/loaded
+# Must be declared here so Ren'Py includes it in saves
+default _map_slot = None
+
 init -1 python:
     import os
     import json
