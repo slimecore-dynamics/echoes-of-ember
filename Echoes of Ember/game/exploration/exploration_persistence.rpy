@@ -94,12 +94,15 @@ init -1 python:
         # Save player-drawn map data to external JSON file
         # File: <savedir>/map_data/<slot>_mapgrid.json
         #
-        # Saves ONLY player-drawn data:
-        # - floor.tiles (player drawings, NOT dungeon_tiles)
-        # - floor.icons (player-placed icons, NOT dungeon_icons)
-        # - floor.revealed_tiles (auto-map)
-        # - map_grid.current_floor_id
-        # - map_grid.auto_map_enabled
+        # Saves ONLY player-drawn data (NOT the dungeon layout):
+        # - floor.tiles - player's hand-drawn map (NOT dungeon_tiles)
+        # - floor.icons - player-placed icons on map (NOT dungeon_icons)
+        # - floor.revealed_tiles - tiles revealed by auto-map
+        # - map_grid.current_floor_id - which floor player is on
+        # - map_grid.auto_map_enabled - auto-map toggle state
+        #
+        # The actual dungeon layout (dungeon_tiles and dungeon_icons) comes from
+        # Tiled JSON files and is loaded via load_dungeon_floor, not from saves.
         global map_grid
 
         if not slot_name or not map_grid:
@@ -153,15 +156,16 @@ init -1 python:
         # Load player-drawn map data from external JSON file
         # Returns: True if loaded, False if file not found
         #
-        # Restores ONLY player-drawn data:
-        # - floor.tiles (player drawings)
-        # - floor.icons (player-placed icons)
-        # - floor.revealed_tiles (auto-map)
-        # - map_grid.current_floor_id
-        # - map_grid.auto_map_enabled
+        # Restores ONLY player-drawn data (NOT the dungeon layout):
+        # - floor.tiles - player's hand-drawn map
+        # - floor.icons - player-placed icons on map
+        # - floor.revealed_tiles - tiles revealed by auto-map
+        # - map_grid.current_floor_id - which floor player is on
+        # - map_grid.auto_map_enabled - auto-map toggle state
         #
-        # Does NOT restore dungeon_tiles or dungeon_icons
-        # (those come from Tiled JSON via load_dungeon_floor)
+        # Does NOT restore dungeon_tiles or dungeon_icons. These must be loaded
+        # separately from Tiled JSON files via load_dungeon_floor. This ensures
+        # the actual dungeon layout always comes from the game files, not saves.
         global map_grid
 
         if not slot_name:

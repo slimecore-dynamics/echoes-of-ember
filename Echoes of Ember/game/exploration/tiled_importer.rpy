@@ -98,22 +98,24 @@ init python:
                 elif layer.get("type") == "objectgroup":
                     TiledImporter._process_object_layer(layer, floor, tile_id_map)
 
-            # CRITICAL: Separate dungeon from drawn map
-            # floor.tiles currently has the real dungeon from Tiled
-            # We need to copy it to dungeon_tiles and clear tiles
+            # CRITICAL: Dual map system - separate real dungeon from player-drawn map
+            # The loaded tiles represent the real dungeon that the player navigates.
+            # We copy these to dungeon_tiles (for movement validation) and clear the
+            # visible map so the player starts with a blank canvas to draw on.
             import copy
             floor.dungeon_tiles = copy.deepcopy(floor.tiles)
 
-            # Clear the drawn map (player starts with blank map)
+            # Clear the drawn map (player starts with blank map to fill in)
             for y in range(height):
                 for x in range(width):
                     floor.set_tile(x, y, MapTile("empty", rotation=0))
 
-            # CRITICAL: Separate dungeon icons from drawn icons
-            # floor.icons currently has the real icons from Tiled (for collision/interaction)
-            # Copy to dungeon_icons and clear icons (so they don't show on map)
+            # CRITICAL: Dual icon system - separate real icons from player-drawn icons
+            # The loaded icons represent the real dungeon objects (for collision/interaction).
+            # We copy these to dungeon_icons (for game logic) and clear the visible icons
+            # so they don't appear on the player's map until discovered.
             floor.dungeon_icons = copy.deepcopy(floor.icons)
-            floor.icons = {}  # Player starts with no icons marked
+            floor.icons = {}  # Player starts with no icons marked on map
 
             return floor
 

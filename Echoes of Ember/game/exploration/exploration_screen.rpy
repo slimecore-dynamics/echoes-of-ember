@@ -395,7 +395,7 @@ init python:
             self.cell_size = cell_size
 
         def render(self, width, height, st, at):
-            # Create a render the size of one cell
+            # Create render the size of one cell
             render = renpy.Render(self.cell_size, self.cell_size)
 
             # Create simple red square as placeholder for triangle
@@ -842,7 +842,7 @@ init python:
                     renpy.notify("Teleported to ({}, {})".format(target_pos[0], target_pos[1]))
 
                     # Trigger auto-map reveal at new location if enabled
-                    if getattr(player_state, 'auto_map_enabled', False):
+                    if getattr(map_grid, 'auto_map_enabled', False):
                         reveal_nearby_tiles(floor, target_pos[0], target_pos[1], player_state.rotation)
 
                     renpy.restart_interaction()
@@ -932,7 +932,7 @@ init python:
                 renpy.notify("Teleported to ({}, {})".format(target_pos[0], target_pos[1]))
 
                 # Trigger auto-map reveal at new location if enabled
-                if getattr(player_state, 'auto_map_enabled', False):
+                if getattr(map_grid, 'auto_map_enabled', False):
                     reveal_nearby_tiles(floor, target_pos[0], target_pos[1], player_state.rotation)
 
                 renpy.restart_interaction()

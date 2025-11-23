@@ -36,23 +36,25 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
         if floor:
             # Check if floor already exists (need actual floor_id from Tiled, not parameter)
             if floor.floor_id in map_grid.floors:
-                # Floor exists - preserve player data
+                # Floor already loaded - preserve player's map progress
                 existing_floor = map_grid.floors[floor.floor_id]
 
-                # Preserve player-drawn data before overwriting
+                # Save player-drawn data before overwriting the floor
+                # This prevents losing the player's map when reloading dungeon layout
                 saved_tiles = existing_floor.tiles
                 saved_icons = existing_floor.icons
                 saved_revealed = existing_floor.revealed_tiles
 
-                # Update floor with new dungeon layout from Tiled
+                # Update floor with fresh dungeon layout from Tiled
+                # This updates dungeon_tiles and dungeon_icons with any changes
                 map_grid.floors[floor.floor_id] = floor
 
-                # Restore player-drawn data
+                # Restore player-drawn data on top of new dungeon layout
                 floor.tiles = saved_tiles
                 floor.icons = saved_icons
                 floor.revealed_tiles = saved_revealed
             else:
-                # New floor - add normally
+                # New floor - add to map grid
                 map_grid.floors[floor.floor_id] = floor
 
             map_grid.current_floor_id = floor.floor_id

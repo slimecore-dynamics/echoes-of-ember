@@ -31,10 +31,15 @@ init -2 python:
                 self.tiles.append(row)
 
             # Real dungeon tiles (from Tiled JSON) - for movement validation
+            # This is the actual dungeon layout that the player navigates
             self.dungeon_tiles = None
 
-            # Icons (stairs, doors, etc.)
+            # Player-drawn icons (visible on map)
             self.icons = {}  # {(x, y): MapIcon}
+
+            # Real dungeon icons (from Tiled JSON) - for collision and interaction
+            # This is separate from player-drawn icons
+            self.dungeon_icons = {}  # {(x, y): MapIcon}
 
             # Revealed tiles (for auto-map)
             self.revealed_tiles = set()  # {(x, y), ...}
