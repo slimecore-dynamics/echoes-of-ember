@@ -59,9 +59,19 @@ screen exploration_view():
                     use render_first_person_view(view_data, floor, ps)
 
                     # Interaction sparkle/pulse overlay
-                    $ icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
-                        floor, ps.x, ps.y, ps.rotation
-                    )
+                    python:
+                        # Check for adjacent triggers (stairs, doors)
+                        icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
+                            floor, ps.x, ps.y, ps.rotation
+                        )
+
+                        # If no adjacent trigger, check for on-tile interactions (teleporter)
+                        if not icon:
+                            icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
+                                floor, ps.x, ps.y, ps.rotation
+                            )
+                            if icon:
+                                adj_x, adj_y = tile_x, tile_y
 
                     if icon:
                         # Show pulsing indicator in first-person view
