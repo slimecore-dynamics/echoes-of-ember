@@ -110,5 +110,6 @@ init -1 python:
             return player
 
 
-# Global player state (saved to JSON like map_grid)
+# Global player state and map grid
 default player_state = None
+default map_grid = None
