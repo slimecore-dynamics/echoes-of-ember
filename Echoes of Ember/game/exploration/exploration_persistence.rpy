@@ -216,7 +216,9 @@ init -1 python:
             map_grid.auto_map_enabled = data.get("auto_map_enabled", False)
 
             # Deserialize each FloorMap
+            print("DEBUG load_map_data_from_file: Loading {} floors".format(len(data.get("floors", {}))))
             for floor_id, floor_data in data.get("floors", {}).items():
+                print("DEBUG load_map_data_from_file: Loading floor '{}'".format(floor_id))
                 floor = FloorMap(
                     floor_data["floor_id"],
                     floor_data["floor_name"],
@@ -224,21 +226,38 @@ init -1 python:
                 )
 
                 # Restore tiles (player-drawn)
+                non_empty_count = 0
                 for y, row in enumerate(floor_data["tiles"]):
                     for x, tile_data in enumerate(row):
                         floor.tiles[y][x] = MapTile(tile_data["type"], tile_data["rotation"])
+                        if tile_data["type"] != "empty":
+                            non_empty_count += 1
+                            if non_empty_count <= 5:  # Show first 5 non-empty tiles
+                                print("DEBUG load_map_data_from_file: Loaded tile at ({},{}): {} rotation {}".format(
+                                    x, y, tile_data["type"], tile_data["rotation"]))
+
+                print("DEBUG load_map_data_from_file: Loaded {} non-empty tiles for floor '{}'".format(non_empty_count, floor_id))
+
+                # Check (0,0) specifically since user mentioned it
+                if floor.tiles[0][0].tile_type != "empty":
+                    print("DEBUG load_map_data_from_file: Tile at (0,0) = {} rotation {}".format(
+                        floor.tiles[0][0].tile_type, floor.tiles[0][0].rotation))
 
                 # Restore icons (player-placed)
                 for pos_str, icon_data in floor_data.get("icons", {}).items():
                     x, y = map(int, pos_str.split(","))
                     floor.icons[(x, y)] = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
+                print("DEBUG load_map_data_from_file: Loaded {} icons for floor '{}'".format(len(floor.icons), floor_id))
 
                 # Restore revealed tiles (auto-map)
                 floor.revealed_tiles = set(tuple(pos) for pos in floor_data.get("revealed_tiles", []))
+                print("DEBUG load_map_data_from_file: Loaded {} revealed tiles for floor '{}'".format(len(floor.revealed_tiles), floor_id))
 
                 map_grid.floors[floor_id] = floor
+                print("DEBUG load_map_data_from_file: Added floor '{}' to map_grid.floors".format(floor_id))
 
-            print("DEBUG load_map_data_from_file: Successfully loaded map data!")
+            print("DEBUG load_map_data_from_file: Successfully loaded map data! map_grid.floors has {} floors".format(len(map_grid.floors)))
+            print("DEBUG load_map_data_from_file: map_grid.current_floor_id = {}".format(map_grid.current_floor_id))
             return True
 
         except Exception as e:
@@ -263,11 +282,11 @@ init -1 python:
             print("DEBUG FileActionWithMapData: __call__ for slot {} (is_load={})".format(self.slot, self.is_load))
 
             if self.is_load:
-                # Load: First load game state, then load map data
+                # Load: Set slot BEFORE FileLoad so after_load can use it
+                print("DEBUG FileActionWithMapData: Setting _map_slot to {} before FileLoad".format(self.slot))
+                store._map_slot = self.slot
                 result = FileLoad(self.slot)()
-                print("DEBUG FileActionWithMapData: FileLoad completed, now loading map data")
-                load_map_data_from_file(self.slot)
-                load_player_state_from_file(self.slot)
+                print("DEBUG FileActionWithMapData: FileLoad completed, map data will be loaded in after_load")
             else:
                 # Save: First save map data, then save game state
                 print("DEBUG FileActionWithMapData: Saving map data before FileSave")
