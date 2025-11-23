@@ -142,7 +142,6 @@ screen exploration_view():
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
-                        yfit True
 
                         hbox:
                             spacing 10
@@ -204,7 +203,6 @@ screen exploration_view():
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
-                        yfit True
 
                         vbox:
                             spacing 4
@@ -270,7 +268,6 @@ screen exploration_view():
                         xsize int(config.screen_width * 0.314)
                         background "#2A2A2A"
                         padding (10, 10)
-                        yfit True
 
                         hbox:
                             spacing 10
