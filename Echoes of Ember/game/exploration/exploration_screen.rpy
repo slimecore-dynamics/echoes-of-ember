@@ -152,17 +152,25 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # DEBUG: Show movement info (using DUNGEON tiles)
+                            # DEBUG: Show movement info (using DUNGEON tiles) + Floor info
                             if floor and ps:
+                                text "Floor: {} | Pos: ({},{}) | Rot: {}".format(
+                                    floor.floor_id if floor else "None",
+                                    ps.x, ps.y, ps.rotation
+                                ) size 9 color "#AAAAAA"
+
                                 $ new_x, new_y = ps.get_forward_position()
                                 $ can_move, reason = MovementValidator.can_move_to(
                                     floor, ps.x, ps.y, new_x, new_y, ps.rotation
                                 )
                                 $ dest_tile = MovementValidator._get_dungeon_tile(floor, new_x, new_y)
                                 $ tile_info = "{}@{}".format(dest_tile.tile_type, dest_tile.rotation) if dest_tile else "None"
-                                $ debug_msg = "Fwd to ({},{}): {} [{}]".format(new_x, new_y, "OK" if can_move else reason, tile_info)
+                                $ has_dungeon = "YES" if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles else "NO"
+                                $ debug_msg = "Fwd to ({},{}): {} [{}] Dungeon:{}".format(
+                                    new_x, new_y, "OK" if can_move else reason, tile_info, has_dungeon
+                                )
                                 $ debug_color = "#00FF00" if can_move else "#FF0000"
-                                text "[debug_msg]" size 10 color debug_color
+                                text "[debug_msg]" size 9 color debug_color
                             else:
                                 $ can_move = False
 
