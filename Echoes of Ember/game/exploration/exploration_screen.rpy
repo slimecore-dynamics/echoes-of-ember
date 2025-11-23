@@ -317,10 +317,10 @@ screen exploration_view():
 
                     # DEBUG BUTTON
                     textbutton "Debug map_grid":
-                        action Function(lambda: renpy.notify("store.map_grid: {} | floors: {} | id: {}".format(
+                        action Function(lambda: renpy.notify("map_grid: {} | floors: {} | floor_ids: {}".format(
                             "exists" if store.map_grid else "None",
                             len(store.map_grid.floors) if store.map_grid else 0,
-                            id(store.map_grid) if store.map_grid else "N/A"
+                            list(store.map_grid.floors.keys()) if store.map_grid else []
                         )))
                         padding (10, 5)
                         background "#FF0000"
