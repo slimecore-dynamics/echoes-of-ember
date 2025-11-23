@@ -33,41 +33,30 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
         if not map_grid:
             map_grid = MapGrid()
 
+        # Check if floor already exists (from save load)
+        floor_id_to_check = floor_id if floor_id else "unknown"
+        if floor_id_to_check in map_grid.floors:
+            existing_floor = map_grid.floors[floor_id_to_check]
+            existing_tile = existing_floor.get_tile(0, 0)
+            print("DEBUG [LOAD_DUNGEON BEFORE] Floor '{}' already exists! tile(0,0) = '{}'".format(floor_id_to_check, existing_tile.tile_type))
+        else:
+            print("DEBUG [LOAD_DUNGEON BEFORE] Floor '{}' does not exist yet".format(floor_id_to_check))
+
         # Load floor using Tiled importer
         floor = TiledImporter.load_tiled_map(floor_filepath, floor_id=floor_id)
 
         if floor:
-            print("DEBUG [LOAD_DUNGEON] Tiled importer returned floor '{}'".format(floor.floor_id))
+            # Check tile in newly loaded floor
+            new_tile = floor.get_tile(0, 0)
+            print("DEBUG [LOAD_DUNGEON MIDDLE] Tiled importer returned floor '{}' with tile(0,0) = '{}'".format(floor.floor_id, new_tile.tile_type))
 
-            # Check if floor already exists (from save load)
-            if floor.floor_id in map_grid.floors:
-                print("DEBUG [LOAD_DUNGEON] Floor '{}' already exists (loaded game)".format(floor.floor_id))
-                existing_floor = map_grid.floors[floor.floor_id]
-                existing_tile = existing_floor.get_tile(0, 0)
-                print("DEBUG [LOAD_DUNGEON] Existing floor tile(0,0) = '{}'".format(existing_tile.tile_type))
-
-                # Only update dungeon data, preserve player-drawn map
-                print("DEBUG [LOAD_DUNGEON] Updating dungeon_tiles and dungeon_icons only")
-                existing_floor.dungeon_tiles = floor.dungeon_tiles
-                existing_floor.dungeon_icons = floor.dungeon_icons
-
-                # Update metadata
-                existing_floor.starting_x = floor.starting_x
-                existing_floor.starting_y = floor.starting_y
-                existing_floor.starting_rotation = floor.starting_rotation
-                existing_floor.view_distance = floor.view_distance
-
-                # Verify player data preserved
-                verify_tile = existing_floor.get_tile(0, 0)
-                print("DEBUG [LOAD_DUNGEON] After update, tile(0,0) = '{}' (should be preserved)".format(verify_tile.tile_type))
-            else:
-                print("DEBUG [LOAD_DUNGEON] Floor '{}' does not exist (new game)".format(floor.floor_id))
-                # New floor - add it normally
-                map_grid.floors[floor.floor_id] = floor
-                new_tile = floor.get_tile(0, 0)
-                print("DEBUG [LOAD_DUNGEON] Added new floor, tile(0,0) = '{}'".format(new_tile.tile_type))
-
+            # Add floor to map grid (THIS OVERWRITES EXISTING FLOOR!)
+            map_grid.floors[floor.floor_id] = floor
             map_grid.current_floor_id = floor.floor_id
+
+            # Verify after overwrite
+            final_tile = map_grid.floors[floor.floor_id].get_tile(0, 0)
+            print("DEBUG [LOAD_DUNGEON AFTER] Overwrote floor '{}', tile(0,0) now = '{}'".format(floor.floor_id, final_tile.tile_type))
             print("=" * 80)
 
             # Initialize or reset player state for this floor
