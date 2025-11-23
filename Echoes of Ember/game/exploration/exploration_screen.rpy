@@ -15,9 +15,7 @@ default exploration_dialogue_active = False
 default map_grid = None
 
 screen exploration_view():
-    """
-    Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
-    """
+    # Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
 
     # Show floor notification when first entering
     on "show":
@@ -317,19 +315,6 @@ screen exploration_view():
                                 hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
-                    # DEBUG BUTTON
-                    textbutton "Debug map_grid":
-                        action Function(lambda: renpy.notify("map_grid: {} | floors: {} | tile(0,0): {} | floor_id: {}".format(
-                            "exists" if store.map_grid else "None",
-                            len(store.map_grid.floors) if store.map_grid else 0,
-                            floor.tiles[0][0].tile_type if floor and floor.tiles else "no tiles",
-                            list(store.map_grid.floors.keys()) if store.map_grid else []
-                        )))
-                        padding (10, 5)
-                        background "#FF0000"
-                        hover_background "#DD0000"
-                        sensitive (not exploration_dialogue_active)
-
                     # INTERACTION PROMPT (if any)
                     if floor and ps:
                         python:
@@ -352,7 +337,7 @@ screen exploration_view():
 
 init python:
     def handle_map_click(x, y, floor, map_grid):
-        """Handle clicking on a map cell to place tiles or icons."""
+        # Handle clicking on a map cell to place tiles or icons.
         if not map_grid:
             return
 
@@ -373,7 +358,7 @@ init python:
                 renpy.restart_interaction()
 
     def confirm_note_placement(x, y, floor, map_grid, note_text):
-        """Confirm note placement with text from input."""
+        # Confirm note placement with text from input.
         # Hide the popup
         renpy.hide_screen("note_input_popup")
 
@@ -384,7 +369,7 @@ init python:
         renpy.restart_interaction()
 
     def select_tile_type(tile_type):
-        """Select a tile type from the palette."""
+        # Select a tile type from the palette.
         if map_grid:
             map_grid.selected_tile_type = tile_type
             map_grid.selected_icon_type = None
@@ -392,7 +377,7 @@ init python:
             renpy.restart_interaction()
 
     def select_icon_for_placement(icon_type):
-        """Select an icon type from the palette."""
+        # Select an icon type from the palette.
         if map_grid:
             map_grid.selected_icon_type = icon_type
             map_grid.selected_tile_type = None
@@ -400,7 +385,7 @@ init python:
             renpy.restart_interaction()
 
     class PlayerTriangleMarker(renpy.Displayable):
-        """Red triangle showing player position and facing direction."""
+        # Red triangle showing player position and facing direction.
 
         def __init__(self, x, y, rotation, cell_size, **kwargs):
             super(PlayerTriangleMarker, self).__init__(**kwargs)
@@ -514,7 +499,7 @@ screen map_grid_display(floor, cell_size, gridline_width):
 
 
 screen note_input_popup(x, y, floor, map_grid):
-    """Popup for entering note text when placing a note icon."""
+    # Popup for entering note text when placing a note icon.
 
     modal True
 
@@ -556,7 +541,7 @@ screen note_input_popup(x, y, floor, map_grid):
 
 
 screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
-    """Compact interaction prompt in right panel."""
+    # Compact interaction prompt in right panel.
 
     frame:
         xsize int(config.screen_width * 0.314)
@@ -607,7 +592,7 @@ screen compact_interaction_prompt(icon, interaction_type, adj_x, adj_y):
 
 
 screen render_first_person_view(view_data, floor, ps):
-    """Render the first-person view based on view_data."""
+    # Render the first-person view based on view_data.
 
     # Background (ceiling and floor)
     $ view_width = int(config.screen_width * 0.666)
@@ -979,7 +964,7 @@ init python:
             renpy.restart_interaction()
 
     def rotate_selected_tile():
-        """Rotate the currently selected tile."""
+        # Rotate the currently selected tile.
         global map_grid
         if map_grid:
             map_grid.rotate_selected_tile()

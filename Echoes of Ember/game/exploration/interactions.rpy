@@ -3,14 +3,12 @@
 
 init python:
     class InteractionHandler:
-        """
-        Manages interactions with map icons during exploration.
-
-        Three types of interactions:
-        1. Step-on triggers: gathering, event, enemy (automatic when stepping on tile)
-        2. On-tile interact: teleporter (must be on tile AND facing correct direction to interact)
-        3. Adjacent triggers: stairs, doors (must be adjacent and facing the icon)
-        """
+        # Manages interactions with map icons during exploration.
+        #
+        # Three types of interactions:
+        # 1. Step-on triggers: gathering, event, enemy (automatic when stepping on tile)
+        # 2. On-tile interact: teleporter (must be on tile AND facing correct direction to interact)
+        # 3. Adjacent triggers: stairs, doors (must be adjacent and facing the icon)
 
         # Icons that trigger automatically when stepped on
         STEP_ON_ICONS = ["gathering", "event", "enemy"]
@@ -23,12 +21,9 @@ init python:
 
         @staticmethod
         def check_step_on_trigger(floor, x, y):
-            """
-            Check if stepping on (x, y) triggers an interaction.
-            Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
-
-            Returns: (icon, interaction_type) or (None, None)
-            """
+            # Check if stepping on (x, y) triggers an interaction.
+            # Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
+            # Returns: (icon, interaction_type) or (None, None)
             # Check dungeon icons for triggers, not player-drawn icons
             icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
             if not icon:
@@ -41,14 +36,10 @@ init python:
 
         @staticmethod
         def check_adjacent_trigger(floor, x, y, rotation):
-            """
-            Check if there's an interactable icon adjacent to player and facing it.
-            Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
-
-            For icons with prompt_facing property, only show prompt when facing the specified direction.
-
-            Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
-            """
+            # Check if there's an interactable icon adjacent to player and facing it.
+            # Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
+            # For icons with prompt_facing property, only show prompt when facing the specified direction.
+            # Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
             # Get adjacent position based on rotation
             adj_pos = InteractionHandler._get_adjacent_position(x, y, rotation)
             if not adj_pos:

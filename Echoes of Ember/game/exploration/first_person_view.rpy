@@ -3,26 +3,20 @@
 
 init python:
     class FirstPersonView:
-        """
-        Calculates and renders first-person view of the dungeon.
-
-        Shows up to X tiles ahead in the direction player is facing,
-        with walls and obstacles blocking the view.
-        """
+        # Calculates and renders first-person view of the dungeon.
+        # Shows up to X tiles ahead in the direction player is facing,
+        # with walls and obstacles blocking the view.
 
         @staticmethod
         def get_view_data(floor, player_x, player_y, player_rotation, view_distance=3):
-            """
-            Calculate what the player can see ahead.
-
-            Returns: dict with view information
-            {
-                "tiles": [(x, y, tile, distance), ...],
-                "icons": [(x, y, icon, distance), ...],
-                "blocked_at": distance or None,
-                "can_move_forward": bool
-            }
-            """
+            # Calculate what the player can see ahead.
+            # Returns: dict with view information
+            # {
+            #     "tiles": [(x, y, tile, distance), ...],
+            #     "icons": [(x, y, icon, distance), ...],
+            #     "blocked_at": distance or None,
+            #     "can_move_forward": bool
+            # }
             if not floor:
                 return {"tiles": [], "icons": [], "blocked_at": None, "can_move_forward": False}
 
@@ -86,7 +80,7 @@ init python:
 
         @staticmethod
         def _get_direction_delta(rotation):
-            """Get (dx, dy) for rotation"""
+            # Get (dx, dy) for rotation
             if rotation == 0:    # North
                 return (0, -1)
             elif rotation == 90:  # East
@@ -99,11 +93,8 @@ init python:
 
         @staticmethod
         def _tile_blocks_view(tile, player_rotation, dx, dy):
-            """
-            Check if a tile blocks the view ahead.
-
-            Returns True if tile is a wall/obstacle that blocks line of sight.
-            """
+            # Check if a tile blocks the view ahead.
+            # Returns True if tile is a wall/obstacle that blocks line of sight.
             tile_type = tile.tile_type
 
             # Empty blocks view (void)
@@ -141,11 +132,8 @@ init python:
 
         @staticmethod
         def _icon_blocks_view(icon):
-            """
-            Check if an icon blocks the view.
-
-            Returns True if icon is a solid obstacle.
-            """
+            # Check if an icon blocks the view.
+            # Returns True if icon is a solid obstacle.
             # Closed doors block view
             if icon.icon_type == "door_closed":
                 return True

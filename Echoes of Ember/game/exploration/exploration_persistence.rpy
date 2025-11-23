@@ -12,27 +12,19 @@ init -1 python:
 
         # Get Ren'Py's save directory
         save_dir = renpy.config.savedir
-        print("DEBUG get_map_data_dir: save_dir = {}".format(save_dir))
 
         # Create map_data subdirectory
         map_dir = os.path.join(save_dir, "map_data")
-        print("DEBUG get_map_data_dir: map_dir = {}".format(map_dir))
 
         # Ensure directory exists
         if not os.path.exists(map_dir):
-            print("DEBUG get_map_data_dir: Creating directory")
             os.makedirs(map_dir)
-        else:
-            print("DEBUG get_map_data_dir: Directory already exists")
 
         return map_dir
 
     def save_player_state_to_file(slot_name):
-        """
-        Save player_state to external JSON file (same location as map data).
-
-        File: <savedir>/map_data/<slot>_player.json
-        """
+        # Save player_state to external JSON file (same location as map data).
+        # File: <savedir>/map_data/<slot>_player.json
         global player_state
 
         if not slot_name or not player_state:
@@ -63,11 +55,8 @@ init -1 python:
 
 
     def load_player_state_from_file(slot_name):
-        """
-        Load player_state from external JSON file.
-
-        Returns: True if loaded, False if file not found
-        """
+        # Load player_state from external JSON file.
+        # Returns: True if loaded, False if file not found
         global player_state
 
         if not slot_name:
@@ -178,10 +167,7 @@ init -1 python:
         # (those come from Tiled JSON via load_dungeon_floor)
         global map_grid
 
-        print("DEBUG load_map_data_from_file: slot_name = {}".format(slot_name))
-
         if not slot_name:
-            print("DEBUG load_map_data_from_file: No slot_name provided")
             return False
 
         try:
@@ -193,14 +179,10 @@ init -1 python:
 
             # Map grid file path
             map_path = os.path.join(map_dir, "{}_mapgrid.json".format(safe_name))
-            print("DEBUG load_map_data_from_file: Looking for file: {}".format(map_path))
 
             # Check if file exists
             if not os.path.exists(map_path):
-                print("DEBUG load_map_data_from_file: File does not exist!")
                 return False
-
-            print("DEBUG load_map_data_from_file: File exists, loading...")
 
             # Load JSON
             with open(map_path, 'r', encoding='utf-8') as f:
@@ -212,9 +194,7 @@ init -1 python:
             map_grid.auto_map_enabled = data.get("auto_map_enabled", False)
 
             # Deserialize each FloorMap
-            print("DEBUG load_map_data_from_file: Loading {} floors".format(len(data.get("floors", {}))))
             for floor_id, floor_data in data.get("floors", {}).items():
-                print("DEBUG load_map_data_from_file: Loading floor '{}'".format(floor_id))
                 floor = FloorMap(
                     floor_data["floor_id"],
                     floor_data["floor_name"],
@@ -222,45 +202,19 @@ init -1 python:
                 )
 
                 # Restore tiles (player-drawn)
-                non_empty_count = 0
                 for y, row in enumerate(floor_data["tiles"]):
                     for x, tile_data in enumerate(row):
                         floor.tiles[y][x] = MapTile(tile_data["type"], tile_data["rotation"])
-                        if tile_data["type"] != "empty":
-                            non_empty_count += 1
-                            if non_empty_count <= 5:  # Show first 5 non-empty tiles
-                                print("DEBUG load_map_data_from_file: Loaded tile at ({},{}): {} rotation {}".format(
-                                    x, y, tile_data["type"], tile_data["rotation"]))
-
-                print("DEBUG load_map_data_from_file: Loaded {} non-empty tiles for floor '{}'".format(non_empty_count, floor_id))
-
-                # Check (0,0) specifically since user mentioned it
-                if floor.tiles[0][0].tile_type != "empty":
-                    print("DEBUG load_map_data_from_file: Tile at (0,0) = {} rotation {}".format(
-                        floor.tiles[0][0].tile_type, floor.tiles[0][0].rotation))
 
                 # Restore icons (player-placed)
                 for pos_str, icon_data in floor_data.get("icons", {}).items():
                     x, y = map(int, pos_str.split(","))
                     floor.icons[(x, y)] = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
-                print("DEBUG load_map_data_from_file: Loaded {} icons for floor '{}'".format(len(floor.icons), floor_id))
 
                 # Restore revealed tiles (auto-map)
                 floor.revealed_tiles = set(tuple(pos) for pos in floor_data.get("revealed_tiles", []))
-                print("DEBUG load_map_data_from_file: Loaded {} revealed tiles for floor '{}'".format(len(floor.revealed_tiles), floor_id))
 
                 map_grid.floors[floor_id] = floor
-                print("DEBUG load_map_data_from_file: Added floor '{}' to map_grid.floors".format(floor_id))
-
-            print("DEBUG load_map_data_from_file: Successfully loaded map data! map_grid.floors has {} floors".format(len(map_grid.floors)))
-            print("DEBUG load_map_data_from_file: map_grid.current_floor_id = {}".format(map_grid.current_floor_id))
-
-            # Final verification: check tile(0,0) in the loaded floor
-            if map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
-                final_floor = map_grid.floors[map_grid.current_floor_id]
-                final_tile = final_floor.get_tile(0, 0)
-                print("DEBUG [LOAD_MAP_DATA END] tile(0,0) = '{}' rotation {}".format(final_tile.tile_type, final_tile.rotation))
-            print("=" * 80)
 
             return True
 
@@ -282,37 +236,22 @@ init -1 python:
             self.is_load = (screen_name == "load")
 
         def __call__(self):
-            print("=" * 80)
-            print("DEBUG [LOAD START] FileActionWithMapData.__call__ for slot {} (is_load={})".format(self.slot, self.is_load))
-
             if self.is_load:
                 # Load: Write slot to temp file, then restore game state
-                print("DEBUG [LOAD STEP 1] Writing temp file for slot {}".format(self.slot))
                 temp_file_path = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
-                print("DEBUG [LOAD STEP 1] Temp file path: {}".format(temp_file_path))
 
                 try:
                     with open(temp_file_path, 'w') as f:
                         f.write(str(self.slot))
-                    print("DEBUG [LOAD STEP 1] Temp file written successfully")
-
-                    # Verify it was written
-                    with open(temp_file_path, 'r') as f:
-                        content = f.read()
-                    print("DEBUG [LOAD STEP 1] Temp file contains: '{}'".format(content))
                 except Exception as e:
-                    print("DEBUG [LOAD STEP 1] ERROR writing temp file: {}".format(e))
+                    print("Error writing temp file: {}".format(e))
 
-                print("DEBUG [LOAD STEP 2] Calling FileLoad({})".format(self.slot))
                 result = FileLoad(self.slot)()
-                print("DEBUG [LOAD STEP 3] FileLoad completed, after_load should run next")
             else:
                 # Save: First save map data, then save game state
-                print("DEBUG FileActionWithMapData: Saving map data before FileSave")
                 save_map_data_to_file(self.slot)
                 save_player_state_to_file(self.slot)
                 result = FileSave(self.slot)()
-                print("DEBUG FileActionWithMapData: FileSave completed")
 
             return result
 
@@ -333,11 +272,8 @@ init -1 python:
 label save:
     python:
         if current_save_slot:
-            print("DEBUG save label: Saving map data for slot {}".format(current_save_slot))
             save_map_data_to_file(current_save_slot)
             save_player_state_to_file(current_save_slot)
-        else:
-            print("DEBUG save label: No current_save_slot set")
     return
 
 
@@ -347,45 +283,21 @@ label after_load:
     python:
         import os
 
-        print("=" * 80)
-        print("DEBUG [AFTER_LOAD START] after_load label running")
-
         # Check for temp file
         temp_file_path = os.path.join(renpy.config.savedir, "_loading_slot.tmp")
-        print("DEBUG [AFTER_LOAD STEP 1] Looking for temp file: {}".format(temp_file_path))
-        print("DEBUG [AFTER_LOAD STEP 1] Temp file exists: {}".format(os.path.exists(temp_file_path)))
 
         slot = None
         if os.path.exists(temp_file_path):
             try:
-                print("DEBUG [AFTER_LOAD STEP 2] Reading temp file")
                 with open(temp_file_path, 'r') as f:
                     slot = f.read().strip()
-                print("DEBUG [AFTER_LOAD STEP 2] Read slot '{}' from temp file".format(slot))
-
-                print("DEBUG [AFTER_LOAD STEP 3] Deleting temp file")
                 os.remove(temp_file_path)
-                print("DEBUG [AFTER_LOAD STEP 3] Temp file deleted")
             except Exception as e:
-                print("DEBUG [AFTER_LOAD ERROR] Exception reading/deleting temp file: {}".format(e))
-        else:
-            print("DEBUG [AFTER_LOAD STEP 2] No temp file found - skipping map load")
+                print("Error reading/deleting temp file: {}".format(e))
 
         if slot:
-            print("DEBUG [AFTER_LOAD STEP 4] Calling load_map_data_from_file({})".format(slot))
             load_map_data_from_file(slot)
             load_player_state_from_file(slot)
-            print("DEBUG [AFTER_LOAD STEP 5] load_map_data_from_file completed")
 
-            # Verify it loaded
-            if map_grid and map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
-                floor_debug = map_grid.floors[map_grid.current_floor_id]
-                tile_debug = floor_debug.get_tile(0, 0)
-                print("DEBUG [AFTER_LOAD STEP 6] After loading, tile at (0,0) = '{}' rotation {}".format(tile_debug.tile_type, tile_debug.rotation))
-            else:
-                print("DEBUG [AFTER_LOAD STEP 6] After loading, map_grid has no floors!")
-
-        print("DEBUG [AFTER_LOAD END] after_load label complete")
-        print("=" * 80)
     return
 

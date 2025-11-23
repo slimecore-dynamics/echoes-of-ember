@@ -26,37 +26,20 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
     python:
         global map_grid, player_state
 
-        print("=" * 80)
-        print("DEBUG [LOAD_DUNGEON START] load_dungeon_floor('{}')".format(floor_filepath))
-
         # Ensure map_grid exists
         if not map_grid:
             map_grid = MapGrid()
-
-        # Check if floor already exists (from save load)
-        floor_id_to_check = floor_id if floor_id else "unknown"
-        if floor_id_to_check in map_grid.floors:
-            existing_floor = map_grid.floors[floor_id_to_check]
-            existing_tile = existing_floor.get_tile(0, 0)
-            print("DEBUG [LOAD_DUNGEON BEFORE] Floor '{}' already exists! tile(0,0) = '{}'".format(floor_id_to_check, existing_tile.tile_type))
-        else:
-            print("DEBUG [LOAD_DUNGEON BEFORE] Floor '{}' does not exist yet".format(floor_id_to_check))
 
         # Load floor using Tiled importer
         floor = TiledImporter.load_tiled_map(floor_filepath, floor_id=floor_id)
 
         if floor:
-            print("DEBUG [LOAD_DUNGEON MIDDLE] Tiled importer returned floor '{}'".format(floor.floor_id))
-
             # Check if floor already exists (need actual floor_id from Tiled, not parameter)
             if floor.floor_id in map_grid.floors:
-                print("DEBUG [LOAD_DUNGEON] Floor '{}' exists - preserving player data".format(floor.floor_id))
+                # Floor exists - preserve player data
                 existing_floor = map_grid.floors[floor.floor_id]
 
                 # Preserve player-drawn data before overwriting
-                existing_tile = existing_floor.get_tile(0, 0)
-                print("DEBUG [LOAD_DUNGEON] Saving player tile(0,0) = '{}'".format(existing_tile.tile_type))
-
                 saved_tiles = existing_floor.tiles
                 saved_icons = existing_floor.icons
                 saved_revealed = existing_floor.revealed_tiles
@@ -68,17 +51,11 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
                 floor.tiles = saved_tiles
                 floor.icons = saved_icons
                 floor.revealed_tiles = saved_revealed
-
-                restored_tile = floor.get_tile(0, 0)
-                print("DEBUG [LOAD_DUNGEON] Restored player tile(0,0) = '{}'".format(restored_tile.tile_type))
             else:
-                print("DEBUG [LOAD_DUNGEON] Floor '{}' is new - adding normally".format(floor.floor_id))
+                # New floor - add normally
                 map_grid.floors[floor.floor_id] = floor
-                new_tile = floor.get_tile(0, 0)
-                print("DEBUG [LOAD_DUNGEON] New floor tile(0,0) = '{}'".format(new_tile.tile_type))
 
             map_grid.current_floor_id = floor.floor_id
-            print("=" * 80)
 
             # Initialize or reset player state for this floor
             if not player_state:
@@ -162,15 +139,13 @@ label enter_exploration_mode(floor_id):
 
 init python:
     def delete_exploration_floor(floor_id, slot_name=None):
-        """
-        Delete a floor from the map grid and optionally from save files.
-
-        Args:
-            floor_id: ID of the floor to delete
-            slot_name: Optional slot name to delete map data from
-
-        Use this when story prevents returning to a location.
-        """
+        # Delete a floor from the map grid and optionally from save files.
+        #
+        # Args:
+        #     floor_id: ID of the floor to delete
+        #     slot_name: Optional slot name to delete map data from
+        #
+        # Use this when story prevents returning to a location.
         global map_grid
 
         if not map_grid:
@@ -199,11 +174,8 @@ init python:
         return True
 
     def get_exploration_percent_for_floor(floor_id):
-        """
-        Get exploration percentage for a specific floor.
-
-        Returns: int (0-100)
-        """
+        # Get exploration percentage for a specific floor.
+        # Returns: int (0-100)
         global map_grid
 
         if not map_grid or floor_id not in map_grid.floors:
