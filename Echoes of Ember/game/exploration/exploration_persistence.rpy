@@ -267,6 +267,9 @@ init -1 python:
     class FileActionWithMapData(Action):
         # Custom action that saves/loads map data alongside game state
 
+        # Class variable to pass slot to after_load (not saved by FileLoad)
+        _pending_load_slot = None
+
         def __init__(self, slot):
             self.slot = slot
             # Determine if this is save or load based on current screen
@@ -280,7 +283,7 @@ init -1 python:
                 # Load: Set slot for after_load to use, then restore game state
                 # Map data will be loaded in after_load AFTER FileLoad completes
                 print("DEBUG FileActionWithMapData: Setting _pending_load_slot to {}".format(self.slot))
-                store._pending_load_slot = self.slot
+                FileActionWithMapData._pending_load_slot = self.slot
                 result = FileLoad(self.slot)()
                 print("DEBUG FileActionWithMapData: FileLoad completed, map data will be loaded in after_load")
             else:
@@ -323,10 +326,10 @@ label save:
 label after_load:
     python:
         # Check if we have a pending map data load
-        if hasattr(store, '_pending_load_slot') and store._pending_load_slot:
-            print("DEBUG after_load: Loading map data for slot {}".format(store._pending_load_slot))
-            load_map_data_from_file(store._pending_load_slot)
-            load_player_state_from_file(store._pending_load_slot)
+        if FileActionWithMapData._pending_load_slot:
+            print("DEBUG after_load: Loading map data for slot {}".format(FileActionWithMapData._pending_load_slot))
+            load_map_data_from_file(FileActionWithMapData._pending_load_slot)
+            load_player_state_from_file(FileActionWithMapData._pending_load_slot)
 
             # Verify it loaded
             if map_grid and map_grid.current_floor_id and map_grid.current_floor_id in map_grid.floors:
@@ -337,7 +340,7 @@ label after_load:
                 print("DEBUG after_load: After loading, map_grid has no floors")
 
             # Clear the pending slot
-            store._pending_load_slot = None
+            FileActionWithMapData._pending_load_slot = None
         else:
             print("DEBUG after_load: No pending map data load")
     return
