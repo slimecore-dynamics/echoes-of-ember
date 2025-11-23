@@ -94,48 +94,76 @@ screen exploration_view():
                     # SPACER - move everything down
                     null height 75
 
-                    # MAP VIEW (using existing map_grid_display screen)
-                    frame:
-                        xsize int(config.screen_width * 0.25)
-                        ysize int(config.screen_width * 0.25)  # Square viewport
-                        xalign 0.5  # Center horizontally in right third
-                        background Solid("#333333")  # Dark grey border
-                        padding (2, 2)  # Border thickness
+                    # MAP VIEW - Three layers: black border, blue background, grid with gridlines
+                    if floor:
+                        # Grid dimensions from floor
+                        $ grid_w = floor.dimensions[0]
+                        $ grid_h = floor.dimensions[1]
 
-                        # Inner frame for blue background
+                        # Calculate sizes accounting for gridlines
+                        $ gridline_width = 1
+                        $ border_thickness = 3
+                        $ available_size = int(config.screen_width * 0.25) - 20 - (border_thickness * 2)
+
+                        # Cell size accounting for gridlines between cells
+                        $ cell_size = min(
+                            (available_size - gridline_width * (grid_w - 1)) // grid_w,
+                            (available_size - gridline_width * (grid_h - 1)) // grid_h
+                        )
+
+                        # Actual grid size (cells + gridlines)
+                        $ grid_width = cell_size * grid_w + gridline_width * (grid_w - 1)
+                        $ grid_height = cell_size * grid_h + gridline_width * (grid_h - 1)
+
+                        # Black border frame (slightly larger than grid)
                         frame:
-                            xfill True
-                            yfill True
-                            background "#0066CC"  # Blue background
-                            padding (10, 10)
+                            xsize (grid_width + border_thickness * 2)
+                            ysize (grid_height + border_thickness * 2)
+                            xalign 0.5  # Center horizontally in right third
+                            background "#000000"  # Black border
+                            padding (border_thickness, border_thickness)
 
-                            if floor:
-                                # Calculate cell size to match grid display
-                                $ grid_w = floor.dimensions[0]
-                                $ grid_h = floor.dimensions[1]
-                                $ available_size = int(config.screen_width * 0.25) - 20
-                                $ cell_size = min(available_size // grid_w, available_size // grid_h)
+                            # Blue background frame (exact grid size)
+                            frame:
+                                xsize grid_width
+                                ysize grid_height
+                                background "#0066CC"  # Blue background
+                                padding (0, 0)
 
                                 fixed:
-                                    # Show full map grid with tooltip info
-                                    use map_grid_display(floor, cell_size)
+                                    xysize (grid_width, grid_height)
+
+                                    # Show full map grid with gridlines
+                                    use map_grid_display(floor, cell_size, gridline_width)
 
                                     # Add player marker (red triangle) at player's grid position
                                     if ps:
-                                        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos (ps.x * cell_size) ypos (ps.y * cell_size)
+                                        # Position accounting for gridlines
+                                        $ marker_x = ps.x * (cell_size + gridline_width)
+                                        $ marker_y = ps.y * (cell_size + gridline_width)
+                                        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size) xpos marker_x ypos marker_y
 
                                     # Display tooltip at note position (on top of everything)
                                     $ tooltip_data = GetTooltip()
                                     if tooltip_data:
                                         $ note_x, note_y, note_text = tooltip_data
+                                        $ tooltip_x = note_x * (cell_size + gridline_width)
+                                        $ tooltip_y = note_y * (cell_size + gridline_width) - 25
                                         frame:
-                                            xpos (note_x * cell_size)
-                                            ypos (note_y * cell_size - 25)  # Above the note icon
+                                            xpos tooltip_x
+                                            ypos tooltip_y
                                             background "#000000DD"
                                             padding (5, 3)
                                             text note_text size 10 color "#FFFFFF"
-                            else:
-                                text "No map" xalign 0.5 yalign 0.5
+                    else:
+                        # No floor loaded placeholder
+                        frame:
+                            xsize int(config.screen_width * 0.25)
+                            ysize int(config.screen_width * 0.25)
+                            xalign 0.5
+                            background "#000000"
+                            padding (10, 10)
+                            text "No map" xalign 0.5 yalign 0.5
 
                     # PALETTE - Two grids: tiles (left) and icons (right)
                     frame:
@@ -426,44 +454,45 @@ init python:
         return colors.get(icon_type, "#FFFFFF")
 
 
-screen map_grid_display(floor, cell_size):
+screen map_grid_display(floor, cell_size, gridline_width):
     # Display the map grid with clickable tiles for drawing.
-    # This is the main map display that shows tiles, icons, and allows editing.
+    # Grid has dark grey background that shows through spacing as gridlines.
+    # Tiles fit exactly within cells with no gaps.
     $ grid_w = floor.dimensions[0]
     $ grid_h = floor.dimensions[1]
 
-    # Grid with tiles and gridlines
-    grid grid_w grid_h:
-        spacing 1  # Gridline spacing
-        for y in range(grid_h):
-            for x in range(grid_w):
-                $ tile = floor.get_tile(x, y)
-                $ icon = floor.icons.get((x, y))
+    # Dark grey container for gridlines
+    frame:
+        background "#555555"  # Dark grey gridlines
+        padding (0, 0)
 
-                button:
-                    xysize (cell_size, cell_size)
-                    background "#0066CC"  # Match blue background
-                    action Function(handle_map_click, x, y, floor, map_grid)
-                    padding (1, 1)  # Inner padding for gridline effect
+        # Grid with spacing for gridlines
+        grid grid_w grid_h:
+            spacing gridline_width
+            for y in range(grid_h):
+                for x in range(grid_w):
+                    $ tile = floor.get_tile(x, y)
+                    $ icon = floor.icons.get((x, y))
 
-                    # Show tooltip for notes
-                    if icon and icon.icon_type == "note":
-                        tooltip (x, y, icon.metadata.get("note_text", ""))
-
-                    # Cell content frame with lighter border
-                    frame:
-                        xfill True
-                        yfill True
-                        background Solid("#0066CC")  # Blue cell background
+                    button:
+                        xysize (cell_size, cell_size)
+                        background "#0066CC"  # Blue cell background
+                        action Function(handle_map_click, x, y, floor, map_grid)
                         padding (0, 0)
 
-                        # Tile (no rotation - causes offset issues)
-                        if tile.tile_type != "empty":
-                            add "images/maps/tiles/{}.png".format(tile.tile_type) fit "contain"
+                        # Show tooltip for notes
+                        if icon and icon.icon_type == "note":
+                            tooltip (x, y, icon.metadata.get("note_text", ""))
 
-                        # Icon on top
+                        # Tile image (fills cell exactly)
+                        if tile.tile_type != "empty":
+                            add "images/maps/tiles/{}.png".format(tile.tile_type):
+                                xysize (cell_size, cell_size)
+
+                        # Icon on top (fills cell exactly)
                         if icon:
-                            add "images/maps/icons/{}.png".format(icon.icon_type) fit "contain"
+                            add "images/maps/icons/{}.png".format(icon.icon_type):
+                                xysize (cell_size, cell_size)
 
 
 screen note_input_popup(x, y, floor, map_grid):
