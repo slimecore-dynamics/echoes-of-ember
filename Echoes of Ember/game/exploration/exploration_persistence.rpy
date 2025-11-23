@@ -81,35 +81,6 @@ init -1 python:
             return False
 
 
-# Hook into existing save/load system
-# We need to extend FileActionWithMapData to also save player state
-# NOTE: This must run AFTER map_persistence.rpy (init -1), so we use init 1
+# NOTE: save_map_data_to_file extension disabled - mapping module was removed
+# Player state is saved/loaded independently via save_player_state_to_file
 
-init 1 python:
-    # Store reference to original save function
-    _original_save_map_data_to_file = save_map_data_to_file
-    _original_load_map_data_from_file = load_map_data_from_file
-
-    def save_map_data_to_file_extended(slot_name):
-        """Extended version that saves both map and player state"""
-        # Call original map save
-        result = _original_save_map_data_to_file(slot_name)
-
-        # Also save player state
-        save_player_state_to_file(slot_name)
-
-        return result
-
-    def load_map_data_from_file_extended(slot_name):
-        """Extended version that loads both map and player state"""
-        # Call original map load
-        result = _original_load_map_data_from_file(slot_name)
-
-        # Also load player state
-        load_player_state_from_file(slot_name)
-
-        return result
-
-    # Replace the functions
-    save_map_data_to_file = save_map_data_to_file_extended
-    load_map_data_from_file = load_map_data_from_file_extended

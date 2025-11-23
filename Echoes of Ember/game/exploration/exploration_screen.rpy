@@ -84,14 +84,34 @@ screen exploration_view():
                         padding (10, 10)
 
                         if floor:
-                            fixed:
-                                # Show full map grid
-                                use map_grid_display(floor)
+                            $ cell_size = 32
+                            $ map_width = floor.dimensions[0] * cell_size
+                            $ map_height = floor.dimensions[1] * cell_size
 
-                                # Add player marker (red triangle)
-                                if ps and map_grid:
-                                    $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
-                                    add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
+                            viewport:
+                                xsize int(config.screen_width * 0.25)
+                                ysize int(config.screen_width * 0.25)
+                                draggable True
+                                mousewheel True
+
+                                fixed:
+                                    xsize map_width
+                                    ysize map_height
+
+                                    # Draw tiles
+                                    for y in range(floor.dimensions[1]):
+                                        for x in range(floor.dimensions[0]):
+                                            $ tile = floor.get_tile(x, y)
+                                            if tile.tile_type != "empty":
+                                                add Transform("images/maps/tiles/{}.png".format(tile.tile_type), rotate=tile.rotation) xpos x*cell_size ypos y*cell_size
+
+                                    # Draw icons
+                                    for (icon_x, icon_y), icon in floor.icons.items():
+                                        add "images/maps/icons/{}.png".format(icon.icon_type) xpos icon_x*cell_size ypos icon_y*cell_size
+
+                                    # Add player marker
+                                    if ps:
+                                        add PlayerTriangleMarker(ps.x, ps.y, ps.rotation, cell_size)
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
