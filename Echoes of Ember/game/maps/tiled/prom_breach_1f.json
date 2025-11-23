@@ -48,6 +48,11 @@
                          "name":"pair_id",
                          "type":"string",
                          "value":"tp1"
+                        }, 
+                        {
+                         "name":"prompt_facing",
+                         "type":"string",
+                         "value":"w"
                         }],
                  "rotation":0,
                  "type":"",
@@ -66,6 +71,11 @@
                          "name":"pair_id",
                          "type":"string",
                          "value":"tp1"
+                        }, 
+                        {
+                         "name":"prompt_facing",
+                         "type":"string",
+                         "value":"n"
                         }],
                  "rotation":0,
                  "type":"",
