@@ -124,7 +124,10 @@ init python:
             height = tiled_data.get("height", 20)
 
             # Extract custom properties for exploration
-            properties = TiledImporter._extract_properties(tiled_data.get("properties", []))
+            raw_props = tiled_data.get("properties", [])
+            print("TiledImporter - Raw properties from JSON: {}".format(raw_props))
+            properties = TiledImporter._extract_properties(raw_props)
+            print("TiledImporter - Extracted properties dict: {}".format(properties))
 
             # Use floor_id from properties, or parameter, or derive from filename
             if not floor_id:
@@ -145,6 +148,10 @@ init python:
             floor.area_name = properties.get("area_name", "")
             floor.sub_area_name = properties.get("sub_area_name", "")
             floor.description = properties.get("description", "")
+
+            print("TiledImporter - Floor properties set: start=({},{}) rot={} view_dist={}".format(
+                floor.starting_x, floor.starting_y, floor.starting_rotation, floor.view_distance
+            ))
 
             # Build tile ID mapping from tilesets
             tile_id_map = TiledImporter._build_tile_id_map(tiled_data.get("tilesets", []))
