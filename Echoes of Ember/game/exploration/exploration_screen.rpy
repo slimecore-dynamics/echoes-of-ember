@@ -71,15 +71,15 @@ screen exploration_view():
 
                 vbox:
                     spacing 10
-                    xalign 0.5
+                    xpos 10  # Move right by 10 pixels
 
-                    # SPACER - move everything down 200 pixels
-                    null height 100
+                    # SPACER - move everything down
+                    null height 75
 
                     # MAP VIEW (using existing map_grid_display screen)
                     frame:
-                        xsize int(config.screen_width * 0.28)
-                        ysize int(config.screen_width * 0.28)  # Square viewport for 20x20 grid
+                        xsize int(config.screen_width * 0.25)
+                        ysize int(config.screen_width * 0.25)  # Square viewport
                         background "#000000"
                         padding (10, 10)
 
@@ -95,65 +95,53 @@ screen exploration_view():
                         else:
                             text "No map" xalign 0.5 yalign 0.5
 
-                    # PALETTE with custom layout
+                    # PALETTE - 6x4 grid with tiles and icons
                     frame:
                         xsize int(config.screen_width * 0.314)
                         ysize int(config.screen_height * 0.15)
                         background "#2A2A2A"
                         padding (10, 10)
 
-                        vbox:
-                            spacing 8
+                        # 6 columns x 4 rows
+                        grid 6 4:
+                            spacing 3
+                            xalign 0.5
 
-                            # All 16 tile variants (4 rows x 4 columns)
-                            grid 4 4:
-                                spacing 3
-                                xalign 0.5
-                                # All tile variants
-                                for tile_variant in ["hallway_we", "hallway_ns", "corner_es", "corner_ne",
-                                                     "corner_wn", "corner_ws", "t_intersection_wse", "t_intersection_nws",
-                                                     "t_intersection_wne", "t_intersection_nes", "wall_wse", "wall_nws",
-                                                     "wall_wne", "wall_nes", "cross", "empty"]:
-                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_variant)
+                            # Row 1: empty, corner_es, t_intersection_nes, wall_nes, door, stairs_up
+                            # Row 2: cross, corner_ne, t_intersection_nws, wall_nws, enemy, stairs_down
+                            # Row 3: hallway_ns, corner_wn, t_intersection_wne, wall_wne, event, teleporter
+                            # Row 4: hallway_we, corner_ws, t_intersection_wse, wall_wse, gathering, note
+
+                            for item in ["empty", "corner_es", "t_intersection_nes", "wall_nes", "door", "stairs_up",
+                                        "cross", "corner_ne", "t_intersection_nws", "wall_nws", "enemy", "stairs_down",
+                                        "hallway_ns", "corner_wn", "t_intersection_wne", "wall_wne", "event", "teleporter",
+                                        "hallway_we", "corner_ws", "t_intersection_wse", "wall_wse", "gathering", "note"]:
+
+                                # Determine if it's a tile or icon
+                                $ is_icon = item in ["door", "stairs_up", "stairs_down", "enemy", "event", "teleporter", "gathering", "note"]
+
+                                if is_icon:
+                                    # Icon button
+                                    $ icon_name = "door" if item == "door" else item
+                                    $ icon_image = "images/maps/icons/{}.png".format(icon_name)
+                                    $ icon_type = "door_closed" if item == "door" else item
+                                    imagebutton:
+                                        idle icon_image
+                                        hover icon_image
+                                        action Function(select_icon_for_placement, icon_type)
+                                        xysize (32, 32)
+                                        selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                        selected_background "#FFFF0080"
+                                else:
+                                    # Tile button
+                                    $ tile_image = "images/maps/tiles/{}.png".format(item)
                                     imagebutton:
                                         idle tile_image
                                         hover tile_image
-                                        action Function(select_tile_type, tile_variant)
+                                        action Function(select_tile_type, item)
                                         xysize (32, 32)
-                                        selected (map_grid.selected_tile_type == tile_variant and map_grid.current_mode == "edit_tiles" if map_grid else False)
+                                        selected (map_grid.selected_tile_type == item and map_grid.current_mode == "edit_tiles" if map_grid else False)
                                         selected_background "#FFFF0080"
-
-                            # Row 2-3: Icon rows
-                            vbox:
-                                spacing 5
-
-                                # Icons row 1 (stairs, doors)
-                                grid 4 1:
-                                    spacing 3
-                                    for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
-                                        # Map door variants to the single door icon
-                                        $ icon_name = "door" if "door" in icon_type else icon_type
-                                        $ icon_image = "images/maps/icons/{}.png".format(icon_name)
-                                        imagebutton:
-                                            idle icon_image
-                                            hover icon_image
-                                            action Function(select_icon_for_placement, icon_type)
-                                            xysize (32, 32)
-                                            selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                            selected_background "#FFFF0080"
-
-                                # Icons row 2 (gathering, enemy, event, etc)
-                                grid 4 1:
-                                    spacing 3
-                                    for icon_type in ["gathering", "enemy", "event", "teleporter"]:
-                                        $ icon_image = "images/maps/icons/{}.png".format(icon_type)
-                                        imagebutton:
-                                            idle icon_image
-                                            hover icon_image
-                                            action Function(select_icon_for_placement, icon_type)
-                                            xysize (32, 32)
-                                            selected (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                            selected_background "#FFFF0080"
 
                     # NAVIGATION CONTROLS
                     frame:
