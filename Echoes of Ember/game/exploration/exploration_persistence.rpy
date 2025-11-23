@@ -182,7 +182,10 @@ init -1 python:
         # (those come from Tiled JSON via load_dungeon_floor)
         global map_grid
 
+        print("DEBUG load_map_data_from_file: slot_name = {}".format(slot_name))
+
         if not slot_name:
+            print("DEBUG load_map_data_from_file: No slot_name provided")
             return False
 
         try:
@@ -194,10 +197,14 @@ init -1 python:
 
             # Map grid file path
             map_path = os.path.join(map_dir, "{}_mapgrid.json".format(safe_name))
+            print("DEBUG load_map_data_from_file: Looking for file: {}".format(map_path))
 
             # Check if file exists
             if not os.path.exists(map_path):
+                print("DEBUG load_map_data_from_file: File does not exist!")
                 return False
+
+            print("DEBUG load_map_data_from_file: File exists, loading...")
 
             # Load JSON
             with open(map_path, 'r', encoding='utf-8') as f:
@@ -231,6 +238,7 @@ init -1 python:
 
                 map_grid.floors[floor_id] = floor
 
+            print("DEBUG load_map_data_from_file: Successfully loaded map data!")
             return True
 
         except Exception as e:
