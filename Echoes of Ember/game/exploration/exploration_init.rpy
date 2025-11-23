@@ -70,6 +70,13 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
             map_grid.floors[floor.floor_id] = floor
             map_grid.current_floor_id = floor.floor_id
 
+            print("LoadDungeon - Floor loaded: ID={}, starting=({},{}) rot={}".format(
+                floor.floor_id,
+                getattr(floor, 'starting_x', 10),
+                getattr(floor, 'starting_y', 10),
+                getattr(floor, 'starting_rotation', 0)
+            ))
+
             # Initialize or reset player state for this floor
             if not player_state:
                 player_state = PlayerState(
@@ -78,12 +85,18 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
                     rotation=getattr(floor, 'starting_rotation', 0),
                     floor_id=floor.floor_id
                 )
+                print("LoadDungeon - Created NEW player_state at ({},{}) rot={}".format(
+                    player_state.x, player_state.y, player_state.rotation
+                ))
             else:
                 # Move player to starting position
                 player_state.x = getattr(floor, 'starting_x', 10)
                 player_state.y = getattr(floor, 'starting_y', 10)
                 player_state.rotation = getattr(floor, 'starting_rotation', 0)
                 player_state.current_floor_id = floor.floor_id
+                print("LoadDungeon - Updated EXISTING player_state to ({},{}) rot={}".format(
+                    player_state.x, player_state.y, player_state.rotation
+                ))
 
             renpy.notify("Loaded floor: {}".format(floor.floor_name))
         else:
