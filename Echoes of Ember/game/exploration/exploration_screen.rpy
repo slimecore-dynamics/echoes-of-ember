@@ -105,61 +105,63 @@ screen exploration_view():
                         vbox:
                             spacing 8
 
-                            # Row 1: Tiles (center aligned)
-                            text "Tiles" size 12 xalign 0.5
+                            # Row 1: Tiles (center aligned, no header)
                             grid 6 1:
                                 spacing 3
                                 xalign 0.5
+                                # Map tile types to their default image variants
+                                $ tile_image_map = {
+                                    "hallway": "hallway_we",
+                                    "corner": "corner_es",
+                                    "t_intersection": "t_intersection_wse",
+                                    "cross": "cross",
+                                    "wall": "wall_wse",
+                                    "empty": "empty"
+                                }
                                 for tile_type in ["hallway", "corner", "t_intersection", "cross", "wall", "empty"]:
                                     $ is_selected = (map_grid.selected_tile_type == tile_type and map_grid.current_mode == "edit_tiles" if map_grid else False)
-                                    textbutton tile_type.replace("_", " ")[:7]:
+                                    $ tile_image = "images/maps/tiles/{}.png".format(tile_image_map[tile_type])
+                                    imagebutton:
+                                        idle tile_image
+                                        hover tile_image
                                         action Function(select_tile_type, tile_type)
-                                        xsize 60
-                                        ysize 25
-                                        text_size 8
-                                        selected is_selected
+                                        xysize (32, 32)
+                                        if is_selected:
+                                            background "#FFFF0080"
 
-                            # Rows 2-3: hbox with icons on left, rotate on right
-                            hbox:
-                                spacing 10
+                            # Row 2-3: Icon rows
+                            vbox:
+                                spacing 5
 
-                                # Left half: vbox with icon rows
-                                vbox:
-                                    spacing 5
+                                # Icons row 1 (stairs, doors)
+                                grid 4 1:
+                                    spacing 3
+                                    for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
+                                        $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                        # Map door variants to the single door icon
+                                        $ icon_name = "door" if "door" in icon_type else icon_type
+                                        $ icon_image = "images/maps/icons/{}.png".format(icon_name)
+                                        imagebutton:
+                                            idle icon_image
+                                            hover icon_image
+                                            action Function(select_icon_for_placement, icon_type)
+                                            xysize (32, 32)
+                                            if is_selected:
+                                                background "#FFFF0080"
 
-                                    # Icons row 1 (stairs, doors)
-                                    text "Icons" size 12
-                                    grid 4 1:
-                                        spacing 3
-                                        for icon_type in ["stairs_up", "stairs_down", "door_closed", "door_open"]:
-                                            $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                            textbutton icon_type.replace("_", " ")[:7]:
-                                                action Function(select_icon_for_placement, icon_type)
-                                                xsize 60
-                                                ysize 25
-                                                text_size 7
-                                                selected is_selected
-
-                                    # Icons row 2 (gathering, enemy, event, etc)
-                                    grid 4 1:
-                                        spacing 3
-                                        for icon_type in ["gathering", "enemy", "event", "teleporter"]:
-                                            $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
-                                            textbutton icon_type.replace("_", " ")[:7]:
-                                                action Function(select_icon_for_placement, icon_type)
-                                                xsize 60
-                                                ysize 25
-                                                text_size 7
-                                                selected is_selected
-
-                                # Right half: Rotate button
-                                textbutton "Rotate":
-                                    action Function(rotate_selected_tile)
-                                    xalign 1.0
-                                    yalign 1.0
-                                    xsize 60
-                                    ysize 55
-                                    sensitive (not exploration_dialogue_active)
+                                # Icons row 2 (gathering, enemy, event, etc)
+                                grid 4 1:
+                                    spacing 3
+                                    for icon_type in ["gathering", "enemy", "event", "teleporter"]:
+                                        $ is_selected = (map_grid.selected_icon_type == icon_type and map_grid.current_mode == "edit_icons" if map_grid else False)
+                                        $ icon_image = "images/maps/icons/{}.png".format(icon_type)
+                                        imagebutton:
+                                            idle icon_image
+                                            hover icon_image
+                                            action Function(select_icon_for_placement, icon_type)
+                                            xysize (32, 32)
+                                            if is_selected:
+                                                background "#FFFF0080"
 
                     # NAVIGATION CONTROLS
                     frame:
@@ -190,7 +192,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                text_align 0.5
+                                text_xalign 0.5
                                 sensitive (can_move and not exploration_dialogue_active)
 
                             # Empty line
@@ -225,7 +227,7 @@ screen exploration_view():
                                 xalign 0.5
                                 xsize 100
                                 ysize 40
-                                text_align 0.5
+                                text_xalign 0.5
                                 sensitive (not exploration_dialogue_active)
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)

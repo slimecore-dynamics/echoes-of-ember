@@ -29,11 +29,11 @@ init python:
             elif filename == "cross":
                 return ("cross", 0)
             elif filename.startswith("hallway_"):
-                # hallway_hor = horizontal (E-W) = 0 degrees
-                # hallway_ver = vertical (N-S) = 90 degrees
-                if "hor" in filename:
+                # hallway_we = horizontal (W-E) = 0 degrees
+                # hallway_ns = vertical (N-S) = 90 degrees
+                if "we" in filename:
                     return ("hallway", 0)
-                elif "ver" in filename:
+                elif "ns" in filename:
                     return ("hallway", 90)
             elif filename.startswith("corner_"):
                 # corner_es = E+S openings = 0 degrees
@@ -49,30 +49,30 @@ init python:
                 elif "ws" in filename:
                     return ("corner", 90)
             elif filename.startswith("t_intersection_"):
-                # t_intersection_wne = W+N+E openings (no S) = 0 degrees
-                # t_intersection_nes = N+E+S openings (no W) = 270 degrees
-                # t_intersection_wse = W+S+E openings (no N) = 180 degrees
-                # t_intersection_nws = N+W+S openings (no E) = 90 degrees
-                if "wne" in filename:
+                # t_intersection_wse = W+S+E openings (blocks N) = 0 degrees
+                # t_intersection_nws = N+W+S openings (blocks E) = 90 degrees
+                # t_intersection_wne = W+N+E openings (blocks S) = 180 degrees
+                # t_intersection_nes = N+E+S openings (blocks W) = 270 degrees
+                if "wse" in filename:
                     return ("t_intersection", 0)
-                elif "nes" in filename:
-                    return ("t_intersection", 270)
-                elif "wse" in filename:
-                    return ("t_intersection", 180)
                 elif "nws" in filename:
                     return ("t_intersection", 90)
-            elif filename.startswith("wall_"):
-                # wall_wne = walls on W+N+E, opening S = 0 degrees
-                # wall_nes = walls on N+E+S, opening W = 90 degrees
-                # wall_wse = walls on W+S+E, opening N = 180 degrees
-                # wall_nws = walls on N+W+S, opening E = 270 degrees
-                if "wne" in filename:
-                    return ("wall", 0)
+                elif "wne" in filename:
+                    return ("t_intersection", 180)
                 elif "nes" in filename:
-                    return ("wall", 90)
-                elif "wse" in filename:
-                    return ("wall", 180)
+                    return ("t_intersection", 270)
+            elif filename.startswith("wall_"):
+                # wall_wse = W+S+E openings (blocks N) = 0 degrees
+                # wall_nws = N+W+S openings (blocks E) = 90 degrees
+                # wall_wne = W+N+E openings (blocks S) = 180 degrees
+                # wall_nes = N+E+S openings (blocks W) = 270 degrees
+                if "wse" in filename:
+                    return ("wall", 0)
                 elif "nws" in filename:
+                    return ("wall", 90)
+                elif "wne" in filename:
+                    return ("wall", 180)
+                elif "nes" in filename:
                     return ("wall", 270)
 
             # Default fallback
