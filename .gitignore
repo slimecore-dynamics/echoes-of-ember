@@ -26,3 +26,18 @@ Echoes of Ember/dialogue.txt
 Echoes of Ember/strings.json
 *.rpyc
 *.rpyb
+
+# Tiled session files (temporary user state)
+*.tiled-session
+
+# Tiled backup files
+*.tmx~
+*.tsx~
+*.tmj~
+*.tsj~
+
+# Tiled autosave files
+*_autosave.tmx
+*_autosave.tsx
+*_autosave.tmj
+*_autosave.tsj
