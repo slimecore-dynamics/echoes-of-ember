@@ -53,6 +53,15 @@ init -2 python:
             self.sub_area_name = ""
             self.description = ""
 
+            # Path to Tiled JSON file for reloading dungeon layout
+            # This gets pickled so we can reload dungeon_tiles after loading saves
+            self.current_dungeon_file = None
+
+            # Whether this floor is accessible (for story progression)
+            # When False, story should not allow entering this floor
+            # But map data is preserved for potential gallery/review features
+            self.accessible = True
+
         def get_tile(self, x, y):
             # Get tile at position (returns drawn map tile).
             if 0 <= y < len(self.tiles) and 0 <= x < len(self.tiles[y]):
@@ -72,6 +81,21 @@ init -2 python:
             # Remove icon at position.
             if (x, y) in self.icons:
                 del self.icons[(x, y)]
+
+        def __getstate__(self):
+            # Custom pickle: exclude dungeon_tiles and dungeon_icons from saves
+            # These are large and should be reloaded from Tiled files, not pickled
+            # This prevents bloating save files with dungeon layout data
+            state = self.__dict__.copy()
+            state['dungeon_tiles'] = None
+            state['dungeon_icons'] = {}
+            return state
+
+        def __setstate__(self, state):
+            # Custom unpickle: restore attributes
+            self.__dict__.update(state)
+            # dungeon_tiles and dungeon_icons will be None/{} after unpickling
+            # They'll be restored by reloading from current_dungeon_file
 
     class MapGrid:
         # Container for all floors and mapping state.

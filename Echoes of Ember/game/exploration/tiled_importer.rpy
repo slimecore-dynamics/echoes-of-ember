@@ -78,6 +78,9 @@ init python:
             # Create FloorMap
             floor = FloorMap(floor_id, floor_name, (width, height))
 
+            # Store source file path for reloading dungeon layout after loading saves
+            floor.current_dungeon_file = filepath
+
             # Store exploration metadata on floor
             floor.starting_x = properties.get("starting_x", 10)
             floor.starting_y = properties.get("starting_y", 10)
@@ -263,6 +266,40 @@ init python:
                 # Create icon
                 icon = MapIcon(icon_type, (grid_x, grid_y), metadata=properties)
                 floor.place_icon(grid_x, grid_y, icon)
+
+        @staticmethod
+        def reload_dungeon_layout(floor):
+            # Reload dungeon_tiles and dungeon_icons from source file.
+            # Does NOT affect player-drawn tiles, icons, or revealed_tiles.
+            # Used after loading a save to restore dungeon layout.
+            #
+            # Args:
+            #     floor: FloorMap instance with current_dungeon_file attribute set
+            #
+            # Returns:
+            #     True if reloaded successfully, False otherwise
+            if not floor or not floor.current_dungeon_file:
+                return False
+
+            # Load the Tiled map fresh
+            temp_floor = TiledImporter.load_tiled_map(floor.current_dungeon_file)
+            if not temp_floor:
+                return False
+
+            # Copy only dungeon layout (NOT player-drawn data)
+            floor.dungeon_tiles = temp_floor.dungeon_tiles
+            floor.dungeon_icons = temp_floor.dungeon_icons
+
+            # Also refresh metadata in case Tiled file was updated
+            floor.starting_x = temp_floor.starting_x
+            floor.starting_y = temp_floor.starting_y
+            floor.starting_rotation = temp_floor.starting_rotation
+            floor.view_distance = temp_floor.view_distance
+            floor.area_name = temp_floor.area_name
+            floor.sub_area_name = temp_floor.sub_area_name
+            floor.description = temp_floor.description
+
+            return True
 
         @staticmethod
         def save_floor_as_tiled_json(floor, filepath):

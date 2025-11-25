@@ -601,7 +601,8 @@ screen load():
 
 screen file_slots(title):
 
-    default page_name_value = FilePageNameInputValue(pattern=_("Page {}"), auto=_("Automatic saves"), quick=_("Quick saves"))
+    default page_name_value = FilePageNameInputValue(pattern=_("Page {}"), auto=_("Auto/Quick Saves"), quick=_("Auto/Quick Saves"))
+    $ is_save_screen = (title == _("Save"))
 
     use game_menu(title):
 
@@ -624,32 +625,72 @@ screen file_slots(title):
                     value page_name_value
 
             ## The grid of file slots.
-            grid gui.file_slot_cols gui.file_slot_rows:
-                style_prefix "slot"
+            ## For auto/quick page in load screen, show custom layout with 2 slots
+            if (persistent._file_page == "auto" or persistent._file_page == "quick") and not is_save_screen:
+                ## Custom layout for auto and quick saves (side by side)
+                hbox:
+                    xalign 0.5
+                    yalign 0.5
+                    spacing 40
 
-                xalign 0.5
-                yalign 0.5
-
-                spacing gui.slot_spacing
-
-                for i in range(gui.file_slot_cols * gui.file_slot_rows):
-
-                    $ slot = i + 1
-
+                    ## Auto save slot
                     button:
-                        action FileActionWithMapData(slot)
+                        style "slot_button"
+                        action FileLoad("auto-1")
 
                         has vbox
 
-                        add FileScreenshot(slot) xalign 0.5
+                        add FileScreenshot("auto-1") xalign 0.5
 
-                        text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                        text FileTime("auto-1", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
                             style "slot_time_text"
 
-                        text FileSaveName(slot):
+                        text "Auto Save":
                             style "slot_name_text"
 
-                        key "save_delete" action FileDelete(slot)
+                    ## Quick save slot
+                    button:
+                        style "slot_button"
+                        action FileLoad("quick-1")
+
+                        has vbox
+
+                        add FileScreenshot("quick-1") xalign 0.5
+
+                        text FileTime("quick-1", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                            style "slot_time_text"
+
+                        text "Quick Save":
+                            style "slot_name_text"
+
+            else:
+                ## Normal grid for manual save pages
+                grid gui.file_slot_cols gui.file_slot_rows:
+                    style_prefix "slot"
+
+                    xalign 0.5
+                    yalign 0.5
+
+                    spacing gui.slot_spacing
+
+                    for i in range(gui.file_slot_cols * gui.file_slot_rows):
+
+                        $ slot = i + 1
+
+                        button:
+                            action FileAction(slot)
+
+                            has vbox
+
+                            add FileScreenshot(slot) xalign 0.5
+
+                            text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                                style "slot_time_text"
+
+                            text FileSaveName(slot):
+                                style "slot_name_text"
+
+                            key "save_delete" action FileDelete(slot)
 
             ## Buttons to access other pages.
             vbox:
@@ -666,11 +707,9 @@ screen file_slots(title):
                     textbutton _("<") action FilePagePrevious()
                     key "save_page_prev" action FilePagePrevious()
 
-                    if config.has_autosave:
-                        textbutton _("{#auto_page}A") action FilePage("auto")
-
-                    if config.has_quicksave:
-                        textbutton _("{#quick_page}Q") action FilePage("quick")
+                    ## Only show Auto/Quick page in Load screen (not Save screen)
+                    if not is_save_screen and (config.has_autosave or config.has_quicksave):
+                        textbutton _("{#autoquick_page}A/Q") action FilePage("auto")
 
                     ## range(1, 10) gives the numbers from 1 to 9.
                     for page in range(1, 10):
