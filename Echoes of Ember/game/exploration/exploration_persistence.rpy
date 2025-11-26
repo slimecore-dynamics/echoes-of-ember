@@ -26,23 +26,26 @@ init -1 python:
 
                 # Serialize each FloorMap (only player-drawn data and metadata)
                 for floor_id, floor in map_grid.floors.items():
+                    # Save only non-empty tiles with their positions (sparse)
+                    tiles = {}
+                    for y in range(floor.dimensions[1]):
+                        for x in range(floor.dimensions[0]):
+                            tile = floor.tiles[y][x]
+                            if tile.tile_type != "empty":
+                                tiles["{},{}".format(x, y)] = {"type": tile.tile_type}
+
                     map_data["floors"][floor_id] = {
                         "floor_id": floor.floor_id,
                         "floor_name": floor.floor_name,
                         "dimensions": floor.dimensions,
                         "current_dungeon_file": floor.current_dungeon_file,
                         "accessible": floor.accessible,
-                        # Serialize tiles (player-drawn)
-                        "tiles": [[{"type": tile.tile_type, "rotation": tile.rotation}
-                                for tile in row] for row in floor.tiles],
+                        "tiles": tiles,
                         # Serialize icons (player-placed)
                         "icons": {"{},{}".format(x, y): {"type": icon.icon_type,
                                                         "metadata": icon.metadata}
-                                for (x, y), icon in floor.icons.items()},
-                        # Serialize revealed tiles (auto-map)
-                        "revealed_tiles": list(floor.revealed_tiles)
+                                for (x, y), icon in floor.icons.items()}
                     }
-
                 json_dict["map_grid"] = map_data
 
             # Serialize player_state if it exists
@@ -58,21 +61,51 @@ init -1 python:
     def deserialize_map_data_after_load():
         """
         Callback for config.after_load_callbacks.
-        Reloads dungeon_tiles and dungeon_icons from Tiled files after loading.
+        Reloads dungeon_tiles from Tiled files and player-drawn map from JSON.
 
         This is called automatically whenever ANY load happens (regular, quick, or auto).
-        The map_grid was already restored by Ren'Py's pickle system (without dungeon_tiles).
-        We just need to reload dungeon_tiles from the Tiled files.
         """
-        global map_grid, player_state
+        global map_grid
 
         try:
-            # Reload dungeon layouts for all floors (dungeon_tiles/dungeon_icons)
+            # Step 1: Reload dungeon_tiles from Tiled files (for movement)
             # These were excluded from pickling via __getstate__ to save space
             if map_grid and map_grid.floors:
                 for floor_id, floor in map_grid.floors.items():
                     if hasattr(floor, 'current_dungeon_file') and floor.current_dungeon_file:
                         TiledImporter.reload_dungeon_layout(floor)
+
+            # Step 2: Read JSON and restore player-drawn map (for display)
+            if hasattr(persistent, '_loaded_slot') and persistent._loaded_slot:
+                slot_name = persistent._loaded_slot
+                json_data = renpy.slot_json(slot_name)
+
+                if json_data and "map_grid" in json_data:
+                    map_data = json_data["map_grid"]
+
+                    # Restore each floor's player-drawn data
+                    for floor_id, floor_data in map_data.get("floors", {}).items():
+                        if floor_id in map_grid.floors:
+                            floor = map_grid.floors[floor_id]
+
+                            # Clear existing drawn tiles (start fresh)
+                            for y in range(floor.dimensions[1]):
+                                for x in range(floor.dimensions[0]):
+                                    floor.set_tile(x, y, MapTile("empty", rotation=0))
+
+                            # Reconstruct tiles from sparse JSON data
+                            tiles_data = floor_data.get("tiles", {})
+                            for pos_key, tile_data in tiles_data.items():
+                                x, y = map(int, pos_key.split(","))
+                                floor.set_tile(x, y, MapTile(tile_data["type"], rotation=0))
+
+                            # Reconstruct icons
+                            icons_data = floor_data.get("icons", {})
+                            floor.icons = {}
+                            for pos_key, icon_data in icons_data.items():
+                                x, y = map(int, pos_key.split(","))
+                                icon = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
+                                floor.icons[(x, y)] = icon
 
         except Exception as e:
             # If deserialization fails, log but don't crash the load
@@ -91,3 +124,27 @@ init -1 python:
     config.autosave_slots = 1  # Only one autosave slot
     config.has_quicksave = True
     # Note: config.quicksave_slots doesn't exist, but QuickSave action handles this
+
+    # Wrapper actions for tracking which slot is being loaded
+    class FileLoadWithTracking(Action):
+        """Wrapper for FileLoad that tracks which slot is being loaded."""
+        def __init__(self, name, **kwargs):
+            self.name = name
+            self.kwargs = kwargs
+
+        def __call__(self):
+            # Store slot name in persistent (survives the load!)
+            persistent._loaded_slot = self.name
+            return FileLoad(self.name, **self.kwargs)()
+
+
+    class FileActionWithTracking(Action):
+        """Wrapper for FileAction that tracks which slot is being loaded."""
+        def __init__(self, name, **kwargs):
+            self.name = name
+            self.kwargs = kwargs
+
+        def __call__(self):
+            # Store slot name in persistent (survives the load!)
+            persistent._loaded_slot = self.name
+            return FileAction(self.name, **self.kwargs)()

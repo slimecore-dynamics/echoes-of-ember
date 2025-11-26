@@ -87,15 +87,15 @@ init -2 python:
             # These are large and should be reloaded from Tiled files, not pickled
             # This prevents bloating save files with dungeon layout data
             state = self.__dict__.copy()
-            state['dungeon_tiles'] = None
+            del state['dungeon_tiles']
             state['dungeon_icons'] = {}
             return state
 
         def __setstate__(self, state):
             # Custom unpickle: restore attributes
             self.__dict__.update(state)
-            # dungeon_tiles and dungeon_icons will be None/{} after unpickling
-            # They'll be restored by reloading from current_dungeon_file
+            # dungeon_tiles won't exist after unpickling (will be set by callback)
+            # dungeon_icons will be {} after unpickling
 
     class MapGrid:
         # Container for all floors and mapping state.

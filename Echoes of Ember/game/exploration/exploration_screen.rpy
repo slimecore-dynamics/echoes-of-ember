@@ -771,16 +771,8 @@ init python:
                 dungeon_tile = floor.dungeon_tiles[y][x]
 
                 if dungeon_tile and dungeon_tile.tile_type != "empty":
-                    # Copy dungeon tile to drawn map
-                    import copy
-                    floor.set_tile(x, y, copy.deepcopy(dungeon_tile))
-
-                    # Initialize revealed_tiles set if it doesn't exist
-                    if not hasattr(floor, 'revealed_tiles'):
-                        floor.revealed_tiles = set()
-
-                    # Add this tile to revealed tiles
-                    floor.revealed_tiles.add((x, y))
+                    # Copy only tile type, no rotation
+                    floor.set_tile(x, y, MapTile(dungeon_tile.tile_type, rotation=0))
 
     def handle_step_on_trigger(icon, floor, x, y):
         # Handle step-on interactions (gathering, event, teleporter, enemy)
