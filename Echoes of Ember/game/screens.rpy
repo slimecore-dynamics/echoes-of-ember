@@ -636,7 +636,7 @@ screen file_slots(title):
                     ## Auto save slot
                     button:
                         style "slot_button"
-                        action FileLoadWithTracking("auto-1")
+                        action FileLoad("auto-1")
 
                         has vbox
 
@@ -651,7 +651,7 @@ screen file_slots(title):
                     ## Quick save slot
                     button:
                         style "slot_button"
-                        action FileLoadWithTracking("quick-1")
+                        action FileLoad("quick-1")
 
                         has vbox
 
@@ -678,7 +678,7 @@ screen file_slots(title):
                         $ slot = i + 1
 
                         button:
-                            action FileActionWithTracking(slot)
+                            action FileAction(slot)
 
                             has vbox
 
