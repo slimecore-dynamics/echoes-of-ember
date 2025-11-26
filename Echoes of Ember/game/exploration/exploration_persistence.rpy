@@ -240,11 +240,21 @@ init -1 python:
 
         def __call__(self):
             import sys
-            # Write slot name to temp file before loading (if loading)
+            # Construct full slot name
+            if isinstance(self.name, int):
+                # It's a slot number - need to add page prefix
+                page = persistent._file_page if hasattr(persistent, '_file_page') and persistent._file_page else "1"
+                full_slot_name = "{}-{}".format(page, self.name)
+                print("Tracking action on slot: {} (converted to {})".format(self.name, full_slot_name), file=sys.stderr)
+            else:
+                # It's already a full slot name (like "auto-1", "quick-1")
+                full_slot_name = str(self.name)
+                print("Tracking action on slot: {}".format(full_slot_name), file=sys.stderr)
+
+            # Write full slot name to temp file before loading (if loading)
             try:
                 with open(get_slot_tracker_path(), 'w') as f:
-                    f.write(str(self.name))
-                print("Tracking action on slot: {}".format(self.name), file=sys.stderr)
+                    f.write(full_slot_name)
             except Exception as e:
                 print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
 
