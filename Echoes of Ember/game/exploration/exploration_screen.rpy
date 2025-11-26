@@ -835,7 +835,7 @@ init python:
 
                     # Trigger auto-map reveal at new location if enabled
                     if getattr(map_grid, 'auto_map_enabled', False):
-                        reveal_nearby_tiles(floor, target_pos[0], target_pos[1], player_state.rotation)
+                        auto_reveal_tile(floor, target_pos[0], target_pos[1])
 
                     renpy.restart_interaction()
                 else:
@@ -925,7 +925,7 @@ init python:
 
                 # Trigger auto-map reveal at new location if enabled
                 if getattr(map_grid, 'auto_map_enabled', False):
-                    reveal_nearby_tiles(floor, target_pos[0], target_pos[1], player_state.rotation)
+                    auto_reveal_tile(floor, target_pos[0], target_pos[1])
 
                 renpy.restart_interaction()
             else:
