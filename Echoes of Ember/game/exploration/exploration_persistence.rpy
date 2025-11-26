@@ -234,8 +234,8 @@ init -1 python:
             if deleted_count > 0:
                 print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
 
-            # Then do the quicksave
-            return QuickSave()()
+            # Then do the quicksave using renpy.save directly
+            renpy.save("quick-1")
 
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
