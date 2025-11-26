@@ -237,6 +237,15 @@ init -1 python:
             # Then do the quicksave using renpy.save directly
             renpy.save("quick-1")
 
+            # Debug: Check what files exist after save
+            print("\n=== POST-SAVE DEBUG ===", file=sys.stderr)
+            pattern = os.path.join(save_dir, "quick*")
+            for filepath in glob.glob(pattern):
+                filename = os.path.basename(filepath)
+                print("  Found file: {}".format(filename), file=sys.stderr)
+            print("  FileTime('quick-1'): {}".format(FileTime("quick-1") or "[EMPTY]"), file=sys.stderr)
+            print("=== POST-SAVE DEBUG END ===\n", file=sys.stderr)
+
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
         """Wrapper for FileLoad that tracks which slot is being loaded via temp file."""
@@ -255,7 +264,13 @@ init -1 python:
                 print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
 
             # Then perform the actual load
-            return FileLoad(self.name, **self.kwargs)()
+            try:
+                result = FileLoad(self.name, **self.kwargs)()
+                print("FileLoad completed for slot: {}".format(self.name), file=sys.stderr)
+                return result
+            except Exception as e:
+                print("!!! Error during FileLoad for {}: {}".format(self.name, e), file=sys.stderr)
+                raise
 
 
     class FileActionWithTracking(Action):
