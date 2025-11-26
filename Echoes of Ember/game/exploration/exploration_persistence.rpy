@@ -221,38 +221,24 @@ init -1 python:
             # Get save directory path
             save_dir = renpy.config.savedir
 
-            # Delete all quicksave files
-            pattern = os.path.join(save_dir, "quick*")
-            deleted_count = 0
-            for filepath in glob.glob(pattern):
-                try:
-                    os.remove(filepath)
-                    deleted_count += 1
-                except Exception as e:
-                    print("Failed to delete {}: {}".format(filepath, e), file=sys.stderr)
-
-            if deleted_count > 0:
-                print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
+            # # Delete all quicksave files (commented out - may interfere with cache)
+            # pattern = os.path.join(save_dir, "quick*")
+            # deleted_count = 0
+            # for filepath in glob.glob(pattern):
+            #     try:
+            #         os.remove(filepath)
+            #         deleted_count += 1
+            #     except Exception as e:
+            #         print("Failed to delete {}: {}".format(filepath, e), file=sys.stderr)
+            #
+            # if deleted_count > 0:
+            #     print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
 
             # Then do the quicksave using renpy.save directly
             renpy.save("quick-1")
 
-            # Debug: Check what files exist after save
-            print("\n=== POST-SAVE DEBUG ===", file=sys.stderr)
-            pattern = os.path.join(save_dir, "quick*")
-            for filepath in glob.glob(pattern):
-                filename = os.path.basename(filepath)
-                print("  Found file: {}".format(filename), file=sys.stderr)
-
-            # Check what Ren'Py thinks exists
-            saved_games = renpy.list_saved_games(fast=True)
-            quick_saves = [s for s in saved_games if 'quick' in str(s[0])]
-            print("  Ren'Py sees {} quick save(s)".format(len(quick_saves)), file=sys.stderr)
-            for slot, extra, mtime in quick_saves:
-                print("    Slot: {}".format(slot), file=sys.stderr)
-
-            print("  FileTime('quick-1'): {}".format(FileTime("quick-1") or "[EMPTY]"), file=sys.stderr)
-            print("=== POST-SAVE DEBUG END ===\n", file=sys.stderr)
+            # Force cache refresh so the save appears in FileTime/list_saved_games
+            renpy.loadsave.location.scan()
 
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
@@ -272,13 +258,7 @@ init -1 python:
                 print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
 
             # Then perform the actual load
-            try:
-                result = FileLoad(self.name, **self.kwargs)()
-                print("FileLoad completed for slot: {}".format(self.name), file=sys.stderr)
-                return result
-            except Exception as e:
-                print("!!! Error during FileLoad for {}: {}".format(self.name, e), file=sys.stderr)
-                raise
+            return FileLoad(self.name, **self.kwargs)()
 
 
     class FileActionWithTracking(Action):
