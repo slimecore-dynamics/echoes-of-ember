@@ -211,6 +211,32 @@ init -1 python:
     config.has_quicksave = True
     # Note: config.quicksave_slots doesn't exist, but QuickSave action handles this
 
+    # Custom QuickSave action that deletes old backups
+    class QuickSaveWithCleanup(Action):
+        """QuickSave that deletes old quicksave backups first to ensure only one quicksave exists."""
+        def __call__(self):
+            import glob
+            import sys
+
+            # Get save directory path
+            save_dir = renpy.config.savedir
+
+            # Delete all quicksave files
+            pattern = os.path.join(save_dir, "quick*")
+            deleted_count = 0
+            for filepath in glob.glob(pattern):
+                try:
+                    os.remove(filepath)
+                    deleted_count += 1
+                except Exception as e:
+                    print("Failed to delete {}: {}".format(filepath, e), file=sys.stderr)
+
+            if deleted_count > 0:
+                print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
+
+            # Then do the quicksave
+            return QuickSave()()
+
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
         """Wrapper for FileLoad that tracks which slot is being loaded via temp file."""
