@@ -251,7 +251,7 @@ screen quick_menu():
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
             textbutton _("Auto") action Preference("auto-forward", "toggle")
             textbutton _("Save") action ShowMenu('save')
-            textbutton _("Q.Save") action FileSave("quick-1", confirm=False)
+            textbutton _("Q.Save") action [FileSave("quick-1", confirm=False, page=None), Notify("Quick saved")]
             textbutton _("Q.Load") action FileLoadWithTracking("quick-1")
             textbutton _("Prefs") action ShowMenu('preferences')
 
@@ -632,6 +632,13 @@ screen file_slots(title):
                     xalign 0.5
                     yalign 0.5
                     spacing 40
+
+                    ## Debug: Check what FileTime returns for autosave
+                    $ import sys
+                    $ print("=== A/Q MENU DEBUG ===", file=sys.stderr)
+                    $ print("  FileTime('auto-1'): [{}]".format(FileTime("auto-1", empty="EMPTY")), file=sys.stderr)
+                    $ print("  FileTime('auto-1-LT1'): [{}]".format(FileTime("auto-1-LT1", empty="EMPTY")), file=sys.stderr)
+                    $ print("  FileTime('quick-1'): [{}]".format(FileTime("quick-1", empty="EMPTY")), file=sys.stderr)
 
                     ## Auto save slot
                     button:
