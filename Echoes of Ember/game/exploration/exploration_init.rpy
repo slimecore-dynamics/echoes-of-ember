@@ -133,8 +133,8 @@ label enter_exploration_mode(floor_id):
 
     # When we get here, player has exited exploration
 
-    # Autosave
-    $ renpy.save("auto-1")
+    # Autosave (creates proper autosave that shows in load menu)
+    $ renpy.force_autosave()
 
     return
 
