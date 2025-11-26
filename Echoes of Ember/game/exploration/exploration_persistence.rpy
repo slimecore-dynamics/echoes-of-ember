@@ -243,6 +243,14 @@ init -1 python:
             for filepath in glob.glob(pattern):
                 filename = os.path.basename(filepath)
                 print("  Found file: {}".format(filename), file=sys.stderr)
+
+            # Check what Ren'Py thinks exists
+            saved_games = renpy.list_saved_games(fast=True)
+            quick_saves = [s for s in saved_games if 'quick' in str(s[0])]
+            print("  Ren'Py sees {} quick save(s)".format(len(quick_saves)), file=sys.stderr)
+            for slot, extra, mtime in quick_saves:
+                print("    Slot: {}".format(slot), file=sys.stderr)
+
             print("  FileTime('quick-1'): {}".format(FileTime("quick-1") or "[EMPTY]"), file=sys.stderr)
             print("=== POST-SAVE DEBUG END ===\n", file=sys.stderr)
 
