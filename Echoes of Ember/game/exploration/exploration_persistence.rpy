@@ -218,8 +218,11 @@ init -1 python:
             import glob
             import sys
 
+            print("=== QUICKSAVE ACTION CALLED ===", file=sys.stderr)
+
             # Get save directory path
             save_dir = renpy.config.savedir
+            print("Save directory: {}".format(save_dir), file=sys.stderr)
 
             # Delete all quicksave files before creating new one
             pattern = os.path.join(save_dir, "quick*")
