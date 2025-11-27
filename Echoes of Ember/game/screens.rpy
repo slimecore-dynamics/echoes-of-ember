@@ -635,10 +635,12 @@ screen file_slots(title):
 
                     ## Debug: Check what FileTime returns for autosave
                     $ import sys
+
                     $ print("=== A/Q MENU DEBUG ===", file=sys.stderr)
                     $ print("  FileTime('auto-1'): [{}]".format(FileTime("auto-1", empty="EMPTY")), file=sys.stderr)
                     $ print("  FileTime('auto-1-LT1'): [{}]".format(FileTime("auto-1-LT1", empty="EMPTY")), file=sys.stderr)
                     $ print("  FileTime('quick-1'): [{}]".format(FileTime("quick-1", empty="EMPTY")), file=sys.stderr)
+                    $ print("  renpy.list_saved_games(fast=True): {}".format(renpy.list_saved_games(fast=True)), file=sys.stderr)
 
                     ## Auto save slot
                     button:
@@ -712,9 +714,9 @@ screen file_slots(title):
                     spacing gui.page_spacing
 
                     if is_save_screen:
+                        $ persistent._file_page = "1"
                         textbutton _("<") action FilePagePrevious(auto=False, quick=False)
                         key "save_page_prev" action FilePagePrevious(auto=False, quick=False)
-                        $ FilePage(1)
                     else:
                         textbutton _("<") action FilePagePrevious(auto=True, quick=True)
                         key "save_page_prev" action FilePagePrevious(auto=True, quick=True)
