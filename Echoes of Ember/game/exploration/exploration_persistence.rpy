@@ -86,15 +86,13 @@ init -1 python:
 
         This is called automatically whenever ANY load happens (regular, quick, or auto).
         """
-        global map_grid, player_state
-
         try:
             import sys
             print("\n=== DESERIALIZE DEBUG START ===", file=sys.stderr)
-            print("map_grid exists after pickle: {}".format(map_grid is not None), file=sys.stderr)
+            print("map_grid exists after pickle: {}".format(store.map_grid is not None), file=sys.stderr)
 
             # If pickle failed to restore map_grid, restore from JSON
-            if not map_grid:
+            if not store.map_grid:
                 print("Pickle failed - restoring from JSON", file=sys.stderr)
 
                 # Read slot name from tracking file
@@ -118,10 +116,10 @@ init -1 python:
                             map_data = json_data["map_grid"]
                             print("Restoring map_grid from JSON...", file=sys.stderr)
 
-                            # Reconstruct MapGrid
-                            map_grid = MapGrid()
-                            map_grid.current_floor_id = map_data.get("current_floor_id")
-                            map_grid.auto_map_enabled = map_data.get("auto_map_enabled", False)
+                            # Reconstruct MapGrid - update global store variable
+                            store.map_grid = MapGrid()
+                            store.map_grid.current_floor_id = map_data.get("current_floor_id")
+                            store.map_grid.auto_map_enabled = map_data.get("auto_map_enabled", False)
 
                             # Reconstruct each floor
                             for floor_id, floor_data in map_data.get("floors", {}).items():
@@ -154,20 +152,20 @@ init -1 python:
                                     floor.icons[(x, y)] = icon
                                 print("    Restored {} icons".format(len(icons_data)), file=sys.stderr)
 
-                                map_grid.floors[floor_id] = floor
+                                store.map_grid.floors[floor_id] = floor
 
-                        # Restore player_state from JSON
+                        # Restore player_state from JSON - update global store variable
                         if "player_state" in json_data:
                             print("Restoring player_state from JSON...", file=sys.stderr)
-                            player_state = PlayerState.from_dict(json_data["player_state"])
+                            store.player_state = PlayerState.from_dict(json_data["player_state"])
                             print("  Player at ({}, {}) on floor {}".format(
-                                player_state.x, player_state.y, player_state.current_floor_id), file=sys.stderr)
+                                store.player_state.x, store.player_state.y, store.player_state.current_floor_id), file=sys.stderr)
 
             # Now reload dungeon_tiles from Tiled files (for movement validation)
             # These were excluded from JSON to save space
-            if map_grid and map_grid.floors:
+            if store.map_grid and store.map_grid.floors:
                 print("Reloading dungeon_tiles from Tiled files...", file=sys.stderr)
-                for floor_id, floor in map_grid.floors.items():
+                for floor_id, floor in store.map_grid.floors.items():
                     print("Processing floor: {}".format(floor_id), file=sys.stderr)
 
                     # Debug: Check what's in the floor
