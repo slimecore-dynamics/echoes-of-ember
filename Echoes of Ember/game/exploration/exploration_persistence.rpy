@@ -221,18 +221,18 @@ init -1 python:
             # Get save directory path
             save_dir = renpy.config.savedir
 
-            # # Delete all quicksave files (commented out - may interfere with cache)
-            # pattern = os.path.join(save_dir, "quick*")
-            # deleted_count = 0
-            # for filepath in glob.glob(pattern):
-            #     try:
-            #         os.remove(filepath)
-            #         deleted_count += 1
-            #     except Exception as e:
-            #         print("Failed to delete {}: {}".format(filepath, e), file=sys.stderr)
-            #
-            # if deleted_count > 0:
-            #     print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
+            # Delete all quicksave files before creating new one
+            pattern = os.path.join(save_dir, "quick*")
+            deleted_count = 0
+            for filepath in glob.glob(pattern):
+                try:
+                    os.remove(filepath)
+                    deleted_count += 1
+                except Exception as e:
+                    print("Failed to delete {}: {}".format(filepath, e), file=sys.stderr)
+
+            if deleted_count > 0:
+                print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
 
             # Then do the quicksave using renpy.save directly
             renpy.save("quick-1")
