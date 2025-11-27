@@ -252,7 +252,7 @@ screen quick_menu():
             textbutton _("Auto") action Preference("auto-forward", "toggle")
             textbutton _("Save") action ShowMenu('save')
             textbutton _("Q.Save") action QuickSave()
-            textbutton _("Q.Load") action QuickLoad()
+            textbutton _("Q.Load") action FileLoadWithTracking("quick-1")
             textbutton _("Prefs") action ShowMenu('preferences')
 
 
@@ -714,6 +714,7 @@ screen file_slots(title):
                     if is_save_screen:
                         textbutton _("<") action FilePagePrevious(auto=False, quick=False)
                         key "save_page_prev" action FilePagePrevious(auto=False, quick=False)
+                        $ FilePage(1)
                     else:
                         textbutton _("<") action FilePagePrevious(auto=True, quick=True)
                         key "save_page_prev" action FilePagePrevious(auto=True, quick=True)
