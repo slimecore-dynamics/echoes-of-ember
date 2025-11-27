@@ -4,11 +4,6 @@
 
 init -1 python:
     import json
-    import os
-
-    def get_slot_tracker_path():
-        """Get path to temp file for tracking which slot was loaded."""
-        return os.path.join(renpy.config.gamedir, ".last_loaded_slot")
 
     def serialize_map_data_for_save(json_dict):
         """
@@ -81,120 +76,56 @@ init -1 python:
     def deserialize_map_data_after_load():
         """
         Callback for config.after_load_callbacks.
-        Restores map_grid and player_state from JSON (pickle can't handle nested structures).
-        Then reloads dungeon_tiles from Tiled files.
+        Reloads dungeon_tiles from Tiled files and player-drawn map from JSON.
 
         This is called automatically whenever ANY load happens (regular, quick, or auto).
         """
+        global map_grid
+
         try:
-            import sys
-            print("\n=== DESERIALIZE DEBUG START ===", file=sys.stderr)
-            print("map_grid exists after pickle: {}".format(store.map_grid is not None), file=sys.stderr)
-
-            # If pickle failed to restore map_grid, restore from JSON
-            if not store.map_grid:
-                print("Pickle failed - restoring from JSON", file=sys.stderr)
-
-                # Read slot name from tracking file
-                slot_name = None
-                tracker_path = get_slot_tracker_path()
-                if os.path.exists(tracker_path):
-                    with open(tracker_path, 'r') as f:
-                        slot_name = f.read().strip()
-                    print("Loaded slot name from tracker: {}".format(slot_name), file=sys.stderr)
-                else:
-                    print("!!! No slot tracker file found!", file=sys.stderr)
-
-                if slot_name:
-                    # Get JSON data from the save file
-                    json_data = renpy.slot_json(slot_name)
-                    print("JSON data exists: {}".format(json_data is not None), file=sys.stderr)
-
-                    if json_data:
-                        # Restore map_grid from JSON
-                        if "map_grid" in json_data:
-                            map_data = json_data["map_grid"]
-                            print("Restoring map_grid from JSON...", file=sys.stderr)
-
-                            # Reconstruct MapGrid - update global store variable
-                            store.map_grid = MapGrid()
-                            store.map_grid.current_floor_id = map_data.get("current_floor_id")
-                            store.map_grid.auto_map_enabled = map_data.get("auto_map_enabled", False)
-
-                            # Reconstruct each floor
-                            for floor_id, floor_data in map_data.get("floors", {}).items():
-                                print("  Restoring floor: {}".format(floor_id), file=sys.stderr)
-
-                                # Create FloorMap
-                                dimensions = tuple(floor_data.get("dimensions", [20, 20]))
-                                floor = FloorMap(
-                                    floor_id=floor_data.get("floor_id", floor_id),
-                                    floor_name=floor_data.get("floor_name", "Unknown"),
-                                    dimensions=dimensions
-                                )
-
-                                # Restore metadata
-                                floor.current_dungeon_file = floor_data.get("current_dungeon_file")
-                                floor.accessible = floor_data.get("accessible", True)
-
-                                # Restore tiles from sparse JSON data
-                                tiles_data = floor_data.get("tiles", {})
-                                for pos_key, tile_data in tiles_data.items():
-                                    x, y = map(int, pos_key.split(","))
-                                    floor.set_tile(x, y, MapTile(tile_data["type"], rotation=0))
-                                print("    Restored {} tiles".format(len(tiles_data)), file=sys.stderr)
-
-                                # Restore icons
-                                icons_data = floor_data.get("icons", {})
-                                for pos_key, icon_data in icons_data.items():
-                                    x, y = map(int, pos_key.split(","))
-                                    icon = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
-                                    floor.icons[(x, y)] = icon
-                                print("    Restored {} icons".format(len(icons_data)), file=sys.stderr)
-
-                                store.map_grid.floors[floor_id] = floor
-
-                        # Restore player_state from JSON - update global store variable
-                        if "player_state" in json_data:
-                            print("Restoring player_state from JSON...", file=sys.stderr)
-                            store.player_state = PlayerState.from_dict(json_data["player_state"])
-                            print("  Player at ({}, {}) on floor {}".format(
-                                store.player_state.x, store.player_state.y, store.player_state.current_floor_id), file=sys.stderr)
-
-            # Now reload dungeon_tiles from Tiled files (for movement validation)
-            # These were excluded from JSON to save space
-            if store.map_grid and store.map_grid.floors:
-                print("Reloading dungeon_tiles from Tiled files...", file=sys.stderr)
-                for floor_id, floor in store.map_grid.floors.items():
-                    print("Processing floor: {}".format(floor_id), file=sys.stderr)
-
-                    # Debug: Check what's in the floor
-                    non_empty_tiles = 0
-                    if hasattr(floor, 'tiles') and floor.tiles:
-                        for row in floor.tiles:
-                            for tile in row:
-                                if tile.tile_type != "empty":
-                                    non_empty_tiles += 1
-                    print("  Non-empty tiles: {}".format(non_empty_tiles), file=sys.stderr)
-                    print("  Icons count: {}".format(len(floor.icons) if hasattr(floor, 'icons') else 0), file=sys.stderr)
-
-                    # Reload dungeon layout from Tiled
+            # Step 1: Reload dungeon_tiles from Tiled files (for movement)
+            # These were excluded from pickling via __getstate__ to save space
+            if map_grid and map_grid.floors:
+                for floor_id, floor in map_grid.floors.items():
                     if hasattr(floor, 'current_dungeon_file') and floor.current_dungeon_file:
-                        print("  Reloading dungeon from: {}".format(floor.current_dungeon_file), file=sys.stderr)
-                        success = TiledImporter.reload_dungeon_layout(floor)
-                        print("  Reload success: {}".format(success), file=sys.stderr)
-                        print("  dungeon_tiles exists: {}".format(hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles is not None), file=sys.stderr)
-                    else:
-                        print("  No current_dungeon_file set!", file=sys.stderr)
+                        TiledImporter.reload_dungeon_layout(floor)
 
-            print("=== DESERIALIZE DEBUG END ===\n", file=sys.stderr)
+            # Step 2: Read JSON and restore player-drawn map (for display)
+            if hasattr(persistent, '_loaded_slot') and persistent._loaded_slot:
+                slot_name = persistent._loaded_slot
+                json_data = renpy.slot_json(slot_name)
+
+                if json_data and "map_grid" in json_data:
+                    map_data = json_data["map_grid"]
+
+                    # Restore each floor's player-drawn data
+                    for floor_id, floor_data in map_data.get("floors", {}).items():
+                        if floor_id in map_grid.floors:
+                            floor = map_grid.floors[floor_id]
+
+                            # Clear existing drawn tiles (start fresh)
+                            for y in range(floor.dimensions[1]):
+                                for x in range(floor.dimensions[0]):
+                                    floor.set_tile(x, y, MapTile("empty", rotation=0))
+
+                            # Reconstruct tiles from sparse JSON data
+                            tiles_data = floor_data.get("tiles", {})
+                            for pos_key, tile_data in tiles_data.items():
+                                x, y = map(int, pos_key.split(","))
+                                floor.set_tile(x, y, MapTile(tile_data["type"], rotation=0))
+
+                            # Reconstruct icons
+                            icons_data = floor_data.get("icons", {})
+                            floor.icons = {}
+                            for pos_key, icon_data in icons_data.items():
+                                x, y = map(int, pos_key.split(","))
+                                icon = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
+                                floor.icons[(x, y)] = icon
 
         except Exception as e:
             # If deserialization fails, log but don't crash the load
             import sys
-            print("!!! Error deserializing map data: {}".format(e), file=sys.stderr)
-            import traceback
-            traceback.print_exc(file=sys.stderr)
+            print("Error deserializing map data: {}".format(e), file=sys.stderr)
 
 
     # Register the callbacks with Ren'Py
@@ -203,87 +134,37 @@ init -1 python:
     config.after_load_callbacks.append(deserialize_map_data_after_load)
 
 
-    # Configure single-slot autosave and quicksave
+    # Configure autosave and quicksave
     config.has_autosave = True
-    config.autosave_slots = 1  # Only one autosave slot
     config.has_quicksave = True
-    # Note: config.quicksave_slots doesn't exist, but QuickSave action handles this
 
-    # Custom QuickSave action that deletes old backups
-    class QuickSaveWithCleanup(Action):
-        """QuickSave that deletes old quicksave backups first to ensure only one quicksave exists."""
-        def __call__(self):
-            import glob
-            import sys
-
-            print("=== QUICKSAVE ACTION CALLED ===", file=sys.stderr)
-
-            # Get save directory path
-            save_dir = renpy.config.savedir
-            print("Save directory: {}".format(save_dir), file=sys.stderr)
-
-            # Delete all quicksave files before creating new one
-            pattern = os.path.join(save_dir, "quick*")
-            deleted_count = 0
-            for filepath in glob.glob(pattern):
-                try:
-                    os.remove(filepath)
-                    deleted_count += 1
-                except Exception as e:
-                    print("Failed to delete {}: {}".format(filepath, e), file=sys.stderr)
-
-            if deleted_count > 0:
-                print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
-
-            # Then do the quicksave using FileSave action (not renpy.save)
-            # FileSave properly registers the save with Ren'Py's system
-            return FileSave("quick-1", confirm=False)()
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
-        """Wrapper for FileLoad that tracks which slot is being loaded via temp file."""
+        """Wrapper for FileLoad that tracks which slot is being loaded."""
         def __init__(self, name, **kwargs):
             self.name = name
             self.kwargs = kwargs
 
         def __call__(self):
-            import sys
-            # Write slot name to temp file before loading
-            try:
-                with open(get_slot_tracker_path(), 'w') as f:
-                    f.write(self.name)
-                print("Tracking load from slot: {}".format(self.name), file=sys.stderr)
-            except Exception as e:
-                print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
-
-            # Then perform the actual load
+            # Store slot name in persistent (survives the load!)
+            persistent._loaded_slot = self.name
             return FileLoad(self.name, **self.kwargs)()
 
 
     class FileActionWithTracking(Action):
-        """Wrapper for FileAction that tracks which slot is being loaded via temp file."""
+        """Wrapper for FileAction that tracks which slot is being loaded."""
         def __init__(self, name, **kwargs):
             self.name = name
             self.kwargs = kwargs
 
         def __call__(self):
-            import sys
-            # Construct full slot name
+            # Construct full slot name for numbered slots
             if isinstance(self.name, int):
-                # It's a slot number - need to add page prefix
                 page = persistent._file_page if hasattr(persistent, '_file_page') and persistent._file_page else "1"
-                full_slot_name = "{}-{}".format(page, self.name)
-                print("Tracking action on slot: {} (converted to {})".format(self.name, full_slot_name), file=sys.stderr)
+                slot_name = "{}-{}".format(page, self.name)
             else:
-                # It's already a full slot name (like "auto-1", "quick-1")
-                full_slot_name = str(self.name)
-                print("Tracking action on slot: {}".format(full_slot_name), file=sys.stderr)
+                slot_name = self.name
 
-            # Write full slot name to temp file before loading (if loading)
-            try:
-                with open(get_slot_tracker_path(), 'w') as f:
-                    f.write(full_slot_name)
-            except Exception as e:
-                print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
-
-            # Then perform the actual action (save or load)
+            # Store slot name in persistent (survives the load!)
+            persistent._loaded_slot = slot_name
             return FileAction(self.name, **self.kwargs)()
