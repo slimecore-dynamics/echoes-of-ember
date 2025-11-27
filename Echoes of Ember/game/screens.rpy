@@ -643,13 +643,13 @@ screen file_slots(title):
                     ## Auto save slot
                     button:
                         style "slot_button"
-                        action FileLoadWithTracking("auto-1")
+                        action FileActionWithTracking(slot)
 
                         has vbox
 
-                        add FileScreenshot("auto-1") xalign 0.5
+                        add FileScreenshot(slot) xalign 0.5
 
-                        text FileTime("auto-1", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                        text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
                             style "slot_time_text"
 
                         text "Auto Save":
@@ -658,13 +658,13 @@ screen file_slots(title):
                     ## Quick save slot
                     button:
                         style "slot_button"
-                        action FileLoadWithTracking("quick-1")
+                        action FileActionWithTracking(slot)
 
                         has vbox
 
-                        add FileScreenshot("quick-1") xalign 0.5
+                        add FileScreenshot(slot) xalign 0.5
 
-                        text FileTime("quick-1", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                        text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
                             style "slot_time_text"
 
                         text "Quick Save":
@@ -711,11 +711,16 @@ screen file_slots(title):
 
                     spacing gui.page_spacing
 
-                    textbutton _("<") action FilePagePrevious()
-                    key "save_page_prev" action FilePagePrevious()
+                    if is_save_screen:
+                        textbutton _("<") action FilePagePrevious(auto=False, quick=False)
+                        key "save_page_prev" action FilePagePrevious(auto=False, quick=False)
+                    else:
+                        textbutton _("<") action FilePagePrevious(auto=True, quick=True)
+                        key "save_page_prev" action FilePagePrevious(auto=True, quick=True)
+                    
 
                     ## Only show Auto/Quick page in Load screen (not Save screen)
-                    if not is_save_screen and (config.has_autosave or config.has_quicksave):
+                    if not is_save_screen:
                         textbutton _("{#autoquick_page}A/Q") action FilePage("auto")
 
                     ## range(1, 10) gives the numbers from 1 to 9.
