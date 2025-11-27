@@ -68,10 +68,19 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
                     floor_id=floor.floor_id
                 )
             else:
-                # Move player to starting position
-                player_state.x = getattr(floor, 'starting_x', 10)
-                player_state.y = getattr(floor, 'starting_y', 10)
-                player_state.rotation = getattr(floor, 'starting_rotation', 0)
+                # Only reset to starting position if player is already there
+                # (if position differs, it's from a loaded save - keep it)
+                starting_x = getattr(floor, 'starting_x', 10)
+                starting_y = getattr(floor, 'starting_y', 10)
+                starting_rotation = getattr(floor, 'starting_rotation', 0)
+
+                if (player_state.x == starting_x and
+                    player_state.y == starting_y and
+                    player_state.rotation == starting_rotation):
+                    # Player is at default starting position, keep it
+                    pass
+                # else: position is different (loaded save), don't reset it
+
                 player_state.current_floor_id = floor.floor_id
 
         else:
@@ -116,10 +125,19 @@ label enter_exploration_mode(floor_id):
                 floor_id=floor_id
             )
         else:
-            # Move player to starting position
-            player_state.x = getattr(floor, 'starting_x', 10)
-            player_state.y = getattr(floor, 'starting_y', 10)
-            player_state.rotation = getattr(floor, 'starting_rotation', 0)
+            # Only reset to starting position if player is already there
+            # (if position differs, it's from a loaded save - keep it)
+            starting_x = getattr(floor, 'starting_x', 10)
+            starting_y = getattr(floor, 'starting_y', 10)
+            starting_rotation = getattr(floor, 'starting_rotation', 0)
+
+            if (player_state.x == starting_x and
+                player_state.y == starting_y and
+                player_state.rotation == starting_rotation):
+                # Player is at default starting position, keep it
+                pass
+            # else: position is different (loaded save), don't reset it
+
             player_state.current_floor_id = floor_id
 
         # Auto-reveal starting tile if auto-map is enabled

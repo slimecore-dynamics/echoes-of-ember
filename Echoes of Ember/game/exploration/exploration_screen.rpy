@@ -13,6 +13,7 @@ define color_interact = "#FFFF00"
 default exploration_dialogue_active = False
 
 default map_grid = None
+default player_state = None
 
 screen exploration_view():
     # Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.

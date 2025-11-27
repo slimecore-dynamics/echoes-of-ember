@@ -235,12 +235,9 @@ init -1 python:
             if deleted_count > 0:
                 print("Deleted {} old quicksave file(s)".format(deleted_count), file=sys.stderr)
 
-            # Then do the quicksave using renpy.save directly
-            renpy.save("quick-1")
-
-            # Force cache refresh so the save appears in FileTime/list_saved_games
-            # renpy.loadsave.location.scan()  # Commented out - may be causing exception
-
+            # Then do the quicksave using FileSave action (not renpy.save)
+            # FileSave properly registers the save with Ren'Py's system
+            return FileSave("quick-1", confirm=False)()
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
         """Wrapper for FileLoad that tracks which slot is being loaded via temp file."""
