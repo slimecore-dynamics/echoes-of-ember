@@ -238,7 +238,7 @@ init -1 python:
             renpy.save("quick-1")
 
             # Force cache refresh so the save appears in FileTime/list_saved_games
-            renpy.loadsave.location.scan()
+            # renpy.loadsave.location.scan()  # Commented out - may be causing exception
 
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
