@@ -18,7 +18,7 @@ init python:
         center_y = y * cell_size + (cell_size // 2)
 
         # Triangle size
-        tri_size = cell_size * 0.6
+        tri_size = cell_size * PLAYER_MARKER_SIZE_RATIO
 
         # Calculate triangle points based on rotation
         # Rotation 0 = pointing North (up)

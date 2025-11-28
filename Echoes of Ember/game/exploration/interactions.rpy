@@ -74,8 +74,7 @@ init python:
                 if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
                     required_facing = icon.metadata['prompt_facing'].lower()
                     # Map rotation to direction letter
-                    rotation_to_dir = {0: 'n', 90: 'e', 180: 's', 270: 'w'}
-                    current_dir = rotation_to_dir.get(rotation, '')
+                    current_dir = ROTATION_TO_DIRECTION_MAP.get(rotation, '')
 
                     # Only show prompt if facing the required direction
                     if current_dir != required_facing:
@@ -103,8 +102,7 @@ init python:
                 if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
                     required_facing = icon.metadata['prompt_facing'].lower()
                     # Map rotation to direction letter
-                    rotation_to_dir = {0: 'n', 90: 'e', 180: 's', 270: 'w'}
-                    current_dir = rotation_to_dir.get(rotation, '')
+                    current_dir = ROTATION_TO_DIRECTION_MAP.get(rotation, '')
 
                     # Only show prompt if facing the required direction
                     if current_dir != required_facing:

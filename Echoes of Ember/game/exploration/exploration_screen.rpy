@@ -67,7 +67,7 @@ screen exploration_view():
                     # Get view data
                     $ view_data = FirstPersonView.get_view_data(
                         floor, ps.x, ps.y, ps.rotation,
-                        view_distance=getattr(floor, 'view_distance', 3)
+                        view_distance=getattr(floor, 'view_distance', DEFAULT_VIEW_DISTANCE)
                     )
 
                     # Render first-person view
@@ -100,7 +100,7 @@ screen exploration_view():
                         # Calculate sizes accounting for gridlines
                         $ gridline_width = 2
                         $ border_thickness = 3
-                        $ available_size = int(config.screen_width * 0.30) - 20 - (border_thickness * 2)
+                        $ available_size = int(config.screen_width * MINIMAP_SIZE_RATIO) - 20 - (border_thickness * 2)
 
                         # Cell size accounting for gridlines between cells
                         $ cell_size = min(
@@ -155,8 +155,8 @@ screen exploration_view():
                     else:
                         # No floor loaded placeholder
                         frame:
-                            xsize int(config.screen_width * 0.30)
-                            ysize int(config.screen_width * 0.30)
+                            xsize int(config.screen_width * MINIMAP_SIZE_RATIO)
+                            ysize int(config.screen_width * MINIMAP_SIZE_RATIO)
                             xalign 0.5
                             background "#000000"
                             padding (10, 10)
@@ -164,7 +164,7 @@ screen exploration_view():
 
                     # PALETTE - Two grids: tiles (left) and icons (right)
                     frame:
-                        xsize int(config.screen_width * 0.314)
+                        xsize int(config.screen_width * SIDEBAR_CONTENT_WIDTH_RATIO)
                         background "#2A2A2A"
                         padding (10, 10)
 
@@ -225,7 +225,7 @@ screen exploration_view():
 
                     # NAVIGATION CONTROLS
                     frame:
-                        xsize int(config.screen_width * 0.314)
+                        xsize int(config.screen_width * SIDEBAR_CONTENT_WIDTH_RATIO)
                         background "#2A2A2A"
                         padding (10, 10)
 
@@ -286,7 +286,7 @@ screen exploration_view():
 
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
                     frame:
-                        xsize int(config.screen_width * 0.314)
+                        xsize int(config.screen_width * SIDEBAR_CONTENT_WIDTH_RATIO)
                         background "#2A2A2A"
                         padding (10, 10)
 

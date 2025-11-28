@@ -12,6 +12,12 @@ define FIRST_PERSON_VIEW_WIDTH_RATIO = 0.666
 # Map sidebar takes up 1/3 of screen width
 define MAP_VIEW_WIDTH_RATIO = 0.334
 
+# Sidebar content width ratio (for panels within the sidebar)
+define SIDEBAR_CONTENT_WIDTH_RATIO = 0.314
+
+# Minimap size ratio (relative to screen width)
+define MINIMAP_SIZE_RATIO = 0.30
+
 # ==========================================
 # MAP GRID CONSTANTS
 # Used in: exploration_screen.rpy, map_data.rpy, player_marker.rpy
@@ -22,6 +28,37 @@ define MAP_CELL_SIZE = 32
 
 # Width of gridlines between map cells in pixels
 define MAP_GRIDLINE_WIDTH = 2
+
+# ==========================================
+# PLAYER AND DUNGEON DEFAULTS
+# Used in: map_data.rpy, exploration_init.rpy, exploration_screen.rpy
+# Note: These are defaults - actual values loaded from Tiled files
+# ==========================================
+
+# Default starting position when no Tiled data available
+define DEFAULT_STARTING_X = 10
+define DEFAULT_STARTING_Y = 10
+define DEFAULT_STARTING_ROTATION = 0
+
+# Default view distance (how many tiles ahead player can see)
+define DEFAULT_VIEW_DISTANCE = 3
+
+# ==========================================
+# UI COMPONENT CONSTANTS
+# Used in: exploration_ui.rpy, player_marker.rpy
+# ==========================================
+
+# Player marker triangle size as ratio of cell size
+define PLAYER_MARKER_SIZE_RATIO = 0.6
+
+# ==========================================
+# GAMEPLAY CONSTANTS
+# Used in: exploration_handlers.rpy
+# ==========================================
+
+# Exploration percentage calculation weights
+define EXPLORATION_TILES_WEIGHT = 0.7
+define EXPLORATION_ITEMS_WEIGHT = 0.3
 
 # ==========================================
 # LEGACY COLOR DEFINES
@@ -98,3 +135,11 @@ init python:
         "cell_highlight": "#0066CC",
         "interaction_warning": "#FF0000AA"
     }
+
+    # ==========================================
+    # ROTATION AND DIRECTION MAPPING
+    # Used in: interactions.rpy, exploration_state.rpy
+    # ==========================================
+
+    # Map player rotation degrees to direction letters
+    ROTATION_TO_DIRECTION_MAP = {0: 'n', 90: 'e', 180: 's', 270: 'w'}

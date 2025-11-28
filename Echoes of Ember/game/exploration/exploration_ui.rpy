@@ -22,7 +22,7 @@ init python:
             render = renpy.Render(self.cell_size, self.cell_size)
 
             # Triangle size
-            tri_size = self.cell_size * 0.6
+            tri_size = self.cell_size * PLAYER_MARKER_SIZE_RATIO
             half_size = tri_size / 2.0
 
             # Center of cell

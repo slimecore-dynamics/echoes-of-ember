@@ -10,7 +10,7 @@ init python:
         """
 
         @staticmethod
-        def get_view_data(floor, player_x, player_y, player_rotation, view_distance=3):
+        def get_view_data(floor, player_x, player_y, player_rotation, view_distance=DEFAULT_VIEW_DISTANCE):
             """Calculate what the player can see ahead.
 
             Returns: dict with view information

@@ -62,17 +62,17 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
             # Initialize or reset player state for this floor
             if not player_state:
                 player_state = PlayerState(
-                    x=getattr(floor, 'starting_x', 10),
-                    y=getattr(floor, 'starting_y', 10),
-                    rotation=getattr(floor, 'starting_rotation', 0),
+                    x=getattr(floor, 'starting_x', DEFAULT_STARTING_X),
+                    y=getattr(floor, 'starting_y', DEFAULT_STARTING_Y),
+                    rotation=getattr(floor, 'starting_rotation', DEFAULT_STARTING_ROTATION),
                     floor_id=floor.floor_id
                 )
             else:
                 # Only reset to starting position if player is already there
                 # (if position differs, it's from a loaded save - keep it)
-                starting_x = getattr(floor, 'starting_x', 10)
-                starting_y = getattr(floor, 'starting_y', 10)
-                starting_rotation = getattr(floor, 'starting_rotation', 0)
+                starting_x = getattr(floor, 'starting_x', DEFAULT_STARTING_X)
+                starting_y = getattr(floor, 'starting_y', DEFAULT_STARTING_Y)
+                starting_rotation = getattr(floor, 'starting_rotation', DEFAULT_STARTING_ROTATION)
 
                 if (player_state.x == starting_x and
                     player_state.y == starting_y and
@@ -119,17 +119,17 @@ label enter_exploration_mode(floor_id):
         # Initialize or update player state
         if not player_state:
             player_state = PlayerState(
-                x=getattr(floor, 'starting_x', 10),
-                y=getattr(floor, 'starting_y', 10),
-                rotation=getattr(floor, 'starting_rotation', 0),
+                x=getattr(floor, 'starting_x', DEFAULT_STARTING_X),
+                y=getattr(floor, 'starting_y', DEFAULT_STARTING_Y),
+                rotation=getattr(floor, 'starting_rotation', DEFAULT_STARTING_ROTATION),
                 floor_id=floor_id
             )
         else:
             # Only reset to starting position if player is already there
             # (if position differs, it's from a loaded save - keep it)
-            starting_x = getattr(floor, 'starting_x', 10)
-            starting_y = getattr(floor, 'starting_y', 10)
-            starting_rotation = getattr(floor, 'starting_rotation', 0)
+            starting_x = getattr(floor, 'starting_x', DEFAULT_STARTING_X)
+            starting_y = getattr(floor, 'starting_y', DEFAULT_STARTING_Y)
+            starting_rotation = getattr(floor, 'starting_rotation', DEFAULT_STARTING_ROTATION)
 
             if (player_state.x == starting_x and
                 player_state.y == starting_y and

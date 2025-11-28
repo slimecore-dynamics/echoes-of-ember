@@ -59,7 +59,8 @@ init python:
     def calculate_exploration_percent(floor):
         """Calculate exploration percentage.
 
-        Formula: (tiles_drawn / total_walkable) * 0.7 + (discovered_items / total_items) * 0.3
+        Formula uses weights from variables.rpy:
+        (tiles_drawn / total_walkable) * EXPLORATION_TILES_WEIGHT + (discovered_items / total_items) * EXPLORATION_ITEMS_WEIGHT
         """
         if not floor:
             return 0
@@ -92,8 +93,8 @@ init python:
         tile_pct = (float(tiles_drawn) / float(total_walkable)) if total_walkable > 0 else 0.0
         item_pct = (float(discovered_items) / float(total_items)) if total_items > 0 else 0.0
 
-        # Weighted average (70% tiles, 30% items)
-        exploration = (tile_pct * 0.7) + (item_pct * 0.3)
+        # Weighted average (defined in variables.rpy)
+        exploration = (tile_pct * EXPLORATION_TILES_WEIGHT) + (item_pct * EXPLORATION_ITEMS_WEIGHT)
 
         # Round to nearest percent
         return int(round(exploration * 100))

@@ -64,11 +64,11 @@ init -2 python:
             # Revealed tiles (for auto-map)
             self.revealed_tiles = set()  # {(x, y), ...}
 
-            # Metadata from Tiled JSON
-            self.starting_x = 10
-            self.starting_y = 10
-            self.starting_rotation = 0
-            self.view_distance = 3
+            # Metadata from Tiled JSON (defaults from variables.rpy)
+            self.starting_x = DEFAULT_STARTING_X
+            self.starting_y = DEFAULT_STARTING_Y
+            self.starting_rotation = DEFAULT_STARTING_ROTATION
+            self.view_distance = DEFAULT_VIEW_DISTANCE
             self.area_name = ""
             self.sub_area_name = ""
             self.description = ""
