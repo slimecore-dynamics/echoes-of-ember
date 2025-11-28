@@ -6,15 +6,19 @@ init python:
     import os
 
     class TiledImporter:
-        # Import dungeon maps from Tiled Map Editor JSON format.
-        # Tiled Format: https://doc.mapeditor.org/en/stable/reference/json-map-format/
+        """Import dungeon maps from Tiled Map Editor JSON format.
+
+        Tiled Format: https://doc.mapeditor.org/en/stable/reference/json-map-format/
+        """
 
         # Tile type parsing based on image filenames
         @staticmethod
         def parse_tile_from_image(image_path):
-            # Parse tile type from image filename.
-            # Rotation is no longer used - always returns 0.
-            # Returns: (tile_type, rotation)
+            """Parse tile type from image filename.
+
+            Rotation is no longer used - always returns 0.
+            Returns: (tile_type, rotation)
+            """
             import os
             filename = os.path.basename(image_path).replace(".png", "")
 
@@ -38,15 +42,16 @@ init python:
 
         @staticmethod
         def load_tiled_map(filepath, floor_id=None, floor_name=None):
-            # Load a Tiled JSON map and convert to FloorMap.
-            #
-            # Args:
-            #     filepath: Path to Tiled JSON file (relative to game directory)
-            #     floor_id: Optional floor ID (defaults to filename)
-            #     floor_name: Optional floor name (defaults to Tiled map name)
-            #
-            # Returns:
-            #     FloorMap instance, or None on failure
+            """Load a Tiled JSON map and convert to FloorMap.
+
+            Args:
+                filepath: Path to Tiled JSON file (relative to game directory)
+                floor_id: Optional floor ID (defaults to filename)
+                floor_name: Optional floor name (defaults to Tiled map name)
+
+            Returns:
+                FloorMap instance, or None on failure
+            """
             # Resolve path relative to game directory
             full_path = os.path.join(renpy.config.gamedir, filepath)
 
@@ -124,13 +129,14 @@ init python:
 
         @staticmethod
         def _build_tile_id_map(tilesets):
-            # Build mapping from Tiled tile IDs to (tile_type, rotation).
-            #
-            # Args:
-            #     tilesets: List of tileset objects from Tiled JSON
-            #
-            # Returns:
-            #     dict: {tiled_gid: (tile_type, rotation)}
+            """Build mapping from Tiled tile IDs to (tile_type, rotation).
+
+            Args:
+                tilesets: List of tileset objects from Tiled JSON
+
+            Returns:
+                dict: {tiled_gid: (tile_type, rotation)}
+            """
             tile_map = {}
 
             for tileset in tilesets:
@@ -152,8 +158,10 @@ init python:
 
         @staticmethod
         def _extract_properties(properties):
-            # Extract custom properties from Tiled format.
-            # Tiled properties are in array format: [{"name": "x", "type": "int", "value": 10}, ...]
+            """Extract custom properties from Tiled format.
+
+            Tiled properties are in array format: [{"name": "x", "type": "int", "value": 10}, ...]
+            """
             props = {}
 
             # Check if it's a dict first
@@ -171,12 +179,13 @@ init python:
 
         @staticmethod
         def _process_tile_layer(layer, floor, tile_id_map):
-            # Process a Tiled tile layer and populate FloorMap tiles.
-            #
-            # Args:
-            #     layer: Tiled layer object
-            #     floor: FloorMap to populate
-            #     tile_id_map: Mapping from Tiled GID to (tile_type, rotation)
+            """Process a Tiled tile layer and populate FloorMap tiles.
+
+            Args:
+                layer: Tiled layer object
+                floor: FloorMap to populate
+                tile_id_map: Mapping from Tiled GID to (tile_type, rotation)
+            """
             data = layer.get("data", [])
             width = layer.get("width", floor.dimensions[0])
             height = layer.get("height", floor.dimensions[1])
@@ -207,8 +216,10 @@ init python:
 
         @staticmethod
         def _process_object_layer(layer, floor, tile_id_map):
-            # Process a Tiled object layer and populate FloorMap icons.
-            # Objects represent stairs, doors, enemies, etc.
+            """Process a Tiled object layer and populate FloorMap icons.
+
+            Objects represent stairs, doors, enemies, etc.
+            """
             objects = layer.get("objects", [])
 
             for obj in objects:
@@ -251,15 +262,17 @@ init python:
 
         @staticmethod
         def reload_dungeon_layout(floor):
-            # Reload dungeon_tiles and dungeon_icons from source file.
-            # Does NOT affect player-drawn tiles, icons, or revealed_tiles.
-            # Used after loading a save to restore dungeon layout.
-            #
-            # Args:
-            #     floor: FloorMap instance with current_dungeon_file attribute set
-            #
-            # Returns:
-            #     True if reloaded successfully, False otherwise
+            """Reload dungeon_tiles and dungeon_icons from source file.
+
+            Does NOT affect player-drawn tiles, icons, or revealed_tiles.
+            Used after loading a save to restore dungeon layout.
+
+            Args:
+                floor: FloorMap instance with current_dungeon_file attribute set
+
+            Returns:
+                True if reloaded successfully, False otherwise
+            """
             if not floor or not floor.current_dungeon_file:
                 return False
 

@@ -159,13 +159,14 @@ label enter_exploration_mode(floor_id):
 
 init python:
     def delete_exploration_floor(floor_id, slot_name=None):
-        # Delete a floor from the map grid and optionally from save files.
-        #
-        # Args:
-        #     floor_id: ID of the floor to delete
-        #     slot_name: Optional slot name to delete map data from
-        #
-        # Use this when story prevents returning to a location.
+        """Delete a floor from the map grid and optionally from save files.
+
+        Args:
+            floor_id: ID of the floor to delete
+            slot_name: Optional slot name to delete map data from
+
+        Use this when story prevents returning to a location.
+        """
         global map_grid
 
         if not map_grid:
@@ -194,8 +195,10 @@ init python:
         return True
 
     def get_exploration_percent_for_floor(floor_id):
-        # Get exploration percentage for a specific floor.
-        # Returns: int (0-100)
+        """Get exploration percentage for a specific floor.
+
+        Returns: int (0-100)
+        """
         global map_grid
 
         if not map_grid or floor_id not in map_grid.floors:

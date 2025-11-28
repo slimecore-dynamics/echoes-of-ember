@@ -338,7 +338,7 @@ screen exploration_view():
 
 init python:
     def handle_map_click(x, y, floor, map_grid):
-        # Handle clicking on a map cell to place tiles or icons.
+        """Handle clicking on a map cell to place tiles or icons."""
         if not map_grid:
             return
 
@@ -359,7 +359,7 @@ init python:
                 renpy.restart_interaction()
 
     def confirm_note_placement(x, y, floor, map_grid, note_text):
-        # Confirm note placement with text from input.
+        """Confirm note placement with text from input."""
         # Hide the popup
         renpy.hide_screen("note_input_popup")
 
@@ -370,7 +370,7 @@ init python:
         renpy.restart_interaction()
 
     def select_tile_type(tile_type):
-        # Select a tile type from the palette.
+        """Select a tile type from the palette."""
         if map_grid:
             map_grid.selected_tile_type = tile_type
             map_grid.selected_icon_type = None
@@ -378,7 +378,7 @@ init python:
             renpy.restart_interaction()
 
     def select_icon_for_placement(icon_type):
-        # Select an icon type from the palette.
+        """Select an icon type from the palette."""
         if map_grid:
             map_grid.selected_icon_type = icon_type
             map_grid.selected_tile_type = None
@@ -386,7 +386,7 @@ init python:
             renpy.restart_interaction()
 
     class PlayerTriangleMarker(renpy.Displayable):
-        # Red triangle showing player position and facing direction.
+        """Red triangle showing player position and facing direction."""
 
         def __init__(self, x, y, rotation, cell_size, **kwargs):
             super(PlayerTriangleMarker, self).__init__(**kwargs)
@@ -396,7 +396,7 @@ init python:
             self.cell_size = cell_size
 
         def render(self, width, height, st, at):
-            # Create render the size of one cell
+            """Create render the size of one cell."""
             render = renpy.Render(self.cell_size, self.cell_size)
 
             # Create simple red square as placeholder for triangle
@@ -410,10 +410,10 @@ init python:
             return render
 
     class AnimatedInteractIndicator(renpy.Displayable):
-        # Pulsing yellow indicator for interactions.
+        """Pulsing yellow indicator for interactions."""
 
         def render(self, width, height, st, at):
-            # Pulse between 0.5 and 1.0 opacity
+            """Pulse between 0.5 and 1.0 opacity."""
             alpha = 0.5 + 0.5 * abs(math.sin(st * 3.14))
 
             render = renpy.Render(100, 100)
@@ -425,7 +425,7 @@ init python:
             return render
 
     def get_tile_color(tile_type):
-        # Get color for tile type on minimap.
+        """Get color for tile type on minimap."""
         colors = {
             "wall": "#888888",
             "hallway": "#CCCCCC",
@@ -437,7 +437,7 @@ init python:
         return colors.get(tile_type, "#666666")
 
     def get_icon_color(icon_type):
-        # Get color for icon type on minimap.
+        """Get color for icon type on minimap."""
         colors = {
             "stairs_up": "#00FFFF",
             "stairs_down": "#FF00FF",
@@ -618,8 +618,10 @@ init python:
     import math  # For AnimatedInteractIndicator
 
     def calculate_exploration_percent(floor):
-        # Calculate exploration percentage.
-        # Formula: (tiles_drawn / total_walkable) * 0.7 + (discovered_items / total_items) * 0.3
+        """Calculate exploration percentage.
+
+        Formula: (tiles_drawn / total_walkable) * 0.7 + (discovered_items / total_items) * 0.3
+        """
         if not floor:
             return 0
 
@@ -658,7 +660,7 @@ init python:
         return int(round(exploration * 100))
 
     def toggle_auto_map():
-        # Toggle auto-mapping on/off - ONLY toggles, does not exit.
+        """Toggle auto-mapping on/off - ONLY toggles, does not exit."""
         global map_grid
 
         if not map_grid:
@@ -679,21 +681,21 @@ init python:
         renpy.restart_interaction()
 
     def handle_turn_left():
-        # Rotate player 90 degrees left
+        """Rotate player 90 degrees left."""
         global player_state
         if player_state:
             player_state.rotate_left()
             renpy.restart_interaction()
 
     def handle_turn_right():
-        # Rotate player 90 degrees right
+        """Rotate player 90 degrees right."""
         global player_state
         if player_state:
             player_state.rotate_right()
             renpy.restart_interaction()
 
     def handle_move_forward():
-        # Move player one tile forward
+        """Move player one tile forward."""
         global player_state, map_grid
 
         if not player_state or not map_grid:
@@ -729,7 +731,7 @@ init python:
             renpy.notify("Cannot move: {}".format(reason))
 
     def handle_move_backward():
-        # Move player one tile backward
+        """Move player one tile backward."""
         global player_state, map_grid
 
         if not player_state or not map_grid:
@@ -765,7 +767,7 @@ init python:
             renpy.notify("Cannot move: {}".format(reason))
 
     def auto_reveal_tile(floor, x, y):
-        # Auto-reveal tile when walking on it - copy from dungeon to drawn map.
+        """Auto-reveal tile when walking on it - copy from dungeon to drawn map."""
         # Get the REAL tile from dungeon
         if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles:
             if y < len(floor.dungeon_tiles) and x < len(floor.dungeon_tiles[y]):
@@ -776,7 +778,7 @@ init python:
                     floor.set_tile(x, y, MapTile(dungeon_tile.tile_type, rotation=0))
 
     def handle_step_on_trigger(icon, floor, x, y):
-        # Handle step-on interactions (gathering, event, teleporter, enemy)
+        """Handle step-on interactions (gathering, event, teleporter, enemy)."""
         global player_state, exploration_dialogue_active
 
         result = InteractionHandler.handle_interaction(icon, "step_on", player_state, None)
@@ -845,7 +847,7 @@ init python:
                 renpy.notify("Teleporter has no pair_id")
 
     def handle_stairs_interaction(direction, adj_x, adj_y):
-        # Handle stairs interaction (change floors)
+        """Handle stairs interaction (change floors)."""
         global player_state, map_grid
 
         if not map_grid:
@@ -863,7 +865,7 @@ init python:
             renpy.notify("Stairs down (no destination floor)")
 
     def handle_door_interaction(adj_x, adj_y):
-        # Handle door interaction (open door)
+        """Handle door interaction (open door)."""
         global map_grid
 
         if not map_grid:
@@ -882,8 +884,10 @@ init python:
             renpy.restart_interaction()
 
     def handle_teleporter_interaction(adj_x, adj_y):
-        # Handle teleporter interaction (teleport to paired teleporter).
-        # Player must be standing on teleporter and facing correct direction.
+        """Handle teleporter interaction (teleport to paired teleporter).
+
+        Player must be standing on teleporter and facing correct direction.
+        """
         global player_state, map_grid
 
         if not map_grid:

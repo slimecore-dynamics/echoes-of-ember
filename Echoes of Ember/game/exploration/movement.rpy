@@ -3,7 +3,7 @@
 
 init python:
     class MovementValidator:
-        # Validates player movement based on tile types, rotations, and icon collisions.
+        """Validates player movement based on tile types, rotations, and icon collisions."""
 
         # Icon types that block movement
         BLOCKING_ICONS = ["stairs_up", "stairs_down", "door_closed"]
@@ -13,9 +13,11 @@ init python:
 
         @staticmethod
         def can_move_to(floor, from_x, from_y, to_x, to_y, player_rotation):
-            # Check if player can move from (from_x, from_y) to (to_x, to_y).
-            # Only checks if destination tile allows entry - doesn't check source tile.
-            # Returns: (can_move: bool, reason: str)
+            """Check if player can move from (from_x, from_y) to (to_x, to_y).
+
+            Only checks if destination tile allows entry - doesn't check source tile.
+            Returns: (can_move: bool, reason: str)
+            """
             # Check bounds
             if not floor:
                 return (False, "No floor data")
@@ -68,9 +70,11 @@ init python:
 
         @staticmethod
         def _get_allowed_directions(tile):
-            # Get list of directions player can move FROM/TO this tile.
-            # Parse tile name suffix to get allowed directions (e.g., corner_ws = west/south).
-            # Returns: list of strings: ["north", "south", "east", "west"]
+            """Get list of directions player can move FROM/TO this tile.
+
+            Parse tile name suffix to get allowed directions (e.g., corner_ws = west/south).
+            Returns: list of strings: ["north", "south", "east", "west"]
+            """
             tile_type = tile.tile_type
 
             if tile_type == "empty":
@@ -105,7 +109,7 @@ init python:
 
         @staticmethod
         def _get_opposite_direction(direction):
-            # Get opposite direction
+            """Get opposite direction."""
             opposites = {
                 "north": "south",
                 "south": "north",
@@ -116,8 +120,10 @@ init python:
 
         @staticmethod
         def _get_dungeon_tile(floor, x, y):
-            # Get tile from real dungeon (for movement validation).
-            # Falls back to drawn map if dungeon_tiles doesn't exist.
+            """Get tile from real dungeon (for movement validation).
+
+            Falls back to drawn map if dungeon_tiles doesn't exist.
+            """
             if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles:
                 # Use dungeon tiles (real layout)
                 if y < len(floor.dungeon_tiles) and x < len(floor.dungeon_tiles[y]):
@@ -129,8 +135,10 @@ init python:
 
         @staticmethod
         def get_adjacent_icon(floor, x, y, rotation):
-            # Get icon in the tile the player is facing (adjacent to current position).
-            # Returns: MapIcon or None
+            """Get icon in the tile the player is facing (adjacent to current position).
+
+            Returns: MapIcon or None
+            """
             # Calculate adjacent position based on rotation
             if rotation == 0:    # North
                 adj_x, adj_y = x, y - 1
@@ -153,8 +161,10 @@ init python:
 
         @staticmethod
         def get_icon_at_position(floor, x, y):
-            # Get icon at the player's current position.
-            # Returns: MapIcon or None
+            """Get icon at the player's current position.
+
+            Returns: MapIcon or None
+            """
             if not floor:
                 return None
             return floor.icons.get((x, y))

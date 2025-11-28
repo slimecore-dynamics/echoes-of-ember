@@ -3,12 +3,13 @@
 
 init python:
     class InteractionHandler:
-        # Manages interactions with map icons during exploration.
-        #
-        # Three types of interactions:
-        # 1. Step-on triggers: gathering, event, enemy (automatic when stepping on tile)
-        # 2. On-tile interact: teleporter (must be on tile AND facing correct direction to interact)
-        # 3. Adjacent triggers: stairs, doors (must be adjacent and facing the icon)
+        """Manages interactions with map icons during exploration.
+
+        Three types of interactions:
+        1. Step-on triggers: gathering, event, enemy (automatic when stepping on tile)
+        2. On-tile interact: teleporter (must be on tile AND facing correct direction to interact)
+        3. Adjacent triggers: stairs, doors (must be adjacent and facing the icon)
+        """
 
         # Icons that trigger automatically when stepped on
         STEP_ON_ICONS = ["gathering", "event", "enemy"]
@@ -21,9 +22,11 @@ init python:
 
         @staticmethod
         def check_step_on_trigger(floor, x, y):
-            # Check if stepping on (x, y) triggers an interaction.
-            # Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
-            # Returns: (icon, interaction_type) or (None, None)
+            """Check if stepping on (x, y) triggers an interaction.
+
+            Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
+            Returns: (icon, interaction_type) or (None, None)
+            """
             # Check dungeon icons for triggers, not player-drawn icons
             icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
             if not icon:
@@ -36,10 +39,12 @@ init python:
 
         @staticmethod
         def check_adjacent_trigger(floor, x, y, rotation):
-            # Check if there's an interactable icon adjacent to player and facing it.
-            # Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
-            # For icons with prompt_facing property, only show prompt when facing the specified direction.
-            # Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
+            """Check if there's an interactable icon adjacent to player and facing it.
+
+            Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
+            For icons with prompt_facing property, only show prompt when facing the specified direction.
+            Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
+            """
             # Get adjacent position based on rotation
             adj_pos = InteractionHandler._get_adjacent_position(x, y, rotation)
             if not adj_pos:
@@ -75,9 +80,11 @@ init python:
 
         @staticmethod
         def check_on_tile_interact(floor, x, y, rotation):
-            # Check if there's an interactable icon on the current tile that requires facing a direction.
-            # Used for teleporters - player must be on the tile AND facing the correct direction.
-            # Returns: (icon, interaction_type, x, y) or (None, None, None, None)
+            """Check if there's an interactable icon on the current tile that requires facing a direction.
+
+            Used for teleporters - player must be on the tile AND facing the correct direction.
+            Returns: (icon, interaction_type, x, y) or (None, None, None, None)
+            """
             # Get icon at current position from dungeon icons
             icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
 
@@ -102,7 +109,7 @@ init python:
 
         @staticmethod
         def _get_adjacent_position(x, y, rotation):
-            # Get position adjacent to (x, y) based on rotation
+            """Get position adjacent to (x, y) based on rotation."""
             if rotation == 0:    # North
                 return (x, y - 1)
             elif rotation == 90:  # East
@@ -115,8 +122,10 @@ init python:
 
         @staticmethod
         def handle_interaction(icon, interaction_type, player_state, floor):
-            # Handle an interaction and return the result.
-            # Returns: dict with "type" and type-specific data
+            """Handle an interaction and return the result.
+
+            Returns: dict with "type" and type-specific data
+            """
             if not icon:
                 return {"type": "none"}
 

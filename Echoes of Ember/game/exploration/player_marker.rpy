@@ -3,13 +3,14 @@
 
 init python:
     def draw_player_marker(canvas_obj, x, y, rotation, cell_size=32):
-        # Draw a triangle marker showing player position and rotation on the map.
-        #
-        # Args:
-        #     canvas_obj: Ren'Py Canvas object
-        #     x, y: Grid coordinates
-        #     rotation: Player rotation (0, 90, 180, 270)
-        #     cell_size: Size of map grid cells in pixels
+        """Draw a triangle marker showing player position and rotation on the map.
+
+        Args:
+            canvas_obj: Ren'Py Canvas object
+            x, y: Grid coordinates
+            rotation: Player rotation (0, 90, 180, 270)
+            cell_size: Size of map grid cells in pixels
+        """
         import math
 
         # Calculate center of the cell
@@ -79,7 +80,7 @@ screen player_marker_overlay():
 
 init python:
     class CanvasMarker(renpy.Displayable):
-        # Custom displayable that draws the player marker triangle.
+        """Custom displayable that draws the player marker triangle."""
 
         def __init__(self, grid_x, grid_y, rotation, cell_size=32, **kwargs):
             super(CanvasMarker, self).__init__(**kwargs)
