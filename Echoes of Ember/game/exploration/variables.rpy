@@ -18,47 +18,8 @@ define SIDEBAR_CONTENT_WIDTH_RATIO = 0.314
 # Minimap size ratio (relative to screen width)
 define MINIMAP_SIZE_RATIO = 0.30
 
-# ==========================================
-# MAP GRID CONSTANTS
-# Used in: exploration_screen.rpy, map_data.rpy, player_marker.rpy
-# ==========================================
-
-# Size of each map cell in pixels
-define MAP_CELL_SIZE = 32
-
 # Width of gridlines between map cells in pixels
 define MAP_GRIDLINE_WIDTH = 2
-
-# ==========================================
-# PLAYER AND DUNGEON DEFAULTS
-# Used in: map_data.rpy, exploration_init.rpy, exploration_screen.rpy
-# Note: These are defaults - actual values loaded from Tiled files
-# ==========================================
-
-# Default starting position when no Tiled data available
-define DEFAULT_STARTING_X = 10
-define DEFAULT_STARTING_Y = 10
-define DEFAULT_STARTING_ROTATION = 0
-
-# Default view distance (how many tiles ahead player can see)
-define DEFAULT_VIEW_DISTANCE = 3
-
-# ==========================================
-# UI COMPONENT CONSTANTS
-# Used in: exploration_ui.rpy, player_marker.rpy
-# ==========================================
-
-# Player marker triangle size as ratio of cell size
-define PLAYER_MARKER_SIZE_RATIO = 0.6
-
-# ==========================================
-# GAMEPLAY CONSTANTS
-# Used in: exploration_handlers.rpy
-# ==========================================
-
-# Exploration percentage calculation weights
-define EXPLORATION_TILES_WEIGHT = 0.7
-define EXPLORATION_ITEMS_WEIGHT = 0.3
 
 # ==========================================
 # LEGACY COLOR DEFINES
@@ -74,11 +35,55 @@ define color_door_open = "#D2B48C"
 define color_interact = "#FFFF00"
 
 # ==========================================
-# COLOR PALETTES
-# Used in: exploration_ui.rpy, exploration_screen.rpy
+# PYTHON CONSTANTS AND COLOR PALETTES
+# Used in: init python blocks across multiple files
 # ==========================================
 
-init python:
+init -5 python:
+    # ==========================================
+    # MAP GRID CONSTANTS
+    # Used in: exploration_screen.rpy, map_data.rpy, player_marker.rpy
+    # ==========================================
+
+    # Size of each map cell in pixels
+    MAP_CELL_SIZE = 32
+
+    # ==========================================
+    # PLAYER AND DUNGEON DEFAULTS
+    # Used in: map_data.rpy, exploration_init.rpy, exploration_screen.rpy
+    # Note: These are defaults - actual values loaded from Tiled files
+    # ==========================================
+
+    # Default starting position when no Tiled data available
+    DEFAULT_STARTING_X = 10
+    DEFAULT_STARTING_Y = 10
+    DEFAULT_STARTING_ROTATION = 0
+
+    # Default view distance (how many tiles ahead player can see)
+    DEFAULT_VIEW_DISTANCE = 3
+
+    # ==========================================
+    # UI COMPONENT CONSTANTS
+    # Used in: exploration_ui.rpy, player_marker.rpy
+    # ==========================================
+
+    # Player marker triangle size as ratio of cell size
+    PLAYER_MARKER_SIZE_RATIO = 0.6
+
+    # ==========================================
+    # GAMEPLAY CONSTANTS
+    # Used in: exploration_handlers.rpy
+    # ==========================================
+
+    # Exploration percentage calculation weights
+    EXPLORATION_TILES_WEIGHT = 0.7
+    EXPLORATION_ITEMS_WEIGHT = 0.3
+
+    # ==========================================
+    # COLOR PALETTES
+    # Used in: exploration_ui.rpy, exploration_screen.rpy
+    # ==========================================
+
     # First-Person View Colors
     # Used for rendering walls, floors, ceilings in FPV
     FPV_COLORS = {
