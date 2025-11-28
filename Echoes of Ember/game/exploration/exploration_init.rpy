@@ -184,13 +184,14 @@ init python:
             else:
                 map_grid.current_floor_id = None
 
-        # Optionally delete from save file
+        # Optionally update the save file
         if slot_name:
             try:
-                # Save the updated map grid (without the deleted floor)
-                save_map_data_to_file(slot_name)
+                # Simply trigger a save - the serialize callback will handle it
+                renpy.save(slot_name)
             except Exception as e:
-                pass
+                import sys
+                print("Error updating save after floor deletion: {}".format(e), file=sys.stderr)
 
         return True
 

@@ -2,6 +2,13 @@
 # Handles interactions with icons (stairs, doors, gathering points, etc.)
 
 init python:
+    from collections import namedtuple
+
+    # Named tuples for interaction results
+    StepOnResult = namedtuple('StepOnResult', ['icon', 'interaction_type'])
+    AdjacentResult = namedtuple('AdjacentResult', ['icon', 'interaction_type', 'adj_x', 'adj_y'])
+    OnTileResult = namedtuple('OnTileResult', ['icon', 'interaction_type', 'x', 'y'])
+
     class InteractionHandler:
         """Manages interactions with map icons during exploration.
 
@@ -25,17 +32,17 @@ init python:
             """Check if stepping on (x, y) triggers an interaction.
 
             Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
-            Returns: (icon, interaction_type) or (None, None)
+            Returns: StepOnResult(icon, interaction_type)
             """
             # Check dungeon icons for triggers, not player-drawn icons
-            icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
+            icon = floor.get_dungeon_icon(x, y)
             if not icon:
-                return (None, None)
+                return StepOnResult(None, None)
 
             if icon.icon_type in InteractionHandler.STEP_ON_ICONS:
-                return (icon, "step_on")
+                return StepOnResult(icon, "step_on")
 
-            return (None, None)
+            return StepOnResult(None, None)
 
         @staticmethod
         def check_adjacent_trigger(floor, x, y, rotation):
@@ -43,24 +50,24 @@ init python:
 
             Checks dungeon_icons (real icons from Tiled), not player-drawn icons.
             For icons with prompt_facing property, only show prompt when facing the specified direction.
-            Returns: (icon, interaction_type, adj_x, adj_y) or (None, None, None, None)
+            Returns: AdjacentResult(icon, interaction_type, adj_x, adj_y)
             """
             # Get adjacent position based on rotation
             adj_pos = InteractionHandler._get_adjacent_position(x, y, rotation)
             if not adj_pos:
-                return (None, None, None, None)
+                return AdjacentResult(None, None, None, None)
 
             adj_x, adj_y = adj_pos
 
             # Check bounds
             width, height = floor.dimensions
             if adj_x < 0 or adj_x >= width or adj_y < 0 or adj_y >= height:
-                return (None, None, None, None)
+                return AdjacentResult(None, None, None, None)
 
             # Get icon at adjacent tile (from dungeon, not player-drawn)
-            icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
+            icon = floor.get_dungeon_icon(adj_x, adj_y)
             if not icon:
-                return (None, None, None, None)
+                return AdjacentResult(None, None, None, None)
 
             if icon.icon_type in InteractionHandler.ADJACENT_ICONS:
                 # Check if icon has prompt_facing requirement
@@ -72,24 +79,24 @@ init python:
 
                     # Only show prompt if facing the required direction
                     if current_dir != required_facing:
-                        return (None, None, None, None)
+                        return AdjacentResult(None, None, None, None)
 
-                return (icon, "adjacent", adj_x, adj_y)
+                return AdjacentResult(icon, "adjacent", adj_x, adj_y)
 
-            return (None, None, None, None)
+            return AdjacentResult(None, None, None, None)
 
         @staticmethod
         def check_on_tile_interact(floor, x, y, rotation):
             """Check if there's an interactable icon on the current tile that requires facing a direction.
 
             Used for teleporters - player must be on the tile AND facing the correct direction.
-            Returns: (icon, interaction_type, x, y) or (None, None, None, None)
+            Returns: OnTileResult(icon, interaction_type, x, y)
             """
             # Get icon at current position from dungeon icons
-            icon = floor.dungeon_icons.get((x, y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((x, y))
+            icon = floor.get_dungeon_icon(x, y)
 
             if not icon:
-                return (None, None, None, None)
+                return OnTileResult(None, None, None, None)
 
             if icon.icon_type in InteractionHandler.ON_TILE_INTERACT_ICONS:
                 # Check if icon has prompt_facing requirement
@@ -101,11 +108,11 @@ init python:
 
                     # Only show prompt if facing the required direction
                     if current_dir != required_facing:
-                        return (None, None, None, None)
+                        return OnTileResult(None, None, None, None)
 
-                return (icon, "on_tile", x, y)
+                return OnTileResult(icon, "on_tile", x, y)
 
-            return (None, None, None, None)
+            return OnTileResult(None, None, None, None)
 
         @staticmethod
         def _get_adjacent_position(x, y, rotation):

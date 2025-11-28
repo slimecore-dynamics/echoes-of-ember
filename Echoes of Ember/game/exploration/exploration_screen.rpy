@@ -1,13 +1,71 @@
 # exploration_screen.rpy
 # First-person dungeon exploration UI with integrated map view
 
-# Colors for placeholder graphics
+# Screen Layout Constants
+define FIRST_PERSON_VIEW_WIDTH_RATIO = 0.666
+define MAP_VIEW_WIDTH_RATIO = 0.334
+
+# Colors for placeholder graphics (legacy - kept for compatibility)
 define color_wall = "#666666"
 define color_floor = "#333333"
 define color_ceiling = "#4D4D4D"
 define color_door_closed = "#8B4513"
 define color_door_open = "#D2B48C"
 define color_interact = "#FFFF00"
+
+init python:
+    # First-Person View Colors
+    FPV_COLORS = {
+        "wall": "#666666",
+        "floor": "#333333",
+        "ceiling": "#4D4D4D",
+        "door_closed": "#8B4513",
+        "door_open": "#D2B48C",
+        "interact": "#FFFF00"
+    }
+
+    # Map Tile Colors
+    TILE_COLORS = {
+        "wall": "#888888",
+        "hallway": "#CCCCCC",
+        "corner": "#AAAAAA",
+        "t_intersection": "#BBBBBB",
+        "cross": "#DDDDDD",
+        "empty": "#000000"
+    }
+
+    # Map Icon Colors
+    ICON_COLORS = {
+        "stairs_up": "#00FFFF",
+        "stairs_down": "#FF00FF",
+        "door_closed": "#8B4513",
+        "door_open": "#D2B48C",
+        "gathering": "#00FF00",
+        "enemy": "#FF0000",
+        "event": "#FFFF00",
+        "teleporter": "#FF8800",
+        "note": "#FFFFFF"
+    }
+
+    # UI Colors
+    UI_COLORS = {
+        "background": "#000000",
+        "sidebar": "#1A1A1A",
+        "panel": "#2A2A2A",
+        "button": "#444444",
+        "button_hover": "#555555",
+        "button_selected": "#FFFF00",
+        "button_selected_hover": "#FFDD00",
+        "hover_transparent": "#FFFFFF40",
+        "transparent": "#00000000",
+        "text": "#FFFFFF",
+        "border": "#000000",
+        "minimap_bg": "#0066CC",
+        "tooltip_bg": "#000000DD",
+        "gridlines": "#555555",
+        "cell_highlight": "#0066CC",
+        "interaction_warning": "#FF0000AA"
+    }
 
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False
@@ -30,6 +88,28 @@ screen exploration_view():
     $ floor = map_grid.get_current_floor() if map_grid else None
     $ ps = player_state
 
+    # Check for interactions ONCE per frame (used by both indicator and prompt)
+    python:
+        current_interaction = None
+        interaction_pos = (0, 0)
+        if floor and ps:
+            # Check for adjacent triggers (stairs, doors)
+            icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
+                floor, ps.x, ps.y, ps.rotation
+            )
+
+            # If no adjacent trigger, check for on-tile interactions (teleporter)
+            if not icon:
+                icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
+                    floor, ps.x, ps.y, ps.rotation
+                )
+                if icon:
+                    adj_x, adj_y = tile_x, tile_y
+
+            if icon:
+                current_interaction = (icon, int_type, adj_x, adj_y)
+                interaction_pos = (adj_x, adj_y)
+
     # Full screen container
     frame:
         xalign 0.0
@@ -44,9 +124,9 @@ screen exploration_view():
 
             # LEFT 2/3: First-person view
             frame:
-                xsize int(config.screen_width * 0.666)
+                xsize int(config.screen_width * FIRST_PERSON_VIEW_WIDTH_RATIO)
                 ysize config.screen_height
-                background "#000000"
+                background UI_COLORS["background"]
                 padding (0, 0)
 
                 if floor and ps:
@@ -59,23 +139,8 @@ screen exploration_view():
                     # Render first-person view
                     use render_first_person_view(view_data, floor, ps)
 
-                    # Interaction sparkle/pulse overlay
-                    python:
-                        # Check for adjacent triggers (stairs, doors)
-                        icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
-                            floor, ps.x, ps.y, ps.rotation
-                        )
-
-                        # If no adjacent trigger, check for on-tile interactions (teleporter)
-                        if not icon:
-                            icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
-                                floor, ps.x, ps.y, ps.rotation
-                            )
-                            if icon:
-                                adj_x, adj_y = tile_x, tile_y
-
-                    if icon:
-                        # Show pulsing indicator in first-person view
+                    # Show pulsing indicator if there's an interaction available
+                    if current_interaction:
                         add AnimatedInteractIndicator() xalign 0.5 yalign 0.7
 
                 else:
@@ -83,9 +148,9 @@ screen exploration_view():
 
             # RIGHT 1/3: Map + Controls (using existing map screen components)
             frame:
-                xsize int(config.screen_width * 0.334)
+                xsize int(config.screen_width * MAP_VIEW_WIDTH_RATIO)
                 ysize config.screen_height
-                background "#1A1A1A"
+                background UI_COLORS["sidebar"]
                 padding (10, 10)
 
                 vbox:
@@ -317,23 +382,9 @@ screen exploration_view():
                                 sensitive (not exploration_dialogue_active)
 
                     # INTERACTION PROMPT (if any)
-                    if floor and ps:
-                        python:
-                            # Check for adjacent triggers (stairs, doors)
-                            icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
-                                floor, ps.x, ps.y, ps.rotation
-                            )
-
-                            # If no adjacent trigger, check for on-tile interactions (teleporter)
-                            if not icon:
-                                icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
-                                    floor, ps.x, ps.y, ps.rotation
-                                )
-                                if icon:
-                                    adj_x, adj_y = tile_x, tile_y
-
-                        if icon:
-                            use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
+                    if current_interaction:
+                        $ icon, int_type, adj_x, adj_y = current_interaction
+                        use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
 
 
 init python:
@@ -344,7 +395,7 @@ init python:
 
         if map_grid.current_mode == "edit_tiles" and map_grid.selected_tile_type:
             # Place selected tile
-            tile = MapTile(map_grid.selected_tile_type, rotation=0)
+            tile = MapTile(map_grid.selected_tile_type)
             floor.set_tile(x, y, tile)
             renpy.restart_interaction()
 
@@ -396,16 +447,36 @@ init python:
             self.cell_size = cell_size
 
         def render(self, width, height, st, at):
-            """Create render the size of one cell."""
+            """Render actual triangle pointing in player's facing direction."""
+            import math
+
             render = renpy.Render(self.cell_size, self.cell_size)
 
-            # Create simple red square as placeholder for triangle
-            # (Actual triangle rendering would need more complex drawing)
-            marker = Solid("#FF0000", xsize=int(self.cell_size*0.8), ysize=int(self.cell_size*0.8))
-            marker_render = renpy.render(marker, int(self.cell_size*0.8), int(self.cell_size*0.8), st, at)
+            # Triangle size
+            tri_size = self.cell_size * 0.6
+            half_size = tri_size / 2.0
 
-            # Center the marker in the cell
-            render.blit(marker_render, (int(self.cell_size*0.1), int(self.cell_size*0.1)))
+            # Center of cell
+            center_x = self.cell_size / 2.0
+            center_y = self.cell_size / 2.0
+
+            # Calculate triangle points based on rotation
+            # 0 = North (point up), 90 = East (point right), etc.
+            angle_rad = math.radians(self.rotation - 90)  # Adjust so 0 points up
+
+            # Three points of equilateral triangle
+            points = []
+            for i in range(3):
+                point_angle = angle_rad + (i * 2.0 * math.pi / 3.0)
+                px = center_x + (half_size * math.cos(point_angle))
+                py = center_y + (half_size * math.sin(point_angle))
+                points.append((int(px), int(py)))
+
+            # Draw triangle using Canvas
+            canvas = renpy.display.draw.Canvas()
+            canvas.polygon("#FF0000", points)
+            canvas_render = renpy.render(canvas, self.cell_size, self.cell_size, st, at)
+            render.blit(canvas_render, (0, 0))
 
             return render
 
@@ -426,30 +497,11 @@ init python:
 
     def get_tile_color(tile_type):
         """Get color for tile type on minimap."""
-        colors = {
-            "wall": "#888888",
-            "hallway": "#CCCCCC",
-            "corner": "#AAAAAA",
-            "t_intersection": "#BBBBBB",
-            "cross": "#DDDDDD",
-            "empty": "#000000"
-        }
-        return colors.get(tile_type, "#666666")
+        return TILE_COLORS.get(tile_type, "#666666")
 
     def get_icon_color(icon_type):
         """Get color for icon type on minimap."""
-        colors = {
-            "stairs_up": "#00FFFF",
-            "stairs_down": "#FF00FF",
-            "door_closed": "#8B4513",
-            "door_open": "#D2B48C",
-            "gathering": "#00FF00",
-            "enemy": "#FF0000",
-            "event": "#FFFF00",
-            "teleporter": "#FF8800",
-            "note": "#FFFFFF"
-        }
-        return colors.get(icon_type, "#FFFFFF")
+        return ICON_COLORS.get(icon_type, "#FFFFFF")
 
 
 screen map_grid_display(floor, cell_size, gridline_width):
@@ -596,7 +648,7 @@ screen render_first_person_view(view_data, floor, ps):
     # Render the first-person view based on view_data.
 
     # Background (ceiling and floor)
-    $ view_width = int(config.screen_width * 0.666)
+    $ view_width = int(config.screen_width * FIRST_PERSON_VIEW_WIDTH_RATIO)
     $ view_height = config.screen_height
 
     add Solid(color_ceiling) xpos 0 ypos 0 xsize view_width ysize int(view_height / 2)
@@ -774,8 +826,8 @@ init python:
                 dungeon_tile = floor.dungeon_tiles[y][x]
 
                 if dungeon_tile and dungeon_tile.tile_type != "empty":
-                    # Copy only tile type, no rotation
-                    floor.set_tile(x, y, MapTile(dungeon_tile.tile_type, rotation=0))
+                    # Copy tile type from dungeon to drawn map
+                    floor.set_tile(x, y, MapTile(dungeon_tile.tile_type))
 
     def handle_step_on_trigger(icon, floor, x, y):
         """Handle step-on interactions (gathering, event, teleporter, enemy)."""
@@ -876,7 +928,7 @@ init python:
             return
 
         # Get icon at door position from dungeon icons
-        icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
+        icon = floor.get_dungeon_icon(adj_x, adj_y)
         if icon and icon.icon_type == "door_closed":
             # Change door to open
             icon.icon_type = "door_open"
@@ -899,7 +951,7 @@ init python:
 
         # Get icon at current teleporter position from dungeon icons
         # (adj_x, adj_y are actually the player's current position for on-tile interactions)
-        icon = floor.dungeon_icons.get((adj_x, adj_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((adj_x, adj_y))
+        icon = floor.get_dungeon_icon(adj_x, adj_y)
         if not icon or icon.icon_type != "teleporter":
             return
 

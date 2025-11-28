@@ -16,15 +16,14 @@ init python:
         def parse_tile_from_image(image_path):
             """Parse tile type from image filename.
 
-            Rotation is no longer used - always returns 0.
-            Returns: (tile_type, rotation)
+            Returns: tile_type string
             """
             import os
             filename = os.path.basename(image_path).replace(".png", "")
 
             # Return the full filename as tile_type (no suffix stripping)
             # Examples: hallway_we, corner_ws, t_intersection_nws, wall_nes, cross, empty
-            return (filename, 0)
+            return filename
 
         # Mapping from Tiled object types to icon types
         OBJECT_TYPE_MAP = {
@@ -116,7 +115,7 @@ init python:
             # Clear the drawn map (player starts with blank map to fill in)
             for y in range(height):
                 for x in range(width):
-                    floor.set_tile(x, y, MapTile("empty", rotation=0))
+                    floor.set_tile(x, y, MapTile("empty"))
 
             # CRITICAL: Dual icon system - separate real icons from player-drawn icons
             # The loaded icons represent the real dungeon objects (for collision/interaction).
@@ -129,13 +128,13 @@ init python:
 
         @staticmethod
         def _build_tile_id_map(tilesets):
-            """Build mapping from Tiled tile IDs to (tile_type, rotation).
+            """Build mapping from Tiled tile IDs to tile_type.
 
             Args:
                 tilesets: List of tileset objects from Tiled JSON
 
             Returns:
-                dict: {tiled_gid: (tile_type, rotation)}
+                dict: {tiled_gid: tile_type}
             """
             tile_map = {}
 
@@ -147,12 +146,12 @@ init python:
                     tile_id = tile_data.get("id", 0)
                     image_path = tile_data.get("image", "")
 
-                    # Parse tile type and rotation from image filename
-                    tile_type, rotation = TiledImporter.parse_tile_from_image(image_path)
+                    # Parse tile type from image filename
+                    tile_type = TiledImporter.parse_tile_from_image(image_path)
 
                     # Global tile ID = firstgid + tile_id
                     gid = firstgid + tile_id
-                    tile_map[gid] = (tile_type, rotation)
+                    tile_map[gid] = tile_type
 
             return tile_map
 
@@ -184,7 +183,7 @@ init python:
             Args:
                 layer: Tiled layer object
                 floor: FloorMap to populate
-                tile_id_map: Mapping from Tiled GID to (tile_type, rotation)
+                tile_id_map: Mapping from Tiled GID to tile_type
             """
             data = layer.get("data", [])
             width = layer.get("width", floor.dimensions[0])
@@ -201,17 +200,12 @@ init python:
                     # Tiled uses 0 for "no tile"
                     if gid == 0:
                         tile_type = "empty"
-                        rotation = 0
                     else:
-                        # Look up tile type and rotation from map
-                        if gid in tile_id_map:
-                            tile_type, rotation = tile_id_map[gid]
-                        else:
-                            tile_type = "empty"
-                            rotation = 0
+                        # Look up tile type from map
+                        tile_type = tile_id_map.get(gid, "empty")
 
                     # Create and set tile
-                    tile = MapTile(tile_type, rotation)
+                    tile = MapTile(tile_type)
                     floor.set_tile(x, y, tile)
 
         @staticmethod
@@ -279,6 +273,14 @@ init python:
             # Load the Tiled map fresh
             temp_floor = TiledImporter.load_tiled_map(floor.current_dungeon_file)
             if not temp_floor:
+                return False
+
+            # Validate dimensions match to prevent corruption
+            if temp_floor.dimensions != floor.dimensions:
+                import sys
+                print("!!! Error: Dungeon dimensions mismatch!", file=sys.stderr)
+                print("    Expected: {}, Got: {}".format(floor.dimensions, temp_floor.dimensions), file=sys.stderr)
+                print("    File: {}".format(floor.current_dungeon_file), file=sys.stderr)
                 return False
 
             # Copy only dungeon layout (NOT player-drawn data)

@@ -107,33 +107,8 @@ init python:
             if tile_type == "empty":
                 return True
 
-            # Check if we're trying to look through a wall face
-            # Wall blocks view when looking at the solid face
-            if tile_type == "wall":
-                # wall rotation 0 = solid face north
-                # If looking north (dy = -1) and wall rotation is 0, blocked
-                if tile.rotation == 0 and dy == -1:  # Looking north at north-facing wall
-                    return True
-                elif tile.rotation == 90 and dx == 1:  # Looking east at east-facing wall
-                    return True
-                elif tile.rotation == 180 and dy == 1:  # Looking south at south-facing wall
-                    return True
-                elif tile.rotation == 270 and dx == -1:  # Looking west at west-facing wall
-                    return True
-
-            # T-intersection blocks view through the wall side
-            if tile_type == "t_intersection":
-                # rotation 0 = wall at north
-                if tile.rotation == 0 and dy == -1:
-                    return True
-                elif tile.rotation == 90 and dx == 1:
-                    return True
-                elif tile.rotation == 180 and dy == 1:
-                    return True
-                elif tile.rotation == 270 and dx == -1:
-                    return True
-
-            # Hallways, corners, and crosses don't block view
+            # Hallways, corners, crosses, walls, and t-intersections don't block view
+            # (Movement validation handles what directions you can actually move)
             return False
 
         @staticmethod

@@ -2,6 +2,11 @@
 # Movement validation and collision detection for dungeon exploration
 
 init python:
+    from collections import namedtuple
+
+    # Named tuple for movement validation results
+    MoveResult = namedtuple('MoveResult', ['can_move', 'reason'])
+
     class MovementValidator:
         """Validates player movement based on tile types, rotations, and icon collisions."""
 
@@ -16,15 +21,15 @@ init python:
             """Check if player can move from (from_x, from_y) to (to_x, to_y).
 
             Only checks if destination tile allows entry - doesn't check source tile.
-            Returns: (can_move: bool, reason: str)
+            Returns: MoveResult(can_move: bool, reason: str)
             """
             # Check bounds
             if not floor:
-                return (False, "No floor data")
+                return MoveResult(False, "No floor data")
 
             width, height = floor.dimensions
             if to_x < 0 or to_x >= width or to_y < 0 or to_y >= height:
-                return (False, "Out of bounds")
+                return MoveResult(False, "Out of bounds")
 
             # Calculate direction of movement
             dx = to_x - from_x
@@ -44,29 +49,29 @@ init python:
                 move_dir = "north"
                 entry_dir = "south"  # Entering from south
             else:
-                return (False, "Invalid movement (diagonal or too far)")
+                return MoveResult(False, "Invalid movement (diagonal or too far)")
 
             # Get destination tile from DUNGEON (real tiles), not drawn map
-            dest_tile = MovementValidator._get_dungeon_tile(floor, to_x, to_y)
+            dest_tile = floor.get_dungeon_tile(to_x, to_y)
             if not dest_tile:
-                return (False, "Invalid destination")
+                return MoveResult(False, "Invalid destination")
 
             # Empty tiles are voids (unreachable)
             if dest_tile.tile_type == "empty":
-                return (False, "Empty void")
+                return MoveResult(False, "Empty void")
 
             # Check if destination tile allows entry from the direction we're coming from
             dest_allowed_dirs = MovementValidator._get_allowed_directions(dest_tile)
             if entry_dir not in dest_allowed_dirs:
-                return (False, "Cannot enter {} from {}".format(dest_tile.tile_type, entry_dir))
+                return MoveResult(False, "Cannot enter {} from {}".format(dest_tile.tile_type, entry_dir))
 
             # Check if there's a blocking icon at destination (from dungeon, not player-drawn)
-            icon_at_dest = floor.dungeon_icons.get((to_x, to_y)) if hasattr(floor, 'dungeon_icons') else floor.icons.get((to_x, to_y))
+            icon_at_dest = floor.get_dungeon_icon(to_x, to_y)
             if icon_at_dest:
                 if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
-                    return (False, "Blocked by {}".format(icon_at_dest.icon_type))
+                    return MoveResult(False, "Blocked by {}".format(icon_at_dest.icon_type))
 
-            return (True, "OK")
+            return MoveResult(True, "OK")
 
         @staticmethod
         def _get_allowed_directions(tile):
@@ -117,21 +122,6 @@ init python:
                 "west": "east"
             }
             return opposites.get(direction, "")
-
-        @staticmethod
-        def _get_dungeon_tile(floor, x, y):
-            """Get tile from real dungeon (for movement validation).
-
-            Falls back to drawn map if dungeon_tiles doesn't exist.
-            """
-            if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles:
-                # Use dungeon tiles (real layout)
-                if y < len(floor.dungeon_tiles) and x < len(floor.dungeon_tiles[y]):
-                    return floor.dungeon_tiles[y][x]
-                return None
-            else:
-                # Fall back to regular tiles (drawn map)
-                return floor.get_tile(x, y)
 
         @staticmethod
         def get_adjacent_icon(floor, x, y, rotation):
