@@ -239,7 +239,7 @@ init python:
                     gid = obj.get("gid")
                     if gid in tile_id_map:
                         # Get tile name from gid
-                        tile_name, _ = tile_id_map[gid]
+                        tile_name = tile_id_map[gid]
                         obj_type = tile_name.lower()
 
                 # Map to our icon type
