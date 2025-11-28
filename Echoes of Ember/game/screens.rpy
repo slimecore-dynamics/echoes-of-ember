@@ -252,9 +252,8 @@ screen quick_menu():
             textbutton _("Auto") action Preference("auto-forward", "toggle")
             textbutton _("Save") action ShowMenu('save')
             textbutton _("Q.Save") action QuickSave()
-            textbutton _("Q.Load") action QuickLoad()
+            textbutton _("Q.Load") action FileLoadWithTracking(1, page="quick", confirm=False)
             textbutton _("Prefs") action ShowMenu('preferences')
-            textbutton _("Map") action ToggleScreen("map_view")
 
 
 ## This code ensures that the quick_menu screen is displayed in-game, whenever
@@ -602,7 +601,8 @@ screen load():
 
 screen file_slots(title):
 
-    default page_name_value = FilePageNameInputValue(pattern=_("Page {}"), auto=_("Automatic saves"), quick=_("Quick saves"))
+    default page_name_value = FilePageNameInputValue(pattern=_("Page {}"), auto=_("Auto/Quick Saves"), quick=_("Auto/Quick Saves"))
+    $ is_save_screen = (title == _("Save"))
 
     use game_menu(title):
 
@@ -625,32 +625,72 @@ screen file_slots(title):
                     value page_name_value
 
             ## The grid of file slots.
-            grid gui.file_slot_cols gui.file_slot_rows:
-                style_prefix "slot"
+            ## For auto/quick page in load screen, show custom layout with 2 slots
+            if (persistent._file_page == "auto" or persistent._file_page == "quick") and not is_save_screen:
+                ## Custom layout for auto and quick saves (side by side)
+                hbox:
+                    xalign 0.5
+                    yalign 0.5
+                    spacing 40
 
-                xalign 0.5
-                yalign 0.5
-
-                spacing gui.slot_spacing
-
-                for i in range(gui.file_slot_cols * gui.file_slot_rows):
-
-                    $ slot = i + 1
-
+                    ## Auto save slot
                     button:
-                        action FileActionWithMapData(slot)
+                        style "slot_button"
+                        action FileActionWithTracking(1, page="auto")
 
                         has vbox
 
-                        add FileScreenshot(slot) xalign 0.5
+                        add FileScreenshot(1, page="auto") xalign 0.5
 
-                        text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                        text FileTime(1, page="auto", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
                             style "slot_time_text"
 
-                        text FileSaveName(slot):
+                        text "Auto Save":
                             style "slot_name_text"
 
-                        key "save_delete" action FileDelete(slot)
+                    ## Quick save slot
+                    button:
+                        style "slot_button"
+                        action FileActionWithTracking(1, page="quick")
+
+                        has vbox
+
+                        add FileScreenshot(1, page="quick") xalign 0.5
+
+                        text FileTime(1, page="quick", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                            style "slot_time_text"
+
+                        text "Quick Save":
+                            style "slot_name_text"
+
+            else:
+                ## Normal grid for manual save pages
+                grid gui.file_slot_cols gui.file_slot_rows:
+                    style_prefix "slot"
+
+                    xalign 0.5
+                    yalign 0.5
+
+                    spacing gui.slot_spacing
+
+                    for i in range(gui.file_slot_cols * gui.file_slot_rows):
+
+                        $ slot = i + 1
+
+                        button:
+                            action FileActionWithTracking(slot)
+
+                            has vbox
+
+                            add FileScreenshot(slot) xalign 0.5
+
+                            text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                                style "slot_time_text"
+
+                            text FileSaveName(slot):
+                                style "slot_name_text"
+
+                            key "save_delete" action FileDelete(slot)
 
             ## Buttons to access other pages.
             vbox:
@@ -664,14 +704,18 @@ screen file_slots(title):
 
                     spacing gui.page_spacing
 
-                    textbutton _("<") action FilePagePrevious()
-                    key "save_page_prev" action FilePagePrevious()
+                    if is_save_screen:
+                        $ persistent._file_page = "1"
+                        textbutton _("<") action FilePagePrevious(auto=False, quick=False)
+                        key "save_page_prev" action FilePagePrevious(auto=False, quick=False)
+                    else:
+                        textbutton _("<") action FilePagePrevious(auto=True, quick=True)
+                        key "save_page_prev" action FilePagePrevious(auto=True, quick=True)
+                    
 
-                    if config.has_autosave:
-                        textbutton _("{#auto_page}A") action FilePage("auto")
-
-                    if config.has_quicksave:
-                        textbutton _("{#quick_page}Q") action FilePage("quick")
+                    ## Only show Auto/Quick page in Load screen (not Save screen)
+                    if not is_save_screen:
+                        textbutton _("{#autoquick_page}A/Q") action FilePage("auto")
 
                     ## range(1, 10) gives the numbers from 1 to 9.
                     for page in range(1, 10):
@@ -1534,7 +1578,6 @@ screen quick_menu():
             textbutton _("Back") action Rollback()
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
             textbutton _("Auto") action Preference("auto-forward", "toggle")
-            textbutton _("Map") action ToggleScreen("map_view")
             textbutton _("Menu") action ShowMenu()
 
 

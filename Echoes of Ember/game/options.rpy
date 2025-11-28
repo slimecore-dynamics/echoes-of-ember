@@ -143,14 +143,22 @@ default preferences.afm_time = 15
 ## This generally should not be changed, and if it is, should always be a
 ## literal string, not an expression.
 
-define config.save_directory = "EchoesofEmber-1763001024"
-
+define config.save_directory = "EchoesofEmber"
+define config.autosave_slots = 1
+define config.quicksave_slots = 1
 
 ## Icon ########################################################################
 ##
 ## The icon displayed on the taskbar or dock.
 
 define config.window_icon = "gui/window_icon.png"
+
+
+## Display configuration #######################################################
+
+## Prevent screen from adjusting viewport size when hover effects trigger
+## This fixes the "black line at bottom" issue in windowed mode
+define config.adjust_view_size = None
 
 
 ## Build configuration #########################################################
