@@ -934,26 +934,3 @@ init python:
         else:
             renpy.notify("Teleporter has no pair_id")
 
-    # Map editing functions (delegated to map_tools if available)
-    def select_tile_type(tile_type):
-        # Select tile type for placement.
-        global map_grid
-        if map_grid:
-            map_grid.selected_tile_type = tile_type
-            map_grid.current_mode = "edit_tiles"
-            renpy.restart_interaction()
-
-    def select_icon_for_placement(icon_type):
-        # Select icon type for placement.
-        global map_grid
-        if map_grid:
-            map_grid.selected_icon_type = icon_type
-            map_grid.current_mode = "edit_icons"
-            renpy.restart_interaction()
-
-    def rotate_selected_tile():
-        # Rotate the currently selected tile.
-        global map_grid
-        if map_grid:
-            map_grid.rotate_selected_tile()
-            renpy.restart_interaction()

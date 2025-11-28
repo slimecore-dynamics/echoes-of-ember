@@ -206,24 +206,6 @@ init python:
                     floor.set_tile(x, y, tile)
 
         @staticmethod
-        def _calculate_rotation(flipped_h, flipped_v, flipped_d):
-            # Calculate rotation from Tiled flip flags.
-            #
-            # Tiled uses flip flags for rotation. Common mappings:
-            # - No flip: 0°
-            # - Diagonal flip: 90°
-            # - H+V flip: 180°
-            # - H+V+D flip: 270°
-            if flipped_d and not flipped_h and not flipped_v:
-                return 90
-            elif flipped_h and flipped_v and not flipped_d:
-                return 180
-            elif flipped_d and flipped_h and flipped_v:
-                return 270
-            else:
-                return 0
-
-        @staticmethod
         def _process_object_layer(layer, floor, tile_id_map):
             # Process a Tiled object layer and populate FloorMap icons.
             # Objects represent stairs, doors, enemies, etc.
@@ -300,10 +282,3 @@ init python:
             floor.description = temp_floor.description
 
             return True
-
-        @staticmethod
-        def save_floor_as_tiled_json(floor, filepath):
-            # Export FloorMap to Tiled JSON format (for round-tripping).
-            # This is optional - allows editing in Tiled after generation.
-            # TODO: Implement if needed for level editor workflows
-            pass
