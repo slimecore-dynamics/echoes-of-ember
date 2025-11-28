@@ -210,37 +210,54 @@ init -1 python:
     # Wrapper actions for tracking which slot is being loaded
     class FileLoadWithTracking(Action):
         """Wrapper for FileLoad that tracks which slot is being loaded via temp file."""
-        def __init__(self, name, **kwargs):
+        def __init__(self, name, page=None, **kwargs):
             self.name = name
+            self.page = page
             self.kwargs = kwargs
 
         def __call__(self):
             import sys
+            # Construct full slot name for tracking
+            if isinstance(self.name, int) and self.page:
+                full_slot_name = "{}-{}".format(self.page, self.name)
+            elif isinstance(self.name, int):
+                # If no page specified, use current page
+                current_page = persistent._file_page if hasattr(persistent, '_file_page') and persistent._file_page else "1"
+                full_slot_name = "{}-{}".format(current_page, self.name)
+            else:
+                # Name is already a full slot name
+                full_slot_name = str(self.name)
+
             # Write slot name to temp file before loading
             try:
                 with open(get_slot_tracker_path(), 'w') as f:
-                    f.write(self.name)
-                print("Tracking load from slot: {}".format(self.name), file=sys.stderr)
+                    f.write(full_slot_name)
+                print("Tracking load from slot: {}".format(full_slot_name), file=sys.stderr)
             except Exception as e:
                 print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
 
             # Then perform the actual load
-            return FileLoad(self.name, **self.kwargs)()
+            return FileLoad(self.name, page=self.page, **self.kwargs)()
 
 
     class FileActionWithTracking(Action):
         """Wrapper for FileAction that tracks which slot is being loaded via temp file."""
-        def __init__(self, name, **kwargs):
+        def __init__(self, name, page=None, **kwargs):
             self.name = name
+            self.page = page
             self.kwargs = kwargs
 
         def __call__(self):
             import sys
             # Construct full slot name
-            if isinstance(self.name, int):
-                # It's a slot number - need to add page prefix
-                page = persistent._file_page if hasattr(persistent, '_file_page') and persistent._file_page else "1"
-                full_slot_name = "{}-{}".format(page, self.name)
+            if isinstance(self.name, int) and self.page:
+                # Slot number with explicit page
+                full_slot_name = "{}-{}".format(self.page, self.name)
+                print("Tracking action on slot: {} page {} (converted to {})".format(self.name, self.page, full_slot_name), file=sys.stderr)
+            elif isinstance(self.name, int):
+                # It's a slot number - need to add page prefix from current page
+                current_page = persistent._file_page if hasattr(persistent, '_file_page') and persistent._file_page else "1"
+                full_slot_name = "{}-{}".format(current_page, self.name)
                 print("Tracking action on slot: {} (converted to {})".format(self.name, full_slot_name), file=sys.stderr)
             else:
                 # It's already a full slot name (like "auto-1", "quick-1")
@@ -255,4 +272,4 @@ init -1 python:
                 print("!!! Error writing slot tracker: {}".format(e), file=sys.stderr)
 
             # Then perform the actual action (save or load)
-            return FileAction(self.name, **self.kwargs)()
+            return FileAction(self.name, page=self.page, **self.kwargs)()

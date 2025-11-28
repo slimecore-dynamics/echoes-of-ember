@@ -252,7 +252,7 @@ screen quick_menu():
             textbutton _("Auto") action Preference("auto-forward", "toggle")
             textbutton _("Save") action ShowMenu('save')
             textbutton _("Q.Save") action QuickSave()
-            textbutton _("Q.Load") action FileLoadWithTracking("quick-1")
+            textbutton _("Q.Load") action FileLoadWithTracking(1, page="quick", confirm=False)
             textbutton _("Prefs") action ShowMenu('preferences')
 
 
@@ -645,13 +645,13 @@ screen file_slots(title):
                     ## Auto save slot
                     button:
                         style "slot_button"
-                        action FileActionWithTracking(slot)
+                        action FileActionWithTracking(1, page="auto")
 
                         has vbox
 
-                        add FileScreenshot(slot) xalign 0.5
+                        add FileScreenshot(1, page="auto") xalign 0.5
 
-                        text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                        text FileTime(1, page="auto", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
                             style "slot_time_text"
 
                         text "Auto Save":
@@ -660,13 +660,13 @@ screen file_slots(title):
                     ## Quick save slot
                     button:
                         style "slot_button"
-                        action FileActionWithTracking(slot)
+                        action FileActionWithTracking(1, page="quick")
 
                         has vbox
 
-                        add FileScreenshot(slot) xalign 0.5
+                        add FileScreenshot(1, page="quick") xalign 0.5
 
-                        text FileTime(slot, format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
+                        text FileTime(1, page="quick", format=_("{#file_time}%A, %B %d %Y, %H:%M"), empty=_("empty slot")):
                             style "slot_time_text"
 
                         text "Quick Save":
