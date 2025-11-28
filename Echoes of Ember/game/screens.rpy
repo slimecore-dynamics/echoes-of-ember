@@ -633,15 +633,6 @@ screen file_slots(title):
                     yalign 0.5
                     spacing 40
 
-                    ## Debug: Check what FileTime returns for autosave
-                    $ import sys
-
-                    $ print("=== A/Q MENU DEBUG ===", file=sys.stderr)
-                    $ print("  FileTime('auto-1'): [{}]".format(FileTime("auto-1", empty="EMPTY")), file=sys.stderr)
-                    $ print("  FileTime('auto-1-LT1'): [{}]".format(FileTime("auto-1-LT1", empty="EMPTY")), file=sys.stderr)
-                    $ print("  FileTime('quick-1'): [{}]".format(FileTime("quick-1", empty="EMPTY")), file=sys.stderr)
-                    $ print("  renpy.list_saved_games(fast=True): {}".format(renpy.list_saved_games(fast=True)), file=sys.stderr)
-
                     ## Auto save slot
                     button:
                         style "slot_button"
