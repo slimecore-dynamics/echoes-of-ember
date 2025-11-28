@@ -18,8 +18,10 @@ init python:
         def render(self, width, height, st, at):
             """Render actual triangle pointing in player's facing direction."""
             import math
+            import pygame
 
-            render = renpy.Render(self.cell_size, self.cell_size)
+            # Create a pygame surface for drawing
+            surf = pygame.Surface((self.cell_size, self.cell_size), pygame.SRCALPHA)
 
             # Triangle size
             tri_size = self.cell_size * PLAYER_MARKER_SIZE_RATIO
@@ -41,11 +43,14 @@ init python:
                 py = center_y + (half_size * math.sin(point_angle))
                 points.append((int(px), int(py)))
 
-            # Draw triangle using Canvas
-            canvas = renpy.display.draw.Canvas()
-            canvas.polygon("#FF0000", points)
-            canvas_render = renpy.render(canvas, self.cell_size, self.cell_size, st, at)
-            render.blit(canvas_render, (0, 0))
+            # Draw filled red triangle
+            pygame.draw.polygon(surf, (255, 0, 0, 255), points)
+            # Draw white outline
+            pygame.draw.polygon(surf, (255, 255, 255, 255), points, 2)
+
+            # Convert pygame surface to Ren'Py render
+            render = renpy.Render(self.cell_size, self.cell_size)
+            render.blit(surf, (0, 0))
 
             return render
 
