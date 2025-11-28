@@ -1,61 +1,9 @@
 # exploration_ui.rpy
-# UI components: color palettes, displayables, and UI helper functions
+# UI components: displayables and UI helper functions
+# Color palettes are defined in variables.rpy
 
 init python:
     import math
-
-    # First-Person View Colors
-    FPV_COLORS = {
-        "wall": "#666666",
-        "floor": "#333333",
-        "ceiling": "#4D4D4D",
-        "door_closed": "#8B4513",
-        "door_open": "#D2B48C",
-        "interact": "#FFFF00"
-    }
-
-    # Map Tile Colors
-    TILE_COLORS = {
-        "wall": "#888888",
-        "hallway": "#CCCCCC",
-        "corner": "#AAAAAA",
-        "t_intersection": "#BBBBBB",
-        "cross": "#DDDDDD",
-        "empty": "#000000"
-    }
-
-    # Map Icon Colors
-    ICON_COLORS = {
-        "stairs_up": "#00FFFF",
-        "stairs_down": "#FF00FF",
-        "door_closed": "#8B4513",
-        "door_open": "#D2B48C",
-        "gathering": "#00FF00",
-        "enemy": "#FF0000",
-        "event": "#FFFF00",
-        "teleporter": "#FF8800",
-        "note": "#FFFFFF"
-    }
-
-    # UI Colors
-    UI_COLORS = {
-        "background": "#000000",
-        "sidebar": "#1A1A1A",
-        "panel": "#2A2A2A",
-        "button": "#444444",
-        "button_hover": "#555555",
-        "button_selected": "#FFFF00",
-        "button_selected_hover": "#FFDD00",
-        "hover_transparent": "#FFFFFF40",
-        "transparent": "#00000000",
-        "text": "#FFFFFF",
-        "border": "#000000",
-        "minimap_bg": "#0066CC",
-        "tooltip_bg": "#000000DD",
-        "gridlines": "#555555",
-        "cell_highlight": "#0066CC",
-        "interaction_warning": "#FF0000AA"
-    }
 
     class PlayerTriangleMarker(renpy.Displayable):
         """Red triangle showing player position and facing direction."""

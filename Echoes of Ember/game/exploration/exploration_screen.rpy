@@ -1,17 +1,6 @@
 # exploration_screen.rpy
 # First-person dungeon exploration UI with integrated map view
-
-# Screen Layout Constants
-define FIRST_PERSON_VIEW_WIDTH_RATIO = 0.666
-define MAP_VIEW_WIDTH_RATIO = 0.334
-
-# Colors for placeholder graphics (legacy - kept for compatibility)
-define color_wall = "#666666"
-define color_floor = "#333333"
-define color_ceiling = "#4D4D4D"
-define color_door_closed = "#8B4513"
-define color_door_open = "#D2B48C"
-define color_interact = "#FFFF00"
+# Constants are defined in variables.rpy
 
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False

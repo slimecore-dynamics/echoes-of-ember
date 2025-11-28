@@ -144,7 +144,7 @@ init -2 python:
         def __init__(self):
             self.floors = {}  # {floor_id: FloorMap}
             self.current_floor_id = None
-            self.cell_size = 32
+            self.cell_size = MAP_CELL_SIZE  # Defined in variables.rpy
             self.auto_map_enabled = False
 
             # Palette selection state
