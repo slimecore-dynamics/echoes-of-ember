@@ -42,13 +42,8 @@ init -2 python:
             self.floor_name = floor_name
             self.dimensions = dimensions  # (width, height)
 
-            # Drawn map (player-created) - starts empty
-            self.tiles = []
-            for y in range(dimensions[1]):
-                row = []
-                for x in range(dimensions[0]):
-                    row.append(MapTile("empty"))
-                self.tiles.append(row)
+            # Drawn map (player-created) - starts empty (sparse dictionary)
+            self.tiles = {}  # {(x, y): MapTile} # only stores non-empty tiles
 
             # Real dungeon tiles (from Tiled JSON) - for movement validation
             # This is the actual dungeon layout that the player navigates
@@ -84,14 +79,18 @@ init -2 python:
 
         def get_tile(self, x, y):
             """Get tile at position (returns drawn map tile)."""
-            if 0 <= y < len(self.tiles) and 0 <= x < len(self.tiles[y]):
-                return self.tiles[y][x]
+            if 0 <= x < self.dimensions[0] and 0 <= y < self.dimensions[1]:
+                return self.tiles.get((x, y), MapTile("empty"))
             return MapTile("empty")
 
         def set_tile(self, x, y, tile):
             """Set tile at position (updates drawn map)."""
-            if 0 <= y < len(self.tiles) and 0 <= x < len(self.tiles[y]):
-                self.tiles[y][x] = tile
+            if 0 <= x < self.dimensions[0] and 0 <= y < self.dimensions[1]:
+                if tile.tile_type == "empty":
+                    # Remove from dict if setting to empty (save memory)
+                    self.tiles.pop((x, y), None)
+                else:
+                    self.tiles[(x, y)] = tile
 
         def place_icon(self, x, y, icon):
             """Place an icon at position."""
