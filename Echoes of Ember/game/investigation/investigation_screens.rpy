@@ -295,8 +295,7 @@ screen terminal_entry_view(terminal, category, entry_index):
     $ has_next = entry_index < len(entries) - 1
 
     # Collect this entry when viewed (if not already collected)
-    on "show":
-        action Function(handle_terminal_entry_collection, terminal.id, entry.id)
+    $ handle_terminal_entry_collection(terminal.id, entry.id)
 
     vbox:
         spacing 10
