@@ -1,0 +1,9 @@
+{
+  "id": "medical_supplies",
+  "title": "Medical Supply Crate",
+  "image": "images/investigation/boxes/medical_crate.png",
+  "content_file": "investigation/text/objects/medical_supplies.txt",
+  "interaction_range": "adjacent",
+  "is_evidence": false,
+  "evidence_summary": ""
+}

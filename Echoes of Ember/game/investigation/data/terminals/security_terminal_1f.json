@@ -1,0 +1,46 @@
+{
+  "id": "security_terminal_1f",
+  "welcome_message": "Security Terminal Online",
+  "metadata_text": "Prometheus Breach - Security Network\nTerminal ID: SEC-1F-01\nAccess Level: 3",
+  "empty_category_messages": {
+    "Logs": "Access Denied",
+    "Personnel Files": "Database Corrupted",
+    "Research Notes": "No Records Found"
+  },
+  "entries": {
+    "Email": [
+      {
+        "id": "email_security_breach",
+        "title": "Security Breach Alert",
+        "content_file": "investigation/text/emails/security_breach.txt",
+        "is_evidence": true,
+        "evidence_summary": "Security breach detected on March 15th, 2087",
+        "timestamp": "3 days ago",
+        "preview": "FROM: Dr. Sarah Chen - URGENT: Unauthorized access detected..."
+      },
+      {
+        "id": "email_maintenance",
+        "title": "Scheduled Maintenance",
+        "content_file": "investigation/text/emails/maintenance.txt",
+        "is_evidence": false,
+        "evidence_summary": "",
+        "timestamp": "1 week ago",
+        "preview": "FROM: Maintenance Dept - All systems will be offline on..."
+      }
+    ],
+    "Notices": [
+      {
+        "id": "notice_evacuation",
+        "title": "Evacuation Protocol",
+        "content_file": "investigation/text/notices/evacuation.txt",
+        "is_evidence": true,
+        "evidence_summary": "Emergency evacuation was ordered",
+        "timestamp": "2 days ago",
+        "preview": "EMERGENCY NOTICE: All personnel must evacuate immediately..."
+      }
+    ],
+    "Logs": [],
+    "Personnel Files": [],
+    "Research Notes": []
+  }
+}

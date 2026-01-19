@@ -7,6 +7,8 @@ The Investigation System allows players to examine objects during exploration an
 1. **Terminals** - Complex multi-level navigation with categories and entries (emails, logs, notices, etc.)
 2. **Examinable Objects** - Simple objects like books and boxes with text descriptions and optional images
 
+All investigation content is **data-driven** using JSON files, making it easy to add and modify content without editing code.
+
 ## File Structure
 
 ```
@@ -15,11 +17,17 @@ investigation/
 ├── investigation_state.rpy          # State management & helper functions
 ├── investigation_screens.rpy        # All UI screens
 ├── investigation_handlers.rpy       # Interaction handlers
+├── investigation_loader.rpy         # JSON data loader
 ├── investigation_persistence.rpy    # Save/load system
 ├── variables.rpy                    # Configuration constants
-├── terminal_content.rpy            # Terminal definitions
-├── object_content.rpy              # Examinable object definitions
 ├── README.md                       # This file
+├── data/                           # JSON definition files
+│   ├── terminals/                  # Terminal JSON files
+│   │   └── security_terminal_1f.json
+│   └── examinables/                # Book/box JSON files
+│       ├── research_journal.json
+│       ├── medical_supplies.json
+│       └── security_manual.json
 └── text/                          # Content text files
     ├── emails/
     ├── logs/
@@ -29,42 +37,46 @@ investigation/
 
 ## Creating Terminals
 
-### Step 1: Define Terminal Content
+### Step 1: Create Terminal JSON File
 
-Create or edit `terminal_content.rpy`:
+Create `investigation/data/terminals/my_terminal.json`:
 
-```python
-def create_my_terminal():
-    terminal = Terminal(
-        id="my_terminal_id",
-        welcome_message="Terminal Online",
-        metadata_text="Location: Research Lab\nTerminal ID: LAB-01",
-        empty_category_message={
-            "Logs": "Access Denied",
-            "Personnel Files": "No Records"
-        }
-    )
-
-    # Add entries to categories
-    terminal.entries["Email"] = [
-        TerminalEntry(
-            id="my_email_id",
-            category="Email",
-            title="Important Message",
-            content_file="investigation/text/emails/my_email.txt",
-            is_evidence=True,
-            evidence_summary="Short summary for Evidence tab",
-            timestamp="2 days ago",
-            preview="FROM: John Doe - This is a preview..."
-        )
-    ]
-
-    return terminal
-
-# Register terminal
-init python:
-    investigation_state.register_terminal(create_my_terminal())
+```json
+{
+  "id": "my_terminal_id",
+  "welcome_message": "Terminal Online",
+  "metadata_text": "Location: Research Lab\nTerminal ID: LAB-01",
+  "empty_category_messages": {
+    "Logs": "Access Denied",
+    "Personnel Files": "No Records"
+  },
+  "entries": {
+    "Email": [
+      {
+        "id": "my_email_id",
+        "title": "Important Message",
+        "content_file": "investigation/text/emails/my_email.txt",
+        "is_evidence": true,
+        "evidence_summary": "Short summary for Evidence tab",
+        "timestamp": "2 days ago",
+        "preview": "FROM: John Doe - This is a preview..."
+      }
+    ],
+    "Notices": [],
+    "Logs": [],
+    "Personnel Files": [],
+    "Research Notes": []
+  }
+}
 ```
+
+**Notes:**
+- `id`: Unique identifier (used internally)
+- `welcome_message`: Shown on terminal main screen
+- `metadata_text`: Additional info on main screen (supports `\n` for line breaks)
+- `empty_category_messages`: Custom messages for categories with no entries
+- `entries`: Organized by global categories (see variables.rpy)
+  - Empty arrays for unused categories will show as greyed out
 
 ### Step 2: Create Content Text Files
 
@@ -82,38 +94,47 @@ Multiple paragraphs are supported.
 Just use plain text for now.
 ```
 
-### Step 3: Place Terminal in Map
+### Step 3: Place Terminal in Tiled Map
 
-In Tiled, add an object to the Object Layer:
+In Tiled Map Editor, add an object to your Object Layer:
 
-- **Type:** (leave empty or set to object type)
-- **Name:** (descriptive name)
-- **Custom Properties:**
-  - `icon_type` (string): "terminal"
-  - `content_id` (string): "my_terminal_id"
-  - `facing_direction` (int): 0, 90, 180, or 270 (direction player must face)
+**Object Properties:**
+- `type` (string): **"terminal"**
+- `file` (string): **"investigation/data/terminals/my_terminal.json"**
+- `prompt_facing` (string): **"n"**, **"s"**, **"e"**, or **"w"** (direction player must face)
+
+**Example in Tiled:**
+1. Select the Object tool
+2. Place an object on the map
+3. In Properties panel, add:
+   - Name: "Security Terminal" (optional, for your reference)
+   - Type: "terminal"
+   - Custom Properties:
+     - `file`: "investigation/data/my_terminal.json"
+     - `prompt_facing`: "e" (if terminal is on east wall)
+
+The terminal data will be automatically loaded when the map is loaded!
 
 ## Creating Examinable Objects
 
-### Step 1: Define Object Content
+### Step 1: Create Object JSON File
 
-Create or edit `object_content.rpy`:
+Create `investigation/data/examinables/my_book.json`:
 
-```python
-my_book = ExaminableObject(
-    id="my_book_id",
-    title="My Book Title",
-    image="images/investigation/books/my_book.png",
-    content_file="investigation/text/objects/my_book.txt",
-    interaction_range="adjacent",  # or "same_tile"
-    is_evidence=True,
-    evidence_summary="Short summary for Evidence tab"
-)
-
-# Register object
-init python:
-    investigation_state.register_examinable(my_book)
+```json
+{
+  "id": "my_book_id",
+  "title": "My Book Title",
+  "image": "images/investigation/books/my_book.png",
+  "content_file": "investigation/text/objects/my_book.txt",
+  "interaction_range": "adjacent",
+  "is_evidence": true,
+  "evidence_summary": "Short summary for Evidence tab"
+}
 ```
+
+**Notes:**
+- `interaction_range`: Either **"adjacent"** (player can examine from next to it) or **"same_tile"** (player must be on same tile, like a bookshelf)
 
 ### Step 2: Create Content Text File
 
@@ -135,13 +156,15 @@ Create your image at `images/investigation/books/my_book.png`:
 - Size: 400x300 to 800x600 pixels works well
 - Will be scaled based on distance in FPV
 
-### Step 4: Place Object in Map
+### Step 4: Place Object in Tiled Map
 
-In Tiled, add an object to the Object Layer:
+In Tiled Map Editor:
 
-- **Custom Properties:**
-  - `icon_type` (string): "examinable"
-  - `content_id` (string): "my_book_id"
+**Object Properties:**
+- `type` (string): **"examinable"**
+- `file` (string): **"investigation/data/examinables/my_book.json"**
+
+**No `prompt_facing` needed** - examinables can be examined from any adjacent tile (or same tile depending on `interaction_range`).
 
 ## Global Categories
 
@@ -199,10 +222,14 @@ $ data_total = data_count()
 
 The journal has two tabs:
 
-1. **Evidence Tab**: Shows only items with `is_evidence=True`, displays `evidence_summary`
+1. **Evidence Tab**: Shows only items with `is_evidence=true`, displays `evidence_summary`
 2. **Data Tab**: Shows all collected items, displays full content
 
 Both tabs show where each item was found (floor name and location).
+
+**Accessing the Journal:**
+- In exploration: Click "Journal" button under movement controls
+- In VN mode: Click "Journal" in quick menu
 
 ## Configuration
 
@@ -223,15 +250,41 @@ The system is fully integrated with the exploration system:
 - **Interaction Prompts**: Green prompts appear in right panel when player can interact
 - **Journal Button**: Available in exploration navigation and VN quick menu
 - **Save/Load**: All collected data persists through save files
+- **Tiled Loading**: Objects are automatically loaded from JSON when map loads
+
+## Tiled Properties Summary
+
+### Terminal Objects
+```
+type: "terminal"
+file: "investigation/data/terminal_name.json"
+prompt_facing: "n" | "s" | "e" | "w"
+```
+
+### Examinable Objects
+```
+type: "examinable"
+file: "investigation/data/object_name.json"
+```
 
 ## Example Content
 
 See the example content included in the system:
 
-- **Terminal**: `security_terminal_1f` with emails and notices
-- **Book**: `research_journal` (Dr. Chen's journal)
-- **Box**: `medical_supplies` (medical crate)
-- **Book**: `security_manual` (security protocols)
+- **Terminal**: `data/terminals/security_terminal_1f.json` with emails and notices
+- **Book**: `data/examinables/research_journal.json` (Dr. Chen's journal)
+- **Box**: `data/examinables/medical_supplies.json` (medical crate)
+- **Book**: `data/examinables/security_manual.json` (security protocols)
+
+## Direction Format
+
+The system uses directional letters (like teleporters):
+- **"n"** = North (0°)
+- **"e"** = East (90°)
+- **"s"** = South (180°)
+- **"w"** = West (270°)
+
+This is consistent with the teleporter system's `prompt_facing` property.
 
 ## Notes
 
@@ -241,3 +294,4 @@ See the example content included in the system:
 - Examinable objects are collected when examined
 - Re-examining collected items doesn't trigger notification again
 - Investigation interactions take priority over exploration interactions
+- JSON files are loaded automatically when the Tiled map loads

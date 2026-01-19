@@ -1,0 +1,9 @@
+{
+  "id": "security_manual",
+  "title": "Security Protocols Manual",
+  "image": "images/investigation/books/security_manual.png",
+  "content_file": "investigation/text/objects/security_manual.txt",
+  "interaction_range": "same_tile",
+  "is_evidence": false,
+  "evidence_summary": ""
+}

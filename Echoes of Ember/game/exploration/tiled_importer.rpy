@@ -36,7 +36,9 @@ init python:
             "gathering": "gathering",
             "event": "event",
             "enemy": "enemy",
-            "note": "note"
+            "note": "note",
+            "terminal": "terminal",
+            "examinable": "examinable"
         }
 
         @staticmethod
@@ -249,6 +251,35 @@ init python:
 
                 # Extract custom properties
                 properties = TiledImporter._extract_properties(obj.get("properties", []))
+
+                # Handle investigation objects (terminal, examinable)
+                if icon_type in ["terminal", "examinable"]:
+                    # Check if we have a "file" property
+                    data_file = properties.get("file")
+                    if data_file:
+                        # Load investigation data from JSON file
+                        if icon_type == "terminal":
+                            terminal_obj = InvestigationDataLoader.load_terminal(data_file)
+                            if terminal_obj:
+                                # Register terminal with investigation system
+                                investigation_state.register_terminal(terminal_obj)
+                                # Store content_id in properties for later lookup
+                                properties["content_id"] = terminal_obj.id
+                        elif icon_type == "examinable":
+                            examinable_obj = InvestigationDataLoader.load_examinable(data_file)
+                            if examinable_obj:
+                                # Register examinable with investigation system
+                                investigation_state.register_examinable(examinable_obj)
+                                # Store content_id in properties for later lookup
+                                properties["content_id"] = examinable_obj.id
+
+                    # Convert prompt_facing to facing_direction for terminals
+                    if "prompt_facing" in properties:
+                        facing_rotation = InvestigationDataLoader.prompt_facing_to_rotation(
+                            properties["prompt_facing"]
+                        )
+                        if facing_rotation is not None:
+                            properties["facing_direction"] = facing_rotation
 
                 # Create icon
                 icon = MapIcon(icon_type, metadata=properties)

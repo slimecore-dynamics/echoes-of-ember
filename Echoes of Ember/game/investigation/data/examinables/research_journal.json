@@ -1,0 +1,9 @@
+{
+  "id": "research_journal",
+  "title": "Dr. Chen's Research Journal",
+  "image": "images/investigation/books/research_journal.png",
+  "content_file": "investigation/text/objects/research_journal.txt",
+  "interaction_range": "adjacent",
+  "is_evidence": true,
+  "evidence_summary": "Dr. Chen was researching an unknown artifact before the breach"
+}
