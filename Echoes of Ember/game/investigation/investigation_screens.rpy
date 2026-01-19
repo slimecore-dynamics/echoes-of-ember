@@ -538,6 +538,7 @@ screen journal_data_tab():
                                     size 16
                                     color "#d0d0d0"
                                     xfill True
+                                    substitute False
 
 
 ## ==============================================================================
