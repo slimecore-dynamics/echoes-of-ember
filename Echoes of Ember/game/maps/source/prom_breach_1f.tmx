@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="18">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="21">
  <editorsettings>
   <export target="prom_breach_1f.json" format="json"/>
  </editorsettings>
@@ -72,7 +72,7 @@
    <image source="../../images/maps/tiles/cross.png" width="32" height="32"/>
   </tile>
  </tileset>
- <tileset firstgid="17" name="events" tilewidth="32" tileheight="32" tilecount="7" columns="0">
+ <tileset firstgid="17" name="events" tilewidth="32" tileheight="32" tilecount="9" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image source="../../images/maps/icons/teleporter.png" width="32" height="32"/>
@@ -94,6 +94,12 @@
   </tile>
   <tile id="6">
    <image source="../../images/maps/icons/door_closed.png" width="32" height="32"/>
+  </tile>
+  <tile id="7">
+   <image source="../../images/maps/icons/terminal.png" width="32" height="32"/>
+  </tile>
+  <tile id="8">
+   <image source="../../images/maps/icons/examinable.png" width="32" height="32"/>
   </tile>
  </tileset>
  <layer id="1" name="dungeon" width="20" height="20">
@@ -158,5 +164,18 @@
    </properties>
   </object>
   <object id="17" gid="23" x="416" y="96" width="32" height="32"/>
+  <object id="18" gid="24" x="64" y="580" width="32" height="32">
+   <properties>
+    <property name="file" value="investigation/data/terminals/security_terminal_1f.json"/>
+    <property name="prompt_facing" value="e"/>
+    <property name="type" value="terminal"/>
+   </properties>
+  </object>
+  <object id="20" gid="25" x="128" y="480" width="32" height="32">
+   <properties>
+    <property name="file" value="investigation/data/examinables/research_journal.json"/>
+    <property name="type" value="examinable"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
