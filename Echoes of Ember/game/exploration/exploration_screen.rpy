@@ -261,9 +261,10 @@ screen exploration_view():
                                 hover_background "#555555"
                                 sensitive (can_move and not exploration_dialogue_active)
 
-                            # Left and Right buttons (on same line, left and right aligned)
+                            # Left, Interact, Right buttons (on same line)
                             hbox:
                                 xfill True
+                                spacing 4
 
                                 textbutton "Left":
                                     action Function(handle_turn_left)
@@ -273,7 +274,17 @@ screen exploration_view():
                                     hover_background "#555555"
                                     sensitive (not exploration_dialogue_active)
 
-                                null  # Spacer
+                                # Check if there's something to interact with
+                                $ has_interaction = (current_interaction is not None) or (investigation_interaction is not None)
+
+                                textbutton "Interact":
+                                    action Function(handle_interact_button)
+                                    xalign 0.5
+                                    padding (20, 8)
+                                    text_xalign 0.5
+                                    background "#444444"
+                                    hover_background "#555555"
+                                    sensitive (has_interaction and not exploration_dialogue_active)
 
                                 textbutton "Right":
                                     action Function(handle_turn_right)
@@ -293,17 +304,7 @@ screen exploration_view():
                                 hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
-                            # Journal button (text centered)
-                            textbutton "Journal":
-                                action Function(open_journal)
-                                xalign 0.5
-                                padding (20, 8)
-                                text_xalign 0.5
-                                background "#444444"
-                                hover_background "#555555"
-                                sensitive (not exploration_dialogue_active)
-
-                    # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
+                    # AUTO-MAP TOGGLE + JOURNAL + LEAVE BUTTON (one line)
                     frame:
                         xsize int(config.screen_width * SIDEBAR_CONTENT_WIDTH_RATIO)
                         background "#2A2A2A"
@@ -323,6 +324,15 @@ screen exploration_view():
                                 background "#444444"
                                 hover_background "#555555"
                                 selected (map_grid and getattr(map_grid, 'auto_map_enabled', False))
+                                sensitive (not exploration_dialogue_active)
+
+                            # Journal in MIDDLE
+                            textbutton "Journal":
+                                action Function(open_journal)
+                                xalign 0.5
+                                padding (20, 8)
+                                background "#444444"
+                                hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
                             # Leave on RIGHT

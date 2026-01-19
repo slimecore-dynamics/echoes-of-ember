@@ -349,3 +349,56 @@ init python:
                 renpy.notify("Teleporter pair not found (pair_id: {})".format(pair_id))
         else:
             renpy.notify("Teleporter has no pair_id")
+
+    def handle_interact_button():
+        """Handle the Interact button - triggers whatever interaction is available.
+
+        Priority:
+        1. Investigation interactions (terminals, examinables)
+        2. Exploration interactions (doors, stairs, teleporters)
+        """
+        global current_interaction, investigation_interaction, map_grid, player_state
+
+        if not map_grid or not player_state:
+            return
+
+        floor = map_grid.get_current_floor()
+        if not floor:
+            return
+
+        # Check for investigation interactions first (terminals/examinables)
+        inv_icon, inv_type, inv_x, inv_y, content_id = InvestigationInteractionHandler.check_investigation_interaction(
+            floor, player_state.x, player_state.y, player_state.rotation
+        )
+
+        if inv_icon:
+            # Handle investigation interaction
+            if inv_type == "terminal":
+                handle_terminal_interaction(content_id)
+            elif inv_type == "examinable":
+                handle_examinable_interaction(content_id)
+            return
+
+        # Check for standard exploration interactions
+        icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
+            floor, player_state.x, player_state.y, player_state.rotation
+        )
+
+        # If no adjacent trigger, check for on-tile interactions (teleporter)
+        if not icon:
+            icon, int_type, tile_x, tile_y = InteractionHandler.check_on_tile_interact(
+                floor, player_state.x, player_state.y, player_state.rotation
+            )
+            if icon:
+                adj_x, adj_y = tile_x, tile_y
+
+        if icon:
+            # Handle standard exploration interaction based on icon type
+            if icon.icon_type == "stairs_up":
+                handle_stairs_interaction("up", adj_x, adj_y)
+            elif icon.icon_type == "stairs_down":
+                handle_stairs_interaction("down", adj_x, adj_y)
+            elif icon.icon_type == "door_closed":
+                handle_door_interaction(adj_x, adj_y)
+            elif icon.icon_type == "teleporter":
+                handle_teleporter_interaction(adj_x, adj_y)
