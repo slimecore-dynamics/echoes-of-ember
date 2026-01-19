@@ -108,10 +108,3 @@ init -1 python:
             player.max_health = data.get("max_health", 100)
             return player
 
-
-# Global variables (not saved in Ren'Py saves - managed externally)
-init -10 python:
-    if not hasattr(store, 'player_state'):
-        store.player_state = None
-    if not hasattr(store, 'map_grid'):
-        store.map_grid = None
