@@ -267,6 +267,9 @@ init python:
                                 investigation_state.register_terminal(terminal_obj)
                                 # Store content_id in properties for later lookup
                                 properties["content_id"] = terminal_obj.id
+                                renpy.notify("Terminal loaded: {} at ({},{})".format(terminal_obj.id, grid_x, grid_y))
+                            else:
+                                renpy.notify("ERROR: Terminal failed to load from: {}".format(data_file))
                         elif icon_type == "examinable":
                             examinable_obj = InvestigationDataLoader.load_examinable(data_file)
                             if examinable_obj:
@@ -274,6 +277,11 @@ init python:
                                 investigation_state.register_examinable(examinable_obj)
                                 # Store content_id in properties for later lookup
                                 properties["content_id"] = examinable_obj.id
+                                renpy.notify("Examinable loaded: {} at ({},{})".format(examinable_obj.id, grid_x, grid_y))
+                            else:
+                                renpy.notify("ERROR: Examinable failed to load from: {}".format(data_file))
+                    else:
+                        renpy.notify("ERROR: {} at ({},{}) has no 'file' property".format(icon_type, grid_x, grid_y))
 
                     # Convert prompt_facing to facing_direction for terminals
                     if "prompt_facing" in properties:

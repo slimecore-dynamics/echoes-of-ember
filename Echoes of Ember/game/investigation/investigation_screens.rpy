@@ -404,7 +404,7 @@ screen journal_screen():
                     text_size 24
                     text_color ("#ffd700" if current_tab == JOURNAL_TAB_DATA else "#808080")
 
-            add Solid("#404040", xsize=9999, ysize=2)
+            add Solid("#404040", xalign=0.0, xsize=860, ysize=2)
 
             # Content based on selected tab
             if current_tab == JOURNAL_TAB_EVIDENCE:
@@ -415,6 +415,7 @@ screen journal_screen():
             # Close button
             textbutton "Close":
                 xalign 0.5
+                ysize 40
                 action Hide("journal_screen")
 
 
@@ -451,7 +452,7 @@ screen journal_evidence_tab():
                             color "#ffd700"
                             bold True
 
-                        add Solid("#404040", xsize=9999, ysize=1)
+                        add Solid("#404040", xsize=840, ysize=1)
 
                     # Entry
                     frame:
@@ -509,7 +510,7 @@ screen journal_data_tab():
                             color "#ffd700"
                             bold True
 
-                        add Solid("#404040", xsize=9999, ysize=1)
+                        add Solid("#404040", xsize=840, ysize=1)
 
                     # Entry
                     frame:
