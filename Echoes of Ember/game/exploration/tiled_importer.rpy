@@ -42,13 +42,15 @@ init python:
         }
 
         @staticmethod
-        def load_tiled_map(filepath, floor_id=None, floor_name=None):
+        def load_tiled_map(filepath, floor_id=None, floor_name=None, skip_investigation_load=False):
             """Load a Tiled JSON map and convert to FloorMap.
 
             Args:
                 filepath: Path to Tiled JSON file (relative to game directory)
                 floor_id: Optional floor ID (defaults to filename)
                 floor_name: Optional floor name (defaults to Tiled map name)
+                skip_investigation_load: If True, skip loading investigation objects
+                                        (used during save/load reload to prevent duplication)
 
             Returns:
                 FloorMap instance, or None on failure
@@ -255,7 +257,7 @@ init python:
                     continue
 
                 # Handle investigation objects (terminal, examinable)
-                if icon_type in ["terminal", "examinable"]:
+                if icon_type in ["terminal", "examinable"] and not skip_investigation_load:
                     # Check if we have a "file" property
                     data_file = properties.get("file")
                     if data_file:
@@ -312,8 +314,8 @@ init python:
             if not floor or not floor.current_dungeon_file:
                 return False
 
-            # Load the Tiled map fresh
-            temp_floor = TiledImporter.load_tiled_map(floor.current_dungeon_file)
+            # Load the Tiled map fresh (skip investigation objects to prevent duplication)
+            temp_floor = TiledImporter.load_tiled_map(floor.current_dungeon_file, skip_investigation_load=True)
             if not temp_floor:
                 return False
 
