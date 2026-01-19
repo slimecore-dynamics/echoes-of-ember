@@ -230,8 +230,13 @@ init python:
                 grid_x = int(pixel_x / MAP_CELL_SIZE)
                 grid_y = int((pixel_y - tile_height) / MAP_CELL_SIZE)
 
-                # Get object type - try multiple sources
-                obj_type = obj.get("type", "").lower()
+                # Extract custom properties first (we need to check for "type" property)
+                properties = TiledImporter._extract_properties(obj.get("properties", []))
+
+                # Get object type - check custom property "type" first, then Tiled's type field
+                obj_type = properties.get("type", "").lower()
+                if not obj_type:
+                    obj_type = obj.get("type", "").lower()
                 if not obj_type:
                     obj_name = obj.get("name", "").lower()
                     obj_type = obj_name
@@ -248,9 +253,6 @@ init python:
                 icon_type = TiledImporter.OBJECT_TYPE_MAP.get(obj_type)
                 if not icon_type:
                     continue
-
-                # Extract custom properties
-                properties = TiledImporter._extract_properties(obj.get("properties", []))
 
                 # Handle investigation objects (terminal, examinable)
                 if icon_type in ["terminal", "examinable"]:
