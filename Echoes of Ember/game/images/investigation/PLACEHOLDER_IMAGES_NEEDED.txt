@@ -1,0 +1,28 @@
+INVESTIGATION SYSTEM - PLACEHOLDER IMAGES NEEDED
+
+The investigation system requires custom images for:
+
+1. BOOKS (images/investigation/books/)
+   - research_journal.png (Dr. Chen's Research Journal)
+   - security_manual.png (Security Protocols Manual)
+   - [Other books as needed]
+
+2. BOXES (images/investigation/boxes/)
+   - medical_crate.png (Medical Supply Crate)
+   - [Other boxes as needed]
+
+3. TERMINALS
+   - Terminal images are shown in FPV when player faces them
+   - These can be custom terminal screen images or device images
+   - Recommended size: 400x300 to 800x600 pixels
+
+IMAGE REQUIREMENTS:
+- PNG format with transparency recommended
+- Images will be scaled based on distance from player
+- Larger images work better for detail visibility
+- Consider perspective/angle appropriate for first-person view
+
+CURRENT STATUS:
+- System is functional but needs custom artwork
+- Placeholder images should be created for testing
+- See investigation/object_content.rpy and terminal_content.rpy for current image references

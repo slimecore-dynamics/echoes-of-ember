@@ -1,0 +1,38 @@
+PROMETHEUS INITIATIVE
+SECURITY PROTOCOLS MANUAL
+Classification Level: 3
+
+SECTION 1: ACCESS CONTROL
+
+All personnel must display visible identification at all times while on facility premises. Access to restricted areas requires appropriate clearance level verification via biometric scanners.
+
+Clearance Levels:
+- Level 1: General Personnel (Common areas, cafeteria, dormitories)
+- Level 2: Research Staff (Laboratories, data terminals)
+- Level 3: Senior Research & Security (Artifact containment, classified archives)
+- Level 4: Executive Command (All areas, emergency override authority)
+
+SECTION 2: EMERGENCY PROCEDURES
+
+In the event of a containment breach:
+1. Sound facility-wide alarm
+2. Initiate automatic lockdown protocols
+3. Seal affected sectors
+4. Evacuate non-essential personnel
+5. Deploy containment teams to breach site
+
+Emergency override codes are known only to Level 4 personnel and are changed weekly.
+
+SECTION 3: ARTIFACT HANDLING
+
+Special protocols apply to interaction with recovered artifacts:
+
+- No direct physical contact without protective equipment
+- Minimum safe distance: 5 meters for passive observation
+- Active testing requires Level 3 authorization and full hazmat protocols
+- All exposure must be logged and personnel monitored for 72 hours post-contact
+- Any unusual symptoms must be reported to Medical immediately
+
+FAILURE TO COMPLY WITH THESE PROTOCOLS MAY RESULT IN SEVERE DISCIPLINARY ACTION OR IMMEDIATE TERMINATION OF EMPLOYMENT.
+
+[Remainder of manual continues with detailed procedures...]

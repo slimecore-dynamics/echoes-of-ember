@@ -253,6 +253,7 @@ screen quick_menu():
             textbutton _("Save") action ShowMenu('save')
             textbutton _("Q.Save") action QuickSave()
             textbutton _("Q.Load") action FileLoadWithTracking(1, page="quick", confirm=False)
+            textbutton _("Journal") action Function(open_journal)
             textbutton _("Prefs") action ShowMenu('preferences')
 
 

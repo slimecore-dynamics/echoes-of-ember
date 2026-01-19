@@ -26,6 +26,7 @@ screen exploration_view():
     python:
         current_interaction = None
         interaction_pos = (0, 0)
+        investigation_interaction = None
         if floor and ps:
             # Check for adjacent triggers (stairs, doors)
             icon, int_type, adj_x, adj_y = InteractionHandler.check_adjacent_trigger(
@@ -43,6 +44,13 @@ screen exploration_view():
             if icon:
                 current_interaction = (icon, int_type, adj_x, adj_y)
                 interaction_pos = (adj_x, adj_y)
+
+            # Check for investigation interactions
+            inv_icon, inv_type, inv_x, inv_y, content_id = InvestigationInteractionHandler.check_investigation_interaction(
+                floor, ps.x, ps.y, ps.rotation
+            )
+            if inv_icon:
+                investigation_interaction = (inv_icon, inv_type, inv_x, inv_y, content_id)
 
     # Full screen container
     frame:
@@ -72,6 +80,9 @@ screen exploration_view():
 
                     # Render first-person view
                     use render_first_person_view(view_data, floor, ps)
+
+                    # Render investigation object overlays
+                    use render_investigation_fpv_overlays(view_data, floor, ps)
 
                     # Show pulsing indicator if there's an interaction available
                     if current_interaction:
@@ -284,6 +295,16 @@ screen exploration_view():
                                 hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
+                            # Journal button (text centered)
+                            textbutton "Journal":
+                                action Function(open_journal)
+                                xalign 0.5
+                                padding (20, 8)
+                                text_xalign 0.5
+                                background "#444444"
+                                hover_background "#555555"
+                                sensitive (not exploration_dialogue_active)
+
                     # AUTO-MAP TOGGLE + LEAVE BUTTON (one line)
                     frame:
                         xsize int(config.screen_width * SIDEBAR_CONTENT_WIDTH_RATIO)
@@ -319,6 +340,11 @@ screen exploration_view():
                     if current_interaction:
                         $ icon, int_type, adj_x, adj_y = current_interaction
                         use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
+
+                    # INVESTIGATION INTERACTION PROMPT (if any)
+                    if investigation_interaction:
+                        $ inv_icon, inv_type, inv_x, inv_y, content_id = investigation_interaction
+                        use investigation_interaction_prompt(inv_icon, inv_type, content_id)
 
 
 

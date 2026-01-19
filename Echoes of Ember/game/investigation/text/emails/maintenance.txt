@@ -1,0 +1,23 @@
+FROM: Maintenance Department
+TO: All Personnel
+DATE: March 8, 2087
+SUBJECT: Scheduled System Maintenance
+
+This is to inform all personnel that scheduled maintenance will be performed on the facility's primary power grid on March 20th, 2087.
+
+AFFECTED SYSTEMS:
+- Primary power distribution
+- Emergency lighting backup
+- Environmental control systems
+- Data terminal network
+
+DOWNTIME WINDOW: 02:00 - 06:00 hours
+
+All non-essential personnel should vacate the facility during this time. Essential personnel will be provided with portable lighting and communication equipment.
+
+Please ensure all critical work is saved and backed up before the maintenance window begins.
+
+Thank you for your cooperation.
+
+Maintenance Department
+Prometheus Facility
