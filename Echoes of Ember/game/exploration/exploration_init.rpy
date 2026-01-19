@@ -76,6 +76,10 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
 
                 player_state.current_floor_id = floor.floor_id
 
+            # Auto-reveal starting tile if auto-map is enabled
+            if getattr(map_grid, 'auto_map_enabled', False):
+                auto_reveal_tile(floor, player_state.x, player_state.y)
+
         else:
             renpy.notify("Failed to load floor from: {}".format(floor_filepath))
 
@@ -135,9 +139,7 @@ label enter_exploration_mode(floor_id):
 
         # Auto-reveal starting tile if auto-map is enabled
         if getattr(map_grid, 'auto_map_enabled', False):
-            if not hasattr(floor, 'revealed_tiles'):
-                floor.revealed_tiles = set()
-            floor.revealed_tiles.add((player_state.x, player_state.y))
+            auto_reveal_tile(floor, player_state.x, player_state.y)
 
     # Show exploration screen (this will block until player exits)
     call screen exploration_view
