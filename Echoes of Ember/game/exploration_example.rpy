@@ -1,6 +1,9 @@
 # exploration_example.rpy
 # Example script demonstrating dungeon exploration system
 
+define survivor = Character("Survivor", color="#00FF00")
+define ai = Character("AI Voice", color="#00FFFF")
+
 # This label shows how to start exploration with a test dungeon
 label start_dungeon_exploration_example:
     # Example: Start dungeon exploration with test dungeon.
@@ -201,10 +204,6 @@ label dialogue_during_exploration_example:
     # - Returns to exploration after dialogue
 
     call start_exploration_system
-
-    # Character definitions (if not already defined)
-    define survivor = Character("Survivor", color="#00FF00")
-    define ai = Character("AI Voice", color="#00FFFF")
 
     python:
         # Create floor with event triggers

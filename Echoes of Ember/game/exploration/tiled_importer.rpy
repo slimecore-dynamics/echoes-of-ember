@@ -225,8 +225,8 @@ init python:
 
                 # Convert pixel to grid coordinates
                 # NOTE: Tiled y-coordinate is at BOTTOM of tile, so subtract height first
-                grid_x = int(pixel_x / 32)
-                grid_y = int((pixel_y - tile_height) / 32)
+                grid_x = int(pixel_x / MAP_CELL_SIZE)
+                grid_y = int((pixel_y - tile_height) / MAP_CELL_SIZE)
 
                 # Get object type - try multiple sources
                 obj_type = obj.get("type", "").lower()

@@ -35,7 +35,7 @@ init -1 python:
                     tiles = {}
                     for y in range(floor.dimensions[1]):
                         for x in range(floor.dimensions[0]):
-                            tile = floor.tiles[y][x]
+                            tile = floor.get_tile(x, y)
                             if tile.tile_type != "empty":
                                 tiles["{},{}".format(x, y)] = {"type": tile.tile_type}
 

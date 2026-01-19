@@ -156,3 +156,15 @@ init -2 python:
             if self.current_floor_id and self.current_floor_id in self.floors:
                 return self.floors[self.current_floor_id]
             return None
+
+        def get_floor(self, floor_id):
+            """Get a specific floor by its ID."""
+            return self.floors.get(floor_id)
+
+        def switch_floor(self, floor_id):
+            """Switch the current active floor."""
+            if floor_id in self.floors:
+                self.current_floor_id = floor_id
+                return True
+            return False
+

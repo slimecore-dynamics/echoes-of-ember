@@ -69,14 +69,19 @@ init python:
         total_walkable = 0
         tiles_drawn = 0
 
+        # Count dungeon tiles (actual walkable space) vs player-drawn tiles
         for y in range(floor.dimensions[1]):
             for x in range(floor.dimensions[0]):
-                tile = floor.get_tile(x, y)
-                if tile and tile.tile_type != "empty":
+                # Check the ACTUAL dungeon tile (real layout)
+                dungeon_tile = floor.get_dungeon_tile(x, y)
+                if dungeon_tile and dungeon_tile.tile_type != "empty":
                     total_walkable += 1
-                    # Count as "drawn" if tile type is not empty
-                    if tile.tile_type != "empty":
+                    
+                    # Check if player has DRAWN this tile on their map
+                    player_tile = floor.tiles.get((x, y))
+                    if player_tile and player_tile.tile_type != "empty":
                         tiles_drawn += 1
+
 
         # Count discoverable items (gathering points and notes)
         total_items = 0

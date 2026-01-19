@@ -74,13 +74,6 @@ label load_dungeon_floor(floor_filepath, floor_id=None):
                 starting_y = getattr(floor, 'starting_y', DEFAULT_STARTING_Y)
                 starting_rotation = getattr(floor, 'starting_rotation', DEFAULT_STARTING_ROTATION)
 
-                if (player_state.x == starting_x and
-                    player_state.y == starting_y and
-                    player_state.rotation == starting_rotation):
-                    # Player is at default starting position, keep it
-                    pass
-                # else: position is different (loaded save), don't reset it
-
                 player_state.current_floor_id = floor.floor_id
 
         else:
