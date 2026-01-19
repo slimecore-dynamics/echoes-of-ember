@@ -207,15 +207,15 @@ screen exploration_view():
                                             fit_first True
                                             add tile_image xysize (32, 32)
 
-                            # ICONS GRID (right-aligned): 5 columns x 2 rows
-                            grid 5 2:
+                            # ICONS GRID (right-aligned): 6 columns x 2 rows
+                            grid 6 2:
                                 spacing 6
                                 xalign 1.0
 
-                                # Row 1: door_open | enemy | gathering | stairs_down | note
-                                # Row 2: door_closed | event | teleporter | stairs_up | (empty slot)
-                                for icon_type in ["door_open", "enemy", "gathering", "stairs_down", "note",
-                                                "door_closed", "event", "teleporter", "stairs_up"]:
+                                # Row 1: door_open | enemy | gathering | stairs_down | note | terminal
+                                # Row 2: door_closed | event | teleporter | stairs_up | examinable | (empty slot)
+                                for icon_type in ["door_open", "enemy", "gathering", "stairs_down", "note", "terminal",
+                                                "door_closed", "event", "teleporter", "stairs_up", "examinable"]:
                                     $ icon_image = "images/maps/icons/{}.png".format(icon_type)
                                     button:
                                         xysize (36, 36)
