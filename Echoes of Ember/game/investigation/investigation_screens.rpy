@@ -45,11 +45,15 @@ screen examination_popup(examinable_obj):
 
             # Image (if present)
             if examinable_obj.image:
-                image examinable_obj.image:
+                fixed:
                     xalign 0.5
-                    fit "contain"
                     xmaximum INVESTIGATION_MAX_IMAGE_WIDTH
                     ymaximum 300
+
+                    add examinable_obj.image:
+                        fit "contain"
+                        xalign 0.5
+                        yalign 0.5
 
             # Content (scrollable)
             viewport:
