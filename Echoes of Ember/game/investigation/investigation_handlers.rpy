@@ -195,8 +195,11 @@ init python:
 
     def handle_terminal_entry_collection(terminal_id, entry_id):
         """Collect a terminal entry when first viewed."""
+        print("DEBUG: handle_terminal_entry_collection called with terminal_id={}, entry_id={}".format(terminal_id, entry_id))
+
         terminal = investigation_state.get_terminal(terminal_id)
         if not terminal:
+            print("ERROR: Terminal not found: {}".format(terminal_id))
             return
 
         # Find the entry
@@ -210,7 +213,10 @@ init python:
                 break
 
         if not entry:
+            print("ERROR: Entry not found: {}".format(entry_id))
             return
+
+        print("DEBUG: Found entry: {} (is_evidence={})".format(entry.title, entry.is_evidence))
 
         # Get current location for journal entry
         floor = map_grid.get_current_floor() if map_grid else None
@@ -231,6 +237,8 @@ init python:
             is_evidence=entry.is_evidence,
             evidence_summary=entry.evidence_summary
         )
+
+        print("DEBUG: Entry collected (newly_collected={})".format(newly_collected))
 
         # Show notification if newly collected
         if newly_collected:
