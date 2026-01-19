@@ -66,6 +66,7 @@ screen examination_popup(examinable_obj):
                     size 18
                     color "#e0e0e0"
                     xfill True
+                    substitute False
 
             # Close button
             textbutton "Close":
@@ -152,11 +153,8 @@ screen terminal_interface(terminal):
                                     background None
                                     action [
                                         SetVariable("investigation_state.current_terminal_category", category),
-                                        If(has_content,
-                                           SetVariable("investigation_state.current_terminal_entry_index", None),
-                                           NullAction())
+                                        SetVariable("investigation_state.current_terminal_entry_index", None)
                                     ]
-                                    sensitive has_content
 
                                     text category:
                                         xalign 0.5
@@ -235,7 +233,7 @@ screen terminal_category_list(terminal, category):
             size 24
             color TERMINAL_HIGHLIGHT_COLOR
 
-        add Solid(TERMINAL_BORDER_COLOR, xsize=9999, ysize=1)
+        add Solid(TERMINAL_BORDER_COLOR, xalign=0.0, xsize=800, ysize=1)
 
         if len(entries) == 0:
             # No entries - show empty message
@@ -331,7 +329,7 @@ screen terminal_entry_view(terminal, category, entry_index):
                 text_size 24
                 text_color (TERMINAL_TEXT_COLOR if has_next else TERMINAL_DISABLED_COLOR)
 
-        add Solid(TERMINAL_BORDER_COLOR, xsize=9999, ysize=1)
+        add Solid(TERMINAL_BORDER_COLOR, xalign=0.0, xsize=800, ysize=1)
 
         # Content (scrollable)
         viewport:
@@ -346,6 +344,7 @@ screen terminal_entry_view(terminal, category, entry_index):
                 size 18
                 color TERMINAL_TEXT_COLOR
                 xfill True
+                substitute False
 
 
 ## ==============================================================================
