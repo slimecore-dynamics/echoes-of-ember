@@ -106,7 +106,7 @@ init python:
 
     def toggle_auto_map():
         """Toggle auto-mapping on/off - ONLY toggles, does not exit."""
-        global map_grid
+        global map_grid, player_state
 
         if not map_grid:
             return
@@ -114,6 +114,12 @@ init python:
         # Toggle the flag (initialize if it doesn't exist)
         current_state = getattr(map_grid, 'auto_map_enabled', False)
         map_grid.auto_map_enabled = not current_state
+
+        # If auto-map was turned ON, reveal the current tile
+        if map_grid.auto_map_enabled and player_state:
+            floor = map_grid.get_current_floor()
+            if floor:
+                auto_reveal_tile(floor, player_state.x, player_state.y)
 
         # Show notification
         status = "ON" if map_grid.auto_map_enabled else "OFF"

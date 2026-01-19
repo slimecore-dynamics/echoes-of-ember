@@ -316,7 +316,7 @@ screen exploration_view():
 
                             # Auto-Map on LEFT
                             textbutton "Auto-Map":
-                                action ToggleField(map_grid, "auto_map_enabled")
+                                action Function(toggle_auto_map)
                                 xalign 0.0
                                 padding (20, 8)
                                 selected_background "#FFFF00"

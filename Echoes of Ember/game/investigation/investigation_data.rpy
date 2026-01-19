@@ -35,7 +35,9 @@ init python:
             """Load and return content from file, caching it."""
             if self._cached_content is None:
                 try:
-                    self._cached_content = renpy.file(self.content_file).read().decode('utf-8')
+                    content = renpy.file(self.content_file).read().decode('utf-8')
+                    # Remove carriage returns (Windows line endings show as rectangles)
+                    self._cached_content = content.replace('\r', '')
                 except:
                     self._cached_content = "[Content file not found: {}]".format(self.content_file)
             return self._cached_content
@@ -89,7 +91,9 @@ init python:
             """Load and return content from file, caching it."""
             if self._cached_content is None:
                 try:
-                    self._cached_content = renpy.file(self.content_file).read().decode('utf-8')
+                    content = renpy.file(self.content_file).read().decode('utf-8')
+                    # Remove carriage returns (Windows line endings show as rectangles)
+                    self._cached_content = content.replace('\r', '')
                 except:
                     self._cached_content = "[Content file not found: {}]".format(self.content_file)
             return self._cached_content
