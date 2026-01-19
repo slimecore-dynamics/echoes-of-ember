@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="18">
+ <editorsettings>
+  <export target="prom_breach_1f.json" format="json"/>
+ </editorsettings>
+ <properties>
+  <property name="ambient_sound" value=""/>
+  <property name="area_name" value="Prometheus"/>
+  <property name="auto_map_available" type="bool" value="true"/>
+  <property name="bgm" value=""/>
+  <property name="description" value="The mangled carcasses of two ships colliding..."/>
+  <property name="encounter_rate" type="float" value="0"/>
+  <property name="floor_id" value="prometheus_breach_1f"/>
+  <property name="floor_name" value="Breach - 1F"/>
+  <property name="lighting" value=""/>
+  <property name="size_x" type="int" value="20"/>
+  <property name="size_y" type="int" value="20"/>
+  <property name="starting_rotation" type="int" value="270"/>
+  <property name="starting_x" type="int" value="5"/>
+  <property name="starting_y" type="int" value="5"/>
+  <property name="sub_area_name" value="Breach"/>
+  <property name="view_distance" type="int" value="5"/>
+ </properties>
+ <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="16" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image source="../../images/maps/tiles/empty.png" width="32" height="32"/>
+  </tile>
+  <tile id="1">
+   <image source="../../images/maps/tiles/wall_wse.png" width="32" height="32"/>
+  </tile>
+  <tile id="2">
+   <image source="../../images/maps/tiles/wall_nws.png" width="32" height="32"/>
+  </tile>
+  <tile id="3">
+   <image source="../../images/maps/tiles/wall_wne.png" width="32" height="32"/>
+  </tile>
+  <tile id="4">
+   <image source="../../images/maps/tiles/wall_nes.png" width="32" height="32"/>
+  </tile>
+  <tile id="5">
+   <image source="../../images/maps/tiles/t_intersection_nes.png" width="32" height="32"/>
+  </tile>
+  <tile id="6">
+   <image source="../../images/maps/tiles/t_intersection_nws.png" width="32" height="32"/>
+  </tile>
+  <tile id="7">
+   <image source="../../images/maps/tiles/t_intersection_wne.png" width="32" height="32"/>
+  </tile>
+  <tile id="8">
+   <image source="../../images/maps/tiles/t_intersection_wse.png" width="32" height="32"/>
+  </tile>
+  <tile id="9">
+   <image source="../../images/maps/tiles/hallway_we.png" width="32" height="32"/>
+  </tile>
+  <tile id="10">
+   <image source="../../images/maps/tiles/hallway_ns.png" width="32" height="32"/>
+  </tile>
+  <tile id="11">
+   <image source="../../images/maps/tiles/corner_es.png" width="32" height="32"/>
+  </tile>
+  <tile id="12">
+   <image source="../../images/maps/tiles/corner_ne.png" width="32" height="32"/>
+  </tile>
+  <tile id="13">
+   <image source="../../images/maps/tiles/corner_wn.png" width="32" height="32"/>
+  </tile>
+  <tile id="14">
+   <image source="../../images/maps/tiles/corner_ws.png" width="32" height="32"/>
+  </tile>
+  <tile id="15">
+   <image source="../../images/maps/tiles/cross.png" width="32" height="32"/>
+  </tile>
+ </tileset>
+ <tileset firstgid="17" name="events" tilewidth="32" tileheight="32" tilecount="7" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image source="../../images/maps/icons/teleporter.png" width="32" height="32"/>
+  </tile>
+  <tile id="1">
+   <image source="../../images/maps/icons/enemy.png" width="32" height="32"/>
+  </tile>
+  <tile id="2">
+   <image source="../../images/maps/icons/event.png" width="32" height="32"/>
+  </tile>
+  <tile id="3">
+   <image source="../../images/maps/icons/gathering.png" width="32" height="32"/>
+  </tile>
+  <tile id="4">
+   <image source="../../images/maps/icons/stairs_down.png" width="32" height="32"/>
+  </tile>
+  <tile id="5">
+   <image source="../../images/maps/icons/stairs_up.png" width="32" height="32"/>
+  </tile>
+  <tile id="6">
+   <image source="../../images/maps/icons/door_closed.png" width="32" height="32"/>
+  </tile>
+ </tileset>
+ <layer id="1" name="dungeon" width="20" height="20">
+  <data encoding="csv">
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,12,2,2,2,2,2,2,2,2,2,2,10,9,9,15,1,12,15,1,
+1,13,4,4,4,4,4,4,4,4,4,14,1,11,13,14,1,11,11,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,13,10,10,10,14,11,1,
+1,1,1,12,10,15,1,1,1,1,1,1,12,10,10,9,15,1,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,13,15,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,11,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,6,10,10,16,10,14,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,11,1,11,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,11,12,14,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,1,13,16,10,10,10,10,10,10,10,7,1,1,11,1,1,11,1,
+1,1,1,1,11,1,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,12,2,16,15,1,1,1,1,1,1,11,1,1,11,1,1,11,1,
+1,1,13,4,4,14,1,1,1,1,1,1,13,10,10,8,10,10,14,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+ <objectgroup id="2" name="events">
+  <object id="5" gid="17" x="64" y="608" width="32" height="32">
+   <properties>
+    <property name="pair_id" value="tp1"/>
+    <property name="prompt_facing" value="w"/>
+   </properties>
+  </object>
+  <object id="6" gid="17" x="480" y="64" width="32" height="32">
+   <properties>
+    <property name="pair_id" value="tp1"/>
+    <property name="prompt_facing" value="n"/>
+   </properties>
+  </object>
+  <object id="7" gid="18" x="384" y="384" width="32" height="32">
+   <properties>
+    <property name="damage" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="8" gid="18" x="480" y="384" width="32" height="32">
+   <properties>
+    <property name="damage" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="13" gid="22" x="32" y="64" width="32" height="32"/>
+  <object id="14" gid="21" x="160" y="608" width="32" height="32"/>
+  <object id="15" gid="19" x="96" y="288" width="32" height="32">
+   <properties>
+    <property name="label" value="test_event_dialogue"/>
+    <property name="message" value="Test event triggered successfully"/>
+   </properties>
+  </object>
+  <object id="16" gid="20" x="384" y="160" width="32" height="32">
+   <properties>
+    <property name="amount" type="int" value="1"/>
+    <property name="item" value="scrap"/>
+   </properties>
+  </object>
+  <object id="17" gid="23" x="416" y="96" width="32" height="32"/>
+ </objectgroup>
+</map>

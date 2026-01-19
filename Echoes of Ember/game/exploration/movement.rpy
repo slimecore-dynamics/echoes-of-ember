@@ -1,0 +1,160 @@
+# movement.rpy
+# Movement validation and collision detection for dungeon exploration
+
+init python:
+    from collections import namedtuple
+
+    # Named tuple for movement validation results
+    MoveResult = namedtuple('MoveResult', ['can_move', 'reason'])
+
+    class MovementValidator:
+        """Validates player movement based on tile types, rotations, and icon collisions."""
+
+        # Icon types that block movement
+        BLOCKING_ICONS = ["stairs_up", "stairs_down", "door_closed"]
+
+        # Icon types that are passable
+        PASSABLE_ICONS = ["teleporter", "gathering", "event", "enemy", "note", "door_open"]
+
+        @staticmethod
+        def can_move_to(floor, from_x, from_y, to_x, to_y, player_rotation):
+            """Check if player can move from (from_x, from_y) to (to_x, to_y).
+
+            Only checks if destination tile allows entry - doesn't check source tile.
+            Returns: MoveResult(can_move: bool, reason: str)
+            """
+            # Check bounds
+            if not floor:
+                return MoveResult(False, "No floor data")
+
+            width, height = floor.dimensions
+            if to_x < 0 or to_x >= width or to_y < 0 or to_y >= height:
+                return MoveResult(False, "Out of bounds")
+
+            # Calculate direction of movement
+            dx = to_x - from_x
+            dy = to_y - from_y
+
+            # Determine which direction we're moving (and entering from)
+            if dx == 1 and dy == 0:
+                move_dir = "east"
+                entry_dir = "west"  # Entering from west
+            elif dx == -1 and dy == 0:
+                move_dir = "west"
+                entry_dir = "east"  # Entering from east
+            elif dx == 0 and dy == 1:
+                move_dir = "south"
+                entry_dir = "north"  # Entering from north
+            elif dx == 0 and dy == -1:
+                move_dir = "north"
+                entry_dir = "south"  # Entering from south
+            else:
+                return MoveResult(False, "Invalid movement (diagonal or too far)")
+
+            # Get destination tile from DUNGEON (real tiles), not drawn map
+            dest_tile = floor.get_dungeon_tile(to_x, to_y)
+            if not dest_tile:
+                return MoveResult(False, "Invalid destination")
+
+            # Empty tiles are voids (unreachable)
+            if dest_tile.tile_type == "empty":
+                return MoveResult(False, "Empty void")
+
+            # Check if destination tile allows entry from the direction we're coming from
+            dest_allowed_dirs = MovementValidator._get_allowed_directions(dest_tile)
+            if entry_dir not in dest_allowed_dirs:
+                return MoveResult(False, "Cannot enter {} from {}".format(dest_tile.tile_type, entry_dir))
+
+            # Check if there's a blocking icon at destination (from dungeon, not player-drawn)
+            icon_at_dest = floor.get_dungeon_icon(to_x, to_y)
+            if icon_at_dest:
+                if icon_at_dest.icon_type in MovementValidator.BLOCKING_ICONS:
+                    return MoveResult(False, "Blocked by {}".format(icon_at_dest.icon_type))
+
+            return MoveResult(True, "OK")
+
+        @staticmethod
+        def _get_allowed_directions(tile):
+            """Get list of directions player can move FROM/TO this tile.
+
+            Parse tile name suffix to get allowed directions (e.g., corner_ws = west/south).
+            Returns: list of strings: ["north", "south", "east", "west"]
+            """
+            tile_type = tile.tile_type
+
+            if tile_type == "empty":
+                return []  # Empty is void - no movement allowed
+
+            elif tile_type == "cross":
+                # Cross allows all 4 directions
+                return ["north", "south", "east", "west"]
+
+            else:
+                # Parse suffix letters from tile name (e.g., "corner_ws" -> "ws")
+                # Letters indicate passable directions: n=north, s=south, e=east, w=west
+                parts = tile_type.split("_")
+                if len(parts) < 2:
+                    # No suffix, assume all directions for unknown types
+                    return ["north", "south", "east", "west"]
+
+                suffix = parts[-1]  # Get last part (e.g., "ws", "nes", "we")
+                allowed = []
+
+                # Map letters to directions
+                if 'n' in suffix:
+                    allowed.append("north")
+                if 's' in suffix:
+                    allowed.append("south")
+                if 'e' in suffix:
+                    allowed.append("east")
+                if 'w' in suffix:
+                    allowed.append("west")
+
+                return allowed if allowed else []
+
+        @staticmethod
+        def _get_opposite_direction(direction):
+            """Get opposite direction."""
+            opposites = {
+                "north": "south",
+                "south": "north",
+                "east": "west",
+                "west": "east"
+            }
+            return opposites.get(direction, "")
+
+        @staticmethod
+        def get_adjacent_icon(floor, x, y, rotation):
+            """Get icon in the tile the player is facing (adjacent to current position).
+
+            Returns: MapIcon or None
+            """
+            # Calculate adjacent position based on rotation
+            if rotation == 0:    # North
+                adj_x, adj_y = x, y - 1
+            elif rotation == 90:  # East
+                adj_x, adj_y = x + 1, y
+            elif rotation == 180: # South
+                adj_x, adj_y = x, y + 1
+            elif rotation == 270: # West
+                adj_x, adj_y = x - 1, y
+            else:
+                return None
+
+            # Check bounds
+            width, height = floor.dimensions
+            if adj_x < 0 or adj_x >= width or adj_y < 0 or adj_y >= height:
+                return None
+
+            # Get icon at adjacent tile
+            return floor.icons.get((adj_x, adj_y))
+
+        @staticmethod
+        def get_icon_at_position(floor, x, y):
+            """Get icon at the player's current position.
+
+            Returns: MapIcon or None
+            """
+            if not floor:
+                return None
+            return floor.icons.get((x, y))

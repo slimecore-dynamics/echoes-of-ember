@@ -1,0 +1,22 @@
+Placeholder Images Needed for First-Person View
+=================================================
+
+Create these images in: game/images/exploration/first_person/
+
+Required Images:
+----------------
+1. wall.png (800x600) - Gray stone wall texture
+2. floor.png (800x600) - Dark floor texture
+3. ceiling.png (800x600) - Stone ceiling texture
+4. door_closed.png (800x600) - Wooden door (closed)
+5. door_open.png (800x600) - Open doorway
+6. corner.png (800x600) - Corner where two walls meet
+7. interact_highlight.png (100x100) - Glowing indicator for interactions (animated if possible)
+
+For now, the system will use colored rectangles as placeholders:
+- Wall: #666666 (gray)
+- Floor: #333333 (dark gray)
+- Ceiling: #4D4D4D (medium gray)
+- Door Closed: #8B4513 (brown)
+- Door Open: #D2B48C (tan)
+- Interact Highlight: #FFFF00 (yellow, pulsing)

@@ -28,6 +28,30 @@ label start:
 
     e "Once you add a story, pictures, and music, you can release it to the world!"
 
+    e "The mapping system has been initialized. You can use it to create Etrian Odyssey-style dungeon maps!"
+
+    # Initialize exploration system
+    call start_exploration_system
+
+    # Load the Prometheus Breach dungeon from Tiled JSON
+    call load_dungeon_floor("maps/exports/prom_breach_1f.json")
+
+    # Show exploration screen
+    call screen exploration_view
+
     # This ends the game.
 
     return
+
+
+# Event dialogue labels
+label test_event_dialogue:
+    # Test event dialogue for object layer testing.
+
+    # Get the message from the event metadata (passed via icon)
+    "Test event triggered successfully"
+
+    "Moving on from test event now."
+
+    return
+

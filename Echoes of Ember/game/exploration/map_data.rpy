@@ -1,0 +1,157 @@
+# map_data.rpy
+# Core data structures for dungeon mapping and exploration
+
+init -2 python:
+    class MapTile:
+        """Represents a single tile on the map."""
+        def __init__(self, tile_type):
+            self.tile_type = tile_type  # "empty", "hallway", "corner", etc.
+
+    class MapIcon:
+        """Represents an icon placed on the map (stairs, doors, enemies, etc.).
+
+        Position is stored as the dictionary key in floor.icons: {(x, y): MapIcon}
+        To get an icon's position, use the key from floor.icons.items().
+        """
+        def __init__(self, icon_type, metadata=None):
+            self.icon_type = icon_type  # "stairs_up", "door_closed", "enemy", etc.
+            self.metadata = metadata or {}  # Additional data
+
+    class FloorMap:
+        """Represents a single floor/level of a dungeon."""
+        def __init__(self, floor_id, floor_name, dimensions):
+            self.floor_id = floor_id
+            self.floor_name = floor_name
+            self.dimensions = dimensions  # (width, height)
+
+            # Drawn map (player-created) - starts empty (sparse dictionary)
+            self.tiles = {}  # {(x, y): MapTile} # only stores non-empty tiles
+
+            # Real dungeon tiles (from Tiled JSON) - for movement validation
+            # This is the actual dungeon layout that the player navigates
+            self.dungeon_tiles = None
+
+            # Player-drawn icons (visible on map)
+            self.icons = {}  # {(x, y): MapIcon}
+
+            # Real dungeon icons (from Tiled JSON) - for collision and interaction
+            # This is separate from player-drawn icons
+            self.dungeon_icons = {}  # {(x, y): MapIcon}
+
+            # Revealed tiles (for auto-map)
+            self.revealed_tiles = set()  # {(x, y), ...}
+
+            # Metadata from Tiled JSON (defaults from variables.rpy)
+            self.starting_x = DEFAULT_STARTING_X
+            self.starting_y = DEFAULT_STARTING_Y
+            self.starting_rotation = DEFAULT_STARTING_ROTATION
+            self.view_distance = DEFAULT_VIEW_DISTANCE
+            self.area_name = ""
+            self.sub_area_name = ""
+            self.description = ""
+
+            # Path to Tiled JSON file for reloading dungeon layout
+            # This gets pickled so we can reload dungeon_tiles after loading saves
+            self.current_dungeon_file = None
+
+            # Whether this floor is accessible (for story progression)
+            # When False, story should not allow entering this floor
+            # But map data is preserved for potential gallery/review features
+            self.accessible = True
+
+        def get_tile(self, x, y):
+            """Get tile at position (returns drawn map tile)."""
+            if 0 <= x < self.dimensions[0] and 0 <= y < self.dimensions[1]:
+                return self.tiles.get((x, y), MapTile("empty"))
+            return MapTile("empty")
+
+        def set_tile(self, x, y, tile):
+            """Set tile at position (updates drawn map)."""
+            if 0 <= x < self.dimensions[0] and 0 <= y < self.dimensions[1]:
+                if tile.tile_type == "empty":
+                    # Remove from dict if setting to empty (save memory)
+                    self.tiles.pop((x, y), None)
+                else:
+                    self.tiles[(x, y)] = tile
+
+        def place_icon(self, x, y, icon):
+            """Place an icon at position."""
+            self.icons[(x, y)] = icon
+
+        def remove_icon(self, x, y):
+            """Remove icon at position."""
+            if (x, y) in self.icons:
+                del self.icons[(x, y)]
+
+        def get_dungeon_icon(self, x, y):
+            """Get real dungeon icon at position (for collision/interaction).
+
+            Returns dungeon icon if it exists, otherwise returns None.
+            Dungeon icons represent the actual game world, not player-drawn icons.
+            """
+            dungeon_icons = getattr(self, 'dungeon_icons', None)
+            if dungeon_icons:
+                return dungeon_icons.get((x, y))
+            return None
+
+        def get_dungeon_tile(self, x, y):
+            """Get real dungeon tile at position (for movement validation).
+
+            Returns dungeon tile if it exists, falls back to drawn map.
+            dungeon_tiles is a sparse dictionary with (x, y) tuple keys.
+            """
+            dungeon_tiles = getattr(self, 'dungeon_tiles', None)
+            if dungeon_tiles:
+                # dungeon_tiles is a dict {(x, y): MapTile}, not a 2D array
+                tile = dungeon_tiles.get((x, y))
+                if tile:
+                    return tile
+            return self.get_tile(x, y)  # Fallback to drawn map
+
+        def __getstate__(self):
+            """Custom pickle: exclude dungeon_tiles and dungeon_icons from saves.
+
+            These are large and should be reloaded from Tiled files, not pickled.
+            This prevents bloating save files with dungeon layout data.
+            """
+            state = self.__dict__.copy()
+            del state['dungeon_tiles']
+            state['dungeon_icons'] = {}
+            return state
+
+        def __setstate__(self, state):
+            """Custom unpickle: restore attributes."""
+            self.__dict__.update(state)
+            # dungeon_tiles won't exist after unpickling (will be set by callback)
+            # dungeon_icons will be {} after unpickling
+
+    class MapGrid:
+        """Container for all floors and mapping state."""
+        def __init__(self):
+            self.floors = {}  # {floor_id: FloorMap}
+            self.current_floor_id = None
+            self.cell_size = MAP_CELL_SIZE  # Defined in variables.rpy
+            self.auto_map_enabled = False
+
+            # Palette selection state
+            self.selected_tile_type = "empty"
+            self.selected_icon_type = None
+            self.current_mode = "edit_tiles"  # "edit_tiles" or "edit_icons"
+
+        def get_current_floor(self):
+            """Get the currently active floor."""
+            if self.current_floor_id and self.current_floor_id in self.floors:
+                return self.floors[self.current_floor_id]
+            return None
+
+        def get_floor(self, floor_id):
+            """Get a specific floor by its ID."""
+            return self.floors.get(floor_id)
+
+        def switch_floor(self, floor_id):
+            """Switch the current active floor."""
+            if floor_id in self.floors:
+                self.current_floor_id = floor_id
+                return True
+            return False
+
