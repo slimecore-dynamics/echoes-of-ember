@@ -124,15 +124,13 @@ init python:
 
     def auto_reveal_tile(floor, x, y):
         """Auto-reveal tile when walking on it - copy from dungeon to drawn map."""
-        # Get the REAL tile from dungeon
+        # Get the REAL tile from dungeon (dungeon_tiles is a sparse dict {(x, y): MapTile})
         dungeon_tiles = getattr(floor, 'dungeon_tiles', None)
         if dungeon_tiles:
-            if y < len(dungeon_tiles) and x < len(dungeon_tiles[y]):
-                dungeon_tile = dungeon_tiles[y][x]
-
-                if dungeon_tile and dungeon_tile.tile_type != "empty":
-                    # Copy tile type from dungeon to drawn map
-                    floor.set_tile(x, y, MapTile(dungeon_tile.tile_type))
+            dungeon_tile = dungeon_tiles.get((x, y))
+            if dungeon_tile and dungeon_tile.tile_type != "empty":
+                # Copy tile type from dungeon to drawn map
+                floor.set_tile(x, y, MapTile(dungeon_tile.tile_type))
 
     # === MOVEMENT HANDLERS ===
 

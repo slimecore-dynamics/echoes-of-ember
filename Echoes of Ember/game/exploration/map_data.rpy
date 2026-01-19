@@ -98,11 +98,14 @@ init -2 python:
             """Get real dungeon tile at position (for movement validation).
 
             Returns dungeon tile if it exists, falls back to drawn map.
+            dungeon_tiles is a sparse dictionary with (x, y) tuple keys.
             """
             dungeon_tiles = getattr(self, 'dungeon_tiles', None)
             if dungeon_tiles:
-                if 0 <= y < len(dungeon_tiles) and 0 <= x < len(dungeon_tiles[y]):
-                    return dungeon_tiles[y][x]
+                # dungeon_tiles is a dict {(x, y): MapTile}, not a 2D array
+                tile = dungeon_tiles.get((x, y))
+                if tile:
+                    return tile
             return self.get_tile(x, y)  # Fallback to drawn map
 
         def __getstate__(self):
