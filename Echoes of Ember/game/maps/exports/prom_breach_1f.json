@@ -216,7 +216,7 @@
                         {
                          "name":"prompt_facing",
                          "type":"string",
-                         "value":"e"
+                         "value":"w"
                         }, 
                         {
                          "name":"type",
@@ -239,7 +239,7 @@
                         {
                          "name":"file",
                          "type":"string",
-                         "value":"investigation\/text\/objects\/security_manual.txt"
+                         "value":"investigation\/data\/examinables\/security_manual.json"
                         }, 
                         {
                          "name":"type",
