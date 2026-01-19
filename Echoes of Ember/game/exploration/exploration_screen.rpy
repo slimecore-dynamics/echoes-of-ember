@@ -5,8 +5,6 @@
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False
 
-default map_grid = None
-
 screen exploration_view():
     # Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
 
