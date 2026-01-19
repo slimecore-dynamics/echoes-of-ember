@@ -249,10 +249,6 @@ init python:
                         tile_name = tile_id_map[gid]
                         obj_type = tile_name.lower()
 
-                # DEBUG: Log what we found
-                if obj_type in ["terminal", "examinable"]:
-                    print("DEBUG: Found {} at ({},{}), props: {}".format(obj_type, grid_x, grid_y, properties))
-
                 # Map to our icon type
                 icon_type = TiledImporter.OBJECT_TYPE_MAP.get(obj_type)
                 if not icon_type:
@@ -271,9 +267,9 @@ init python:
                                 investigation_state.register_terminal(terminal_obj)
                                 # Store content_id in properties for later lookup
                                 properties["content_id"] = terminal_obj.id
-                                print("SUCCESS: Terminal loaded: {} at ({},{})".format(terminal_obj.id, grid_x, grid_y))
                             else:
-                                print("ERROR: Terminal failed to load from: {}".format(data_file))
+                                # Loading failed - skip this icon to prevent errors
+                                continue
                         elif icon_type == "examinable":
                             examinable_obj = InvestigationDataLoader.load_examinable(data_file)
                             if examinable_obj:
@@ -281,11 +277,12 @@ init python:
                                 investigation_state.register_examinable(examinable_obj)
                                 # Store content_id in properties for later lookup
                                 properties["content_id"] = examinable_obj.id
-                                print("SUCCESS: Examinable loaded: {} at ({},{})".format(examinable_obj.id, grid_x, grid_y))
                             else:
-                                print("ERROR: Examinable failed to load from: {}".format(data_file))
+                                # Loading failed - skip this icon to prevent errors
+                                continue
                     else:
-                        print("ERROR: {} at ({},{}) has no 'file' property".format(icon_type, grid_x, grid_y))
+                        # No file property - skip this icon to prevent errors
+                        continue
 
                     # Convert prompt_facing to facing_direction for terminals
                     if "prompt_facing" in properties:
