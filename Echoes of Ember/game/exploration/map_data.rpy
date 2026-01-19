@@ -131,7 +131,7 @@ init -2 python:
             self.floors = {}  # {floor_id: FloorMap}
             self.current_floor_id = None
             self.cell_size = MAP_CELL_SIZE  # Defined in variables.rpy
-            self.auto_map_enabled = False
+            self.auto_map_enabled = True
 
             # Palette selection state
             self.selected_tile_type = "empty"
