@@ -45,8 +45,9 @@ screen examination_popup(examinable_obj):
 
             # Image (if present)
             if examinable_obj.image:
-                add examinable_obj.image:
+                image examinable_obj.image:
                     xalign 0.5
+                    fit "contain"
                     xmaximum INVESTIGATION_MAX_IMAGE_WIDTH
                     ymaximum 300
 
@@ -588,8 +589,8 @@ screen render_investigation_fpv_overlays(view_data, floor, ps):
                             yanchor 0.5
                             idle content_obj.image
                             hover content_obj.image
-                            xzoom scale
-                            yzoom scale
+                            at transform:
+                                zoom scale
                             action [
                                 If(icon.icon_type == "terminal",
                                    Function(handle_terminal_interaction, content_id),
