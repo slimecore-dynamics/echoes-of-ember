@@ -344,15 +344,7 @@ screen exploration_view():
                                 hover_background "#555555"
                                 sensitive (not exploration_dialogue_active)
 
-                    # INTERACTION PROMPT (if any)
-                    if current_interaction:
-                        $ icon, int_type, adj_x, adj_y = current_interaction
-                        use compact_interaction_prompt(icon, int_type, adj_x, adj_y)
-
-                    # INVESTIGATION INTERACTION PROMPT (if any)
-                    if investigation_interaction:
-                        $ inv_icon, inv_type, inv_x, inv_y, content_id = investigation_interaction
-                        use investigation_interaction_prompt(inv_icon, inv_type, content_id)
+                    # Removed interaction prompts - using Interact button instead
 
 
 
