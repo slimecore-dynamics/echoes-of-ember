@@ -34,6 +34,10 @@ define color_door_closed = "#8B4513"
 define color_door_open = "#D2B48C"
 define color_interact = "#FFFF00"
 
+# Global exploration system variables
+default player_state = None
+default map_grid = None
+
 # ==========================================
 # PYTHON CONSTANTS AND COLOR PALETTES
 # Used in: init python blocks across multiple files
