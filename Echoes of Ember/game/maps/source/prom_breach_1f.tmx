@@ -173,7 +173,7 @@
   </object>
   <object id="20" gid="25" x="128" y="480" width="32" height="32">
    <properties>
-    <property name="file" value="investigation/data/examinables/research_journal.json"/>
+    <property name="file" value="investigation/text/objects/security_manual.txt"/>
     <property name="type" value="examinable"/>
    </properties>
   </object>

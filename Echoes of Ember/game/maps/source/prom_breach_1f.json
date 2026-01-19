@@ -239,7 +239,7 @@
                         {
                          "name":"file",
                          "type":"string",
-                         "value":"investigation\/data\/examinables\/research_journal.json"
+                         "value":"investigation\/text\/objects\/security_manual.txt"
                         }, 
                         {
                          "name":"type",
