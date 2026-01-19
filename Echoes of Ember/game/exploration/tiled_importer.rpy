@@ -251,7 +251,7 @@ init python:
                 properties = TiledImporter._extract_properties(obj.get("properties", []))
 
                 # Create icon
-                icon = MapIcon(icon_type, (grid_x, grid_y), metadata=properties)
+                icon = MapIcon(icon_type, metadata=properties)
                 floor.place_icon(grid_x, grid_y, icon)
 
         @staticmethod

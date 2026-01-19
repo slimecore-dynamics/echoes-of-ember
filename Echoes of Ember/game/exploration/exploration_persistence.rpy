@@ -122,7 +122,7 @@ init -1 python:
                                 icons_data = floor_data.get("icons", {})
                                 for pos_key, icon_data in icons_data.items():
                                     x, y = map(int, pos_key.split(","))
-                                    icon = MapIcon(icon_data["type"], (x, y), icon_data.get("metadata", {}))
+                                    icon = MapIcon(icon_data["type"], icon_data.get("metadata", {}))
                                     floor.icons[(x, y)] = icon
 
                                 store.map_grid.floors[floor_id] = floor
@@ -136,7 +136,8 @@ init -1 python:
             if store.map_grid and store.map_grid.floors:
                 for floor_id, floor in store.map_grid.floors.items():
                     # Reload dungeon layout from Tiled
-                    if hasattr(floor, 'current_dungeon_file') and floor.current_dungeon_file:
+                    current_dungeon_file = getattr(floor, 'current_dungeon_file', None)
+                    if current_dungeon_file:
                         TiledImporter.reload_dungeon_layout(floor)
 
         except Exception as e:

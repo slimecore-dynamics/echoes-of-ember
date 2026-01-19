@@ -23,7 +23,7 @@ init python:
                 renpy.show_screen("note_input_popup", x, y, floor, map_grid)
             else:
                 # Place selected icon
-                icon = MapIcon(map_grid.selected_icon_type, (x, y))
+                icon = MapIcon(map_grid.selected_icon_type)
                 floor.place_icon(x, y, icon)
                 renpy.restart_interaction()
 
@@ -33,7 +33,7 @@ init python:
         renpy.hide_screen("note_input_popup")
 
         # Create note icon with text in metadata
-        icon = MapIcon("note", (x, y), metadata={"note_text": note_text})
+        icon = MapIcon("note", metadata={"note_text": note_text})
         floor.place_icon(x, y, icon)
 
         renpy.restart_interaction()
@@ -111,12 +111,9 @@ init python:
         if not map_grid:
             return
 
-        # Initialize auto_map_enabled if it doesn't exist
-        if not hasattr(map_grid, 'auto_map_enabled'):
-            map_grid.auto_map_enabled = False
-
-        # Toggle the flag
-        map_grid.auto_map_enabled = not map_grid.auto_map_enabled
+        # Toggle the flag (initialize if it doesn't exist)
+        current_state = getattr(map_grid, 'auto_map_enabled', False)
+        map_grid.auto_map_enabled = not current_state
 
         # Show notification
         status = "ON" if map_grid.auto_map_enabled else "OFF"
@@ -128,9 +125,10 @@ init python:
     def auto_reveal_tile(floor, x, y):
         """Auto-reveal tile when walking on it - copy from dungeon to drawn map."""
         # Get the REAL tile from dungeon
-        if hasattr(floor, 'dungeon_tiles') and floor.dungeon_tiles:
-            if y < len(floor.dungeon_tiles) and x < len(floor.dungeon_tiles[y]):
-                dungeon_tile = floor.dungeon_tiles[y][x]
+        dungeon_tiles = getattr(floor, 'dungeon_tiles', None)
+        if dungeon_tiles:
+            if y < len(dungeon_tiles) and x < len(dungeon_tiles[y]):
+                dungeon_tile = dungeon_tiles[y][x]
 
                 if dungeon_tile and dungeon_tile.tile_type != "empty":
                     # Copy tile type from dungeon to drawn map
@@ -326,8 +324,9 @@ init python:
             target_pos = None
 
             # Search dungeon_icons for another teleporter with same pair_id
-            if hasattr(floor, 'dungeon_icons'):
-                for pos, other_icon in floor.dungeon_icons.items():
+            dungeon_icons = getattr(floor, 'dungeon_icons', None)
+            if dungeon_icons:
+                for pos, other_icon in dungeon_icons.items():
                     # Skip the current teleporter
                     if pos == (adj_x, adj_y):
                         continue

@@ -76,7 +76,7 @@ label multi_floor_dungeon_example:
             floor1.set_tile(x, 10, MapTile("hallway", rotation=0))
 
         # Stairs down at end
-        floor1.place_icon(12, 10, MapIcon("stairs_down", (12, 10)))
+        floor1.place_icon(12, 10, MapIcon("stairs_down"))
 
         # Add to map
         map_grid.floors["prom_breach_1f"] = floor1
@@ -94,11 +94,10 @@ label multi_floor_dungeon_example:
                 floor2.set_tile(x, y, MapTile("cross", rotation=0))
 
         # Stairs up at entrance
-        floor2.place_icon(10, 10, MapIcon("stairs_up", (10, 10)))
+        floor2.place_icon(10, 10, MapIcon("stairs_up"))
 
         # Enemy in room
-        floor2.place_icon(11, 11, MapIcon("enemy", (11, 11),
-            metadata={"damage": 10}))
+        floor2.place_icon(11, 11, MapIcon("enemy", metadata={"damage": 10}))
 
         # Add to map
         map_grid.floors["prom_breach_2f"] = floor2
@@ -141,13 +140,13 @@ label gathering_example:
             floor.set_tile(x, 10, MapTile("hallway", rotation=0))
 
         # Place gathering points
-        floor.place_icon(9, 10, MapIcon("gathering", (9, 10),
+        floor.place_icon(9, 10, MapIcon("gathering",
             metadata={"item": "metal scrap", "amount": 3}))
 
-        floor.place_icon(11, 10, MapIcon("gathering", (11, 10),
+        floor.place_icon(11, 10, MapIcon("gathering",
             metadata={"item": "electronics", "amount": 2}))
 
-        floor.place_icon(13, 10, MapIcon("gathering", (13, 10),
+        floor.place_icon(13, 10, MapIcon("gathering",
             metadata={"item": "data", "amount": 1}))
 
         map_grid.floors["gather_test"] = floor
@@ -218,15 +217,15 @@ label dialogue_during_exploration_example:
             floor.set_tile(x, 10, MapTile("hallway", rotation=0))
 
         # Event 1: Survivor at (9, 10)
-        floor.place_icon(9, 10, MapIcon("event", (9, 10),
+        floor.place_icon(9, 10, MapIcon("event",
             metadata={"label": "found_survivor", "message": "You see someone..."}))
 
         # Event 2: AI console at (12, 10)
-        floor.place_icon(12, 10, MapIcon("event", (12, 10),
+        floor.place_icon(12, 10, MapIcon("event",
             metadata={"label": "ai_console", "message": "A console flickers..."}))
 
         # Gathering point
-        floor.place_icon(14, 10, MapIcon("gathering", (14, 10),
+        floor.place_icon(14, 10, MapIcon("gathering",
             metadata={"item": "data", "amount": 1}))
 
         # Variables to track story

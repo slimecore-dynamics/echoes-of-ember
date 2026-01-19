@@ -71,8 +71,9 @@ init python:
 
             if icon.icon_type in InteractionHandler.ADJACENT_ICONS:
                 # Check if icon has prompt_facing requirement
-                if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
-                    required_facing = icon.metadata['prompt_facing'].lower()
+                metadata = getattr(icon, 'metadata', {})
+                if 'prompt_facing' in metadata:
+                    required_facing = metadata['prompt_facing'].lower()
                     # Map rotation to direction letter
                     current_dir = ROTATION_TO_DIRECTION_MAP.get(rotation, '')
 
@@ -99,8 +100,9 @@ init python:
 
             if icon.icon_type in InteractionHandler.ON_TILE_INTERACT_ICONS:
                 # Check if icon has prompt_facing requirement
-                if hasattr(icon, 'metadata') and 'prompt_facing' in icon.metadata:
-                    required_facing = icon.metadata['prompt_facing'].lower()
+                metadata = getattr(icon, 'metadata', {})
+                if 'prompt_facing' in metadata:
+                    required_facing = metadata['prompt_facing'].lower()
                     # Map rotation to direction letter
                     current_dir = ROTATION_TO_DIRECTION_MAP.get(rotation, '')
 

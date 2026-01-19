@@ -10,29 +10,11 @@ init -2 python:
     class MapIcon:
         """Represents an icon placed on the map (stairs, doors, enemies, etc.).
 
-        WARNING: Position Duplication Issue
-        ------------------------------------
-        The position data is stored in TWO places:
-        1. As self.position attribute in this MapIcon instance
-        2. As the dictionary key in floor.icons: {(x, y): MapIcon}
-
-        This duplication can lead to inconsistencies if:
-        - An icon's position attribute is modified without updating the dict key
-        - An icon is moved to a new position without removing the old dict entry
-
-        Current usage patterns that avoid this issue:
-        - Icons are created with position and never moved
-        - Icons are removed via floor.remove_icon(x, y) which uses the dict key
-        - Icon position is read from the dict key, not from icon.position
-
-        Future refactoring options:
-        - Remove self.position attribute, always use dict key
-        - Add a move_icon() method that maintains consistency
-        - Make position a read-only property that reads from parent floor
+        Position is stored as the dictionary key in floor.icons: {(x, y): MapIcon}
+        To get an icon's position, use the key from floor.icons.items().
         """
-        def __init__(self, icon_type, position, metadata=None):
+        def __init__(self, icon_type, metadata=None):
             self.icon_type = icon_type  # "stairs_up", "door_closed", "enemy", etc.
-            self.position = position    # (x, y) tuple - WARNING: duplicates dict key!
             self.metadata = metadata or {}  # Additional data
 
     class FloorMap:
@@ -107,8 +89,9 @@ init -2 python:
             Returns dungeon icon if it exists, otherwise returns None.
             Dungeon icons represent the actual game world, not player-drawn icons.
             """
-            if hasattr(self, 'dungeon_icons') and self.dungeon_icons:
-                return self.dungeon_icons.get((x, y))
+            dungeon_icons = getattr(self, 'dungeon_icons', None)
+            if dungeon_icons:
+                return dungeon_icons.get((x, y))
             return None
 
         def get_dungeon_tile(self, x, y):
@@ -116,9 +99,10 @@ init -2 python:
 
             Returns dungeon tile if it exists, falls back to drawn map.
             """
-            if hasattr(self, 'dungeon_tiles') and self.dungeon_tiles:
-                if 0 <= y < len(self.dungeon_tiles) and 0 <= x < len(self.dungeon_tiles[y]):
-                    return self.dungeon_tiles[y][x]
+            dungeon_tiles = getattr(self, 'dungeon_tiles', None)
+            if dungeon_tiles:
+                if 0 <= y < len(dungeon_tiles) and 0 <= x < len(dungeon_tiles[y]):
+                    return dungeon_tiles[y][x]
             return self.get_tile(x, y)  # Fallback to drawn map
 
         def __getstate__(self):

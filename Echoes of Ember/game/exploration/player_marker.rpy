@@ -67,7 +67,7 @@ screen player_marker_overlay():
 
         if floor:
             # Create canvas to draw marker
-            $ cell_size = map_grid.cell_size if hasattr(map_grid, 'cell_size') else 32
+            $ cell_size = getattr(map_grid, 'cell_size', 32)
 
             # Only draw if player is on current floor
             if player_state.current_floor_id == floor.floor_id:
