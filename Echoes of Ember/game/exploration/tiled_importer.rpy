@@ -107,7 +107,7 @@ init python:
                 if layer.get("type") == "tilelayer":
                     TiledImporter._process_tile_layer(layer, floor, tile_id_map)
                 elif layer.get("type") == "objectgroup":
-                    TiledImporter._process_object_layer(layer, floor, tile_id_map)
+                    TiledImporter._process_object_layer(layer, floor, tile_id_map, skip_investigation_load)
 
             # CRITICAL: Dual map system - separate real dungeon from player-drawn map
             # The loaded tiles represent the real dungeon that the player navigates.
@@ -213,10 +213,16 @@ init python:
                     floor.set_tile(x, y, tile)
 
         @staticmethod
-        def _process_object_layer(layer, floor, tile_id_map):
+        def _process_object_layer(layer, floor, tile_id_map, skip_investigation_load=False):
             """Process a Tiled object layer and populate FloorMap icons.
 
             Objects represent stairs, doors, enemies, etc.
+
+            Args:
+                layer: Tiled layer object
+                floor: FloorMap to populate
+                tile_id_map: Mapping from Tiled GID to tile_type
+                skip_investigation_load: If True, skip loading investigation objects
             """
             objects = layer.get("objects", [])
 
