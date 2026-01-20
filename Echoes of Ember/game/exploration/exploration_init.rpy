@@ -12,6 +12,8 @@ label start_exploration_system:
         # Player state is created by load_dungeon_floor, not here
         if not map_grid:
             map_grid = MapGrid()
+        
+        success, errors = InvestigationDataLoader.validate_content_files()
 
     return
 
