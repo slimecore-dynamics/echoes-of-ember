@@ -108,3 +108,57 @@ init python:
                 "w": 270
             }
             return facing_map.get(facing.lower() if facing else None)
+
+        @staticmethod
+        def validate_content_files():
+            """
+            Validate that all content files referenced in terminals and examinables exist.
+
+            Returns:
+                Tuple of (success: bool, errors: list of error messages)
+            """
+            import os
+            import sys
+
+            errors = []
+            success = True
+
+            # Validate terminals
+            for terminal_id, terminal in investigation_state.terminals.items():
+                for category, entries in terminal.entries.items():
+                    for entry in entries:
+                        # Check if content file exists
+                        try:
+                            renpy.file(entry.content_file)
+                        except:
+                            errors.append("Terminal '{}' entry '{}': Content file not found: {}".format(
+                                terminal_id, entry.id, entry.content_file))
+                            success = False
+
+            # Validate examinables
+            for examinable_id, examinable in investigation_state.examinables.items():
+                # Check if content file exists
+                try:
+                    renpy.file(examinable.content_file)
+                except:
+                    errors.append("Examinable '{}': Content file not found: {}".format(
+                        examinable_id, examinable.content_file))
+                    success = False
+
+                # Check if image file exists (if specified)
+                if examinable.image:
+                    try:
+                        renpy.loadable(examinable.image)
+                    except:
+                        errors.append("Examinable '{}': Image file not found: {}".format(
+                            examinable_id, examinable.image))
+                        success = False
+
+            # Print errors to stderr
+            if errors:
+                print("\n=== Investigation Content Validation Errors ===", file=sys.stderr)
+                for error in errors:
+                    print("ERROR: {}".format(error), file=sys.stderr)
+                print("==============================================\n", file=sys.stderr)
+
+            return (success, errors)

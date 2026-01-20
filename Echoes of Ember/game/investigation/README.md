@@ -9,6 +9,26 @@ The Investigation System allows players to examine objects during exploration an
 
 All investigation content is **data-driven** using JSON files, making it easy to add and modify content without editing code.
 
+## ID Naming Convention
+
+**IMPORTANT:** To prevent ID collisions with other systems, all investigation item IDs should follow this convention:
+
+```
+inv_[type]_[location]_[description]
+```
+
+Examples:
+- Terminal IDs: `inv_terminal_security_1f`, `inv_terminal_lab_2f`
+- Terminal Entry IDs: `inv_email_security_breach`, `inv_log_experiment_failure`, `inv_notice_evacuation`
+- Examinable IDs: `inv_book_research_journal`, `inv_box_medical_supplies`
+
+This prevents conflicts if:
+- Exploration system adds items with similar names (e.g., `exp_item_key_card`)
+- Multiple systems track collected items
+
+**Why this matters:**
+All collected items share the same `investigation_state.collected_items` set. Without prefixes, `key_card_01` from exploration would conflict with `key_card_01` from a terminal entry, causing story conditional bugs.
+
 ## File Structure
 
 ```
@@ -295,3 +315,78 @@ This is consistent with the teleporter system's `prompt_facing` property.
 - Re-examining collected items doesn't trigger notification again
 - Investigation interactions take priority over exploration interactions
 - JSON files are loaded automatically when the Tiled map loads
+
+## Story Conditionals
+
+The investigation system provides helper functions for story conditionals:
+
+### Basic Checks
+
+```renpy
+# Check if player has collected a specific evidence item
+if has_evidence("inv_email_security_breach"):
+    "You remember the security breach email."
+
+# Check if player has collected any item (evidence or data)
+if has_data("inv_log_experiment_failure"):
+    "You recall reading about the experiment failure."
+```
+
+### Advanced Checks
+
+```renpy
+# Check if player has ALL of multiple evidence items
+if has_all_evidence(["inv_email_security_breach", "inv_journal_virus_notes", "inv_log_containment_failure"]):
+    "You've gathered enough evidence to confront Dr. Chen."
+    jump confrontation_scene
+
+# Check if player has ANY of multiple evidence items
+if has_any_evidence(["inv_notice_evacuation", "inv_email_evacuation_order"]):
+    "You know an evacuation was ordered."
+
+# Get total count of collected items (for progress tracking)
+$ item_count = get_collected_count()
+if item_count >= 15:
+    "You've been thorough in your investigation. [item_count] items collected."
+```
+
+### Dynamic Content
+
+Add terminal entries during gameplay (story events unlock new emails):
+
+```renpy
+# Create a new terminal entry
+$ new_entry_data = {
+    "id": "inv_email_chen_response",
+    "title": "RE: Your Questions",
+    "content_file": "investigation/text/emails/chen_response.txt",
+    "is_evidence": True,
+    "evidence_summary": "Dr. Chen's defensive response to your questions.",
+    "timestamp": "Just now",
+    "preview": "FROM: Dr. Sarah Chen - I don't appreciate your tone..."
+}
+
+# Add to terminal (returns True if successful)
+$ success = investigation_state.add_terminal_entry("inv_terminal_security_1f", "Email", TerminalEntry(**new_entry_data))
+
+if success:
+    "New email received."
+```
+
+### Content Validation
+
+Before releasing, validate all content files exist:
+
+```renpy
+# In a debug menu or before build
+$ success, errors = InvestigationDataLoader.validate_content_files()
+if not success:
+    "Content validation failed! Check log for details."
+```
+
+This checks:
+- All terminal entry content files exist
+- All examinable content files exist  
+- All examinable image files are loadable
+
+Errors are printed to stderr (visible in log.txt).

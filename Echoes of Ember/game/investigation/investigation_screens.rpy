@@ -352,7 +352,7 @@ screen terminal_entry_view(terminal, category, entry_index):
 
 screen journal_screen():
     """
-    Journal screen with Evidence and Data tabs.
+    Journal screen with Evidence and Data tabs, organized by location.
     Shows all collected items with their content and locations.
     """
     modal True
@@ -360,6 +360,8 @@ screen journal_screen():
 
     # Which tab is currently selected
     default current_tab = JOURNAL_TAB_DATA
+    # Currently selected location (None = show all)
+    default selected_location = None
 
     # Dim background
     add "#000000c0"
@@ -392,13 +394,19 @@ screen journal_screen():
 
                 # Evidence tab
                 textbutton JOURNAL_TAB_EVIDENCE:
-                    action SetScreenVariable("current_tab", JOURNAL_TAB_EVIDENCE)
+                    action [
+                        SetScreenVariable("current_tab", JOURNAL_TAB_EVIDENCE),
+                        SetScreenVariable("selected_location", None)
+                    ]
                     text_size 24
                     text_color ("#ffd700" if current_tab == JOURNAL_TAB_EVIDENCE else "#808080")
 
                 # Data tab
                 textbutton JOURNAL_TAB_DATA:
-                    action SetScreenVariable("current_tab", JOURNAL_TAB_DATA)
+                    action [
+                        SetScreenVariable("current_tab", JOURNAL_TAB_DATA),
+                        SetScreenVariable("selected_location", None)
+                    ]
                     text_size 24
                     text_color ("#ffd700" if current_tab == JOURNAL_TAB_DATA else "#808080")
 
@@ -406,9 +414,9 @@ screen journal_screen():
 
             # Content based on selected tab
             if current_tab == JOURNAL_TAB_EVIDENCE:
-                use journal_evidence_tab()
+                use journal_evidence_tab(selected_location)
             else:
-                use journal_data_tab()
+                use journal_data_tab(selected_location)
 
             # Close button
             textbutton "Close":
@@ -417,8 +425,8 @@ screen journal_screen():
                 action Hide("journal_screen")
 
 
-screen journal_evidence_tab():
-    """Evidence tab - shows only evidence items with summaries."""
+screen journal_evidence_tab(selected_location):
+    """Evidence tab - shows only evidence items with summaries, organized by location."""
     $ evidence_entries = investigation_state.get_evidence_entries()
 
     if len(evidence_entries) == 0:
@@ -428,55 +436,126 @@ screen journal_evidence_tab():
             size 20
             color "#808080"
     else:
-        viewport:
+        # Get unique locations from evidence entries
+        python:
+            locations = []
+            seen = set()
+            for entry in evidence_entries:
+                if entry.location not in seen:
+                    locations.append(entry.location)
+                    seen.add(entry.location)
+
+        # Filter entries by selected location
+        python:
+            if selected_location:
+                filtered_entries = [e for e in evidence_entries if e.location == selected_location]
+            else:
+                filtered_entries = evidence_entries
+
+        hbox:
+            spacing 0
             xfill True
             yfill True
-            scrollbars "vertical"
-            mousewheel True
 
-            vbox:
-                spacing 20
-                xfill True
+            # Left sidebar - Location selection
+            frame:
+                xsize 200
+                yfill True
+                background "#2a2a2a"
+                padding (10, 10)
 
-                # Group by location
-                $ current_location = None
-                for entry in evidence_entries:
-                    if entry.location != current_location:
-                        $ current_location = entry.location
+                vbox:
+                    spacing 5
+                    xfill True
+                    yfill True
 
-                        # Location header
-                        text current_location:
-                            size 22
-                            color "#ffd700"
-                            bold True
-
-                        add Solid("#404040", xsize=840, ysize=1)
-
-                    # Entry
-                    frame:
+                    # "All Locations" option
+                    textbutton "All Locations":
                         xfill True
-                        background "#2a2a2a"
-                        padding (15, 15)
+                        ysize 40
+                        background ("#ffd700" if selected_location is None else "#3a3a3a")
+                        hover_background ("#ffed00" if selected_location is None else "#4a4a4a")
+                        action SetScreenVariable("selected_location", None)
+                        text_size 16
+                        text_color ("#000000" if selected_location is None else "#ffffff")
+                        text_xalign 0.5
+
+                    add Solid("#404040", xsize=180, ysize=2)
+
+                    # Location buttons
+                    viewport:
+                        xfill True
+                        yfill True
+                        scrollbars "vertical"
+                        mousewheel True
 
                         vbox:
-                            spacing 8
+                            spacing 5
                             xfill True
 
-                            # Title
-                            text entry.title:
-                                size 20
-                                color "#ffffff"
-                                bold True
+                            for location in locations:
+                                textbutton location:
+                                    xfill True
+                                    ysize 40
+                                    background ("#ffd700" if selected_location == location else "#3a3a3a")
+                                    hover_background ("#ffed00" if selected_location == location else "#4a4a4a")
+                                    action SetScreenVariable("selected_location", location)
+                                    text_size 14
+                                    text_color ("#000000" if selected_location == location else "#ffffff")
+                                    text_xalign 0.5
 
-                            # Evidence summary
-                            text entry.evidence_summary:
-                                size 16
-                                color "#d0d0d0"
+            # Vertical divider
+            add Solid("#404040", xsize=2)
+
+            # Main content area
+            viewport:
+                xfill True
+                yfill True
+                scrollbars "vertical"
+                mousewheel True
+
+                vbox:
+                    spacing 15
+                    xfill True
+
+                    if len(filtered_entries) == 0:
+                        text "No evidence found in this location.":
+                            xalign 0.5
+                            yalign 0.5
+                            size 18
+                            color "#808080"
+                    else:
+                        for entry in filtered_entries:
+                            frame:
                                 xfill True
+                                background "#2a2a2a"
+                                padding (15, 15)
+
+                                vbox:
+                                    spacing 8
+                                    xfill True
+
+                                    # Title
+                                    text entry.title:
+                                        size 20
+                                        color "#ffffff"
+                                        bold True
+
+                                    # Location (if showing all locations)
+                                    if selected_location is None:
+                                        text entry.location:
+                                            size 14
+                                            color "#ffd700"
+
+                                    # Evidence summary
+                                    text entry.evidence_summary:
+                                        size 16
+                                        color "#d0d0d0"
+                                        xfill True
 
 
-screen journal_data_tab():
-    """Data tab - shows all collected items with full content."""
+screen journal_data_tab(selected_location):
+    """Data tab - shows all collected items with full content, organized by location."""
     $ all_entries = investigation_state.get_all_entries()
 
     if len(all_entries) == 0:
@@ -486,58 +565,129 @@ screen journal_data_tab():
             size 20
             color "#808080"
     else:
-        viewport:
+        # Get unique locations from all entries
+        python:
+            locations = []
+            seen = set()
+            for entry in all_entries:
+                if entry.location not in seen:
+                    locations.append(entry.location)
+                    seen.add(entry.location)
+
+        # Filter entries by selected location
+        python:
+            if selected_location:
+                filtered_entries = [e for e in all_entries if e.location == selected_location]
+            else:
+                filtered_entries = all_entries
+
+        hbox:
+            spacing 0
             xfill True
             yfill True
-            scrollbars "vertical"
-            mousewheel True
 
-            vbox:
-                spacing 20
-                xfill True
+            # Left sidebar - Location selection
+            frame:
+                xsize 200
+                yfill True
+                background "#2a2a2a"
+                padding (10, 10)
 
-                # Group by location
-                $ current_location = None
-                for entry in all_entries:
-                    if entry.location != current_location:
-                        $ current_location = entry.location
+                vbox:
+                    spacing 5
+                    xfill True
+                    yfill True
 
-                        # Location header
-                        text current_location:
-                            size 22
-                            color "#ffd700"
-                            bold True
-
-                        add Solid("#404040", xsize=840, ysize=1)
-
-                    # Entry
-                    frame:
+                    # "All Locations" option
+                    textbutton "All Locations":
                         xfill True
-                        background "#2a2a2a"
-                        padding (15, 15)
+                        ysize 40
+                        background ("#ffd700" if selected_location is None else "#3a3a3a")
+                        hover_background ("#ffed00" if selected_location is None else "#4a4a4a")
+                        action SetScreenVariable("selected_location", None)
+                        text_size 16
+                        text_color ("#000000" if selected_location is None else "#ffffff")
+                        text_xalign 0.5
+
+                    add Solid("#404040", xsize=180, ysize=2)
+
+                    # Location buttons
+                    viewport:
+                        xfill True
+                        yfill True
+                        scrollbars "vertical"
+                        mousewheel True
 
                         vbox:
-                            spacing 8
+                            spacing 5
                             xfill True
 
-                            # Title
-                            text entry.title:
-                                size 20
-                                color "#ffffff"
-                                bold True
-
-                            # Full content (limited height)
-                            viewport:
-                                xfill True
-                                ymaximum 150
-                                scrollbars "vertical"
-                                mousewheel True
-
-                                text entry.content:
-                                    size 16
-                                    color "#d0d0d0"
+                            for location in locations:
+                                textbutton location:
                                     xfill True
-                                    substitute False
+                                    ysize 40
+                                    background ("#ffd700" if selected_location == location else "#3a3a3a")
+                                    hover_background ("#ffed00" if selected_location == location else "#4a4a4a")
+                                    action SetScreenVariable("selected_location", location)
+                                    text_size 14
+                                    text_color ("#000000" if selected_location == location else "#ffffff")
+                                    text_xalign 0.5
+
+            # Vertical divider
+            add Solid("#404040", xsize=2)
+
+            # Main content area
+            viewport:
+                xfill True
+                yfill True
+                scrollbars "vertical"
+                mousewheel True
+
+                vbox:
+                    spacing 15
+                    xfill True
+
+                    if len(filtered_entries) == 0:
+                        text "No data found in this location.":
+                            xalign 0.5
+                            yalign 0.5
+                            size 18
+                            color "#808080"
+                    else:
+                        for entry in filtered_entries:
+                            frame:
+                                xfill True
+                                background "#2a2a2a"
+                                padding (15, 15)
+
+                                vbox:
+                                    spacing 8
+                                    xfill True
+
+                                    # Title
+                                    text entry.title:
+                                        size 20
+                                        color "#ffffff"
+                                        bold True
+
+                                    # Location (if showing all locations)
+                                    if selected_location is None:
+                                        text entry.location:
+                                            size 14
+                                            color "#ffd700"
+
+                                    # Full content (limited height)
+                                    viewport:
+                                        xfill True
+                                        ymaximum 150
+                                        scrollbars "vertical"
+                                        mousewheel True
+
+                                        text entry.content:
+                                            size 16
+                                            color "#d0d0d0"
+                                            xfill True
+                                            substitute False
 
 
 ## ==============================================================================

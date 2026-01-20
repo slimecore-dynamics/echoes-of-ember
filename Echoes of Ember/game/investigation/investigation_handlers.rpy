@@ -3,6 +3,7 @@
 ## This file handles interactions with investigation objects (terminals, books, boxes).
 
 init python:
+    import sys
 
     class InvestigationInteractionHandler:
         """
@@ -197,6 +198,7 @@ init python:
         """Collect a terminal entry when first viewed."""
         terminal = investigation_state.get_terminal(terminal_id)
         if not terminal:
+            print("Warning: Terminal not found: {}".format(terminal_id), file=sys.stderr)
             return
 
         # Find the entry
@@ -210,6 +212,7 @@ init python:
                 break
 
         if not entry:
+            print("Warning: Entry not found: {} in terminal {}".format(entry_id, terminal_id), file=sys.stderr)
             return
 
         # Get current location for journal entry
@@ -235,9 +238,6 @@ init python:
         # Show notification if newly collected
         if newly_collected:
             if entry.is_evidence:
-                renpy.notify(NOTIFICATION_EVIDENCE_SECURED)
-            else:
-                renpy.notify(NOTIFICATION_DATA_SECURED)
                 renpy.notify(NOTIFICATION_EVIDENCE_SECURED)
             else:
                 renpy.notify(NOTIFICATION_DATA_SECURED)

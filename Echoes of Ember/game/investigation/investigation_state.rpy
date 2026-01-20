@@ -91,6 +91,39 @@ init python:
             """Check if a data item has been collected (any item)."""
             return self.has_collected(item_id)
 
+        def has_all_evidence(self, item_ids):
+            """
+            Check if player has ALL of the evidence items.
+
+            Args:
+                item_ids: List of item IDs to check
+
+            Returns:
+                True if all items are collected as evidence, False otherwise
+            """
+            return all(self.has_evidence(item_id) for item_id in item_ids)
+
+        def has_any_evidence(self, item_ids):
+            """
+            Check if player has ANY of the evidence items.
+
+            Args:
+                item_ids: List of item IDs to check
+
+            Returns:
+                True if at least one item is collected as evidence, False otherwise
+            """
+            return any(self.has_evidence(item_id) for item_id in item_ids)
+
+        def get_collected_count(self):
+            """
+            Get total number of collected items.
+
+            Returns:
+                Integer count of collected items
+            """
+            return len(self.collected_items)
+
         def get_evidence_entries(self):
             """Get all evidence journal entries."""
             return [entry for entry in self.journal_entries if entry.entry_type == "evidence"]
@@ -107,10 +140,76 @@ init python:
                 terminal_id: ID of the terminal
                 category: Category to add entry to
                 entry: TerminalEntry object to add
+
+            Returns:
+                True if entry was added successfully, False otherwise
             """
+            import sys
+
             terminal = self.get_terminal(terminal_id)
-            if terminal:
-                terminal.add_entry(entry)
+            if not terminal:
+                print("Warning: Terminal '{}' not found, cannot add entry '{}'".format(terminal_id, entry.id), file=sys.stderr)
+                return False
+
+            # Validate category exists in TERMINAL_CATEGORIES
+            if category not in TERMINAL_CATEGORIES:
+                print("Warning: Invalid category '{}' for terminal '{}'. Valid categories: {}".format(
+                    category, terminal_id, TERMINAL_CATEGORIES), file=sys.stderr)
+                return False
+
+            terminal.add_entry(entry)
+            return True
+
+        def remove_terminal_entry(self, terminal_id, entry_id):
+            """
+            Remove an entry from a terminal (for story events).
+
+            Args:
+                terminal_id: ID of the terminal
+                entry_id: ID of the entry to remove
+
+            Returns:
+                True if entry was removed, False if not found
+            """
+            import sys
+
+            terminal = self.get_terminal(terminal_id)
+            if not terminal:
+                print("Warning: Terminal '{}' not found, cannot remove entry '{}'".format(terminal_id, entry_id), file=sys.stderr)
+                return False
+
+            # Search through all categories
+            for category, entries in terminal.entries.items():
+                for i, entry in enumerate(entries):
+                    if entry.id == entry_id:
+                        del entries[i]
+                        return True
+
+            print("Warning: Entry '{}' not found in terminal '{}'".format(entry_id, terminal_id), file=sys.stderr)
+            return False
+
+        def clear_terminal_category(self, terminal_id, category):
+            """
+            Clear all entries in a category (for story events).
+
+            Args:
+                terminal_id: ID of the terminal
+                category: Category to clear
+
+            Returns:
+                True if category was cleared, False if terminal not found
+            """
+            import sys
+
+            terminal = self.get_terminal(terminal_id)
+            if not terminal:
+                print("Warning: Terminal '{}' not found, cannot clear category '{}'".format(terminal_id, category), file=sys.stderr)
+                return False
+
+            if category in terminal.entries:
+                terminal.entries[category] = []
+
+            return True
 
         def _get_current_timestamp(self):
             """Get current timestamp for journal entries."""
@@ -184,6 +283,51 @@ init python:
             True if collected, False otherwise
         """
         return investigation_state.has_data(item_id)
+
+    def has_all_evidence(item_ids):
+        """
+        Check if player has collected ALL of the specified evidence items.
+
+        Args:
+            item_ids: List of item IDs to check
+
+        Returns:
+            True if all items are collected as evidence, False otherwise
+
+        Example:
+            if has_all_evidence(["email_breach", "journal_virus", "security_log"]):
+                "You've gathered all the evidence."
+        """
+        return investigation_state.has_all_evidence(item_ids)
+
+    def has_any_evidence(item_ids):
+        """
+        Check if player has collected ANY of the specified evidence items.
+
+        Args:
+            item_ids: List of item IDs to check
+
+        Returns:
+            True if at least one item is collected as evidence, False otherwise
+
+        Example:
+            if has_any_evidence(["email_breach", "journal_virus"]):
+                "You've found some evidence."
+        """
+        return investigation_state.has_any_evidence(item_ids)
+
+    def get_collected_count():
+        """
+        Get the total number of collected items (both evidence and data).
+
+        Returns:
+            Integer count of collected items
+
+        Example:
+            if get_collected_count() >= 10:
+                "You've been thorough in your investigation."
+        """
+        return investigation_state.get_collected_count()
 
     def add_terminal_entry(terminal_id, category, entry_dict):
         """
