@@ -5,6 +5,13 @@
 # Global flag for dialogue state during exploration
 default exploration_dialogue_active = False
 
+# Transform for pulsing blue button when interaction is available
+transform pulse_blue:
+    alpha 1.0
+    linear 0.8 alpha 0.5
+    linear 0.8 alpha 1.0
+    repeat
+
 screen exploration_view():
     # Main exploration screen with 2/3 left (first-person) + 1/3 right (map/controls) layout.
 
@@ -282,9 +289,10 @@ screen exploration_view():
                                     xalign 0.5
                                     padding (20, 8)
                                     text_xalign 0.5
-                                    background "#444444"
-                                    hover_background "#555555"
+                                    background ("#0066CC" if has_interaction else "#444444")
+                                    hover_background ("#0088FF" if has_interaction else "#555555")
                                     sensitive (has_interaction and not exploration_dialogue_active)
+                                    at (pulse_blue if has_interaction else None)
 
                                 textbutton "Right":
                                     action Function(handle_turn_right)
