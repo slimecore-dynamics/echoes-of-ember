@@ -60,104 +60,102 @@ init python:
     # Global code input state
     code_input_state = CodeInputState()
 
+    def handle_code_submission(passcode, x, y, icon_type, is_door=True):
+        """
+        Handle code submission and validation.
 
-def handle_code_submission(passcode, x, y, icon_type, is_door=True):
-    """
-    Handle code submission and validation.
+        Args:
+            passcode: The correct passcode
+            x, y: Grid coordinates of the object
+            icon_type: Type of icon (for fetching)
+            is_door: True if door, False if terminal
+        """
+        import time
 
-    Args:
-        passcode: The correct passcode
-        x, y: Grid coordinates of the object
-        icon_type: Type of icon (for fetching)
-        is_door: True if door, False if terminal
-    """
-    import time
+        # Get the player's input
+        player_code = code_input_state.current_code.strip()
 
-    # Get the player's input
-    player_code = code_input_state.current_code.strip()
-
-    # Check if code is correct (case-sensitive exact match)
-    if player_code == passcode:
-        # Success! Flash green and unlock
-        code_input_state.is_flashing = True
-        code_input_state.flash_success = True
-        renpy.restart_interaction()
-
-        # Flash green 3 times (0.2s on, 0.2s off, repeat)
-        for i in range(3):
-            renpy.pause(0.2, hard=True)
-            renpy.restart_interaction()
-            renpy.pause(0.2, hard=True)
+        # Check if code is correct (case-sensitive exact match)
+        if player_code == passcode:
+            # Success! Flash green and unlock
+            code_input_state.is_flashing = True
+            code_input_state.flash_success = True
             renpy.restart_interaction()
 
-        code_input_state.is_flashing = False
+            # Flash green 3 times (0.2s on, 0.2s off, repeat)
+            for i in range(3):
+                renpy.pause(0.2, hard=True)
+                renpy.restart_interaction()
+                renpy.pause(0.2, hard=True)
+                renpy.restart_interaction()
 
-        # Unlock the object
-        floor = map_grid.get_floor(player_state.current_floor_id)
-        if floor:
-            icon = floor.get_dungeon_icon(x, y)
-            if icon and icon.metadata:
-                icon.metadata["unlocked"] = True
+            code_input_state.is_flashing = False
 
-                # For doors, change to door_open
-                if is_door:
-                    icon.icon_type = "door_open"
+            # Unlock the object
+            floor = map_grid.get_floor(player_state.current_floor_id)
+            if floor:
+                icon = floor.get_dungeon_icon(x, y)
+                if icon and icon.metadata:
+                    icon.metadata["unlocked"] = True
 
-        # Reset state and close interface
-        code_input_state.reset()
-        renpy.hide_screen("code_input_interface")
+                    # For doors, change to door_open
+                    if is_door:
+                        icon.icon_type = "door_open"
 
-        # If it was a door, show success message
-        if is_door:
-            renpy.notify("Door unlocked")
+            # Reset state and close interface
+            code_input_state.reset()
+            renpy.hide_screen("code_input_interface")
+
+            # If it was a door, show success message
+            if is_door:
+                renpy.notify("Door unlocked")
+            else:
+                # For terminals, open the terminal interface
+                if icon and icon.metadata:
+                    content_id = icon.metadata.get("content_id")
+                    if content_id:
+                        handle_terminal_interaction(content_id)
         else:
-            # For terminals, open the terminal interface
-            if icon and icon.metadata:
-                content_id = icon.metadata.get("content_id")
-                if content_id:
-                    handle_terminal_interaction(content_id)
-    else:
-        # Failed attempt - flash red
-        code_input_state.is_flashing = True
-        code_input_state.flash_success = False
-        code_input_state.failed_attempts += 1
-        renpy.restart_interaction()
-
-        # Flash red 3 times
-        for i in range(3):
-            renpy.pause(0.2, hard=True)
-            renpy.restart_interaction()
-            renpy.pause(0.2, hard=True)
+            # Failed attempt - flash red
+            code_input_state.is_flashing = True
+            code_input_state.flash_success = False
+            code_input_state.failed_attempts += 1
             renpy.restart_interaction()
 
-        code_input_state.is_flashing = False
+            # Flash red 3 times
+            for i in range(3):
+                renpy.pause(0.2, hard=True)
+                renpy.restart_interaction()
+                renpy.pause(0.2, hard=True)
+                renpy.restart_interaction()
 
-        # Clear input field
-        code_input_state.current_code = ""
+            code_input_state.is_flashing = False
 
-        # Check if we should lock out
-        if code_input_state.failed_attempts >= 3:
-            code_input_state.is_locked_out = True
-            code_input_state.lockout_end_time = time.time() + LOCKOUT_TIMEOUT_SECONDS
+            # Clear input field
+            code_input_state.current_code = ""
 
-        renpy.restart_interaction()
+            # Check if we should lock out
+            if code_input_state.failed_attempts >= 3:
+                code_input_state.is_locked_out = True
+                code_input_state.lockout_end_time = time.time() + LOCKOUT_TIMEOUT_SECONDS
 
+            renpy.restart_interaction()
 
-def get_code_input_from_player(prompt_text, is_numeric):
-    """
-    Get code input from player using renpy.input().
+    def get_code_input_from_player(prompt_text, is_numeric):
+        """
+        Get code input from player using renpy.input().
 
-    Args:
-        prompt_text: Prompt to show player
-        is_numeric: If True, only allow numbers
+        Args:
+            prompt_text: Prompt to show player
+            is_numeric: If True, only allow numbers
 
-    Returns:
-        String input from player
-    """
-    if is_numeric:
-        return renpy.input(prompt_text, allow="0123456789", length=20)
-    else:
-        return renpy.input(prompt_text, length=50)
+        Returns:
+            String input from player
+        """
+        if is_numeric:
+            return renpy.input(prompt_text, allow="0123456789", length=20)
+        else:
+            return renpy.input(prompt_text, length=50)
 
 
 screen code_input_interface(x, y, icon, is_door=True):
