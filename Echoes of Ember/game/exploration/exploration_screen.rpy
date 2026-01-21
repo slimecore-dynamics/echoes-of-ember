@@ -82,9 +82,9 @@ screen exploration_view():
                     # Render investigation object overlays
                     use render_investigation_fpv_overlays(view_data, floor, ps)
 
-                    # Show pulsing indicator if there's an interaction available
-                    if current_interaction:
-                        add AnimatedInteractIndicator() xalign 0.5 yalign 0.7
+                    # Interaction indicator removed - interactions only through button
+                    # if current_interaction:
+                    #     add AnimatedInteractIndicator() xalign 0.5 yalign 0.7
 
                 else:
                     text "No floor loaded" xalign 0.5 yalign 0.5 color "#FFFFFF"
