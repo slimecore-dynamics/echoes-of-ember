@@ -83,6 +83,10 @@ init -5 python:
     EXPLORATION_TILES_WEIGHT = 0.7
     EXPLORATION_ITEMS_WEIGHT = 0.3
 
+    # Code input lockout configuration
+    # Time in seconds before locked door/terminal allows retry after 3 failed attempts
+    LOCKOUT_TIMEOUT_SECONDS = 30
+
     # ==========================================
     # COLOR PALETTES
     # Used in: exploration_ui.rpy, exploration_screen.rpy

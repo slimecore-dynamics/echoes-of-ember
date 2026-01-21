@@ -282,7 +282,7 @@ init python:
             renpy.notify("Stairs down (no destination floor)")
 
     def handle_door_interaction(adj_x, adj_y):
-        """Handle door interaction (open door)."""
+        """Handle door interaction (open door or show locked interface)."""
         global map_grid
 
         if not map_grid:
@@ -295,10 +295,19 @@ init python:
         # Get icon at door position from dungeon icons
         icon = floor.get_dungeon_icon(adj_x, adj_y)
         if icon and icon.icon_type == "door_closed":
-            # Change door to open
-            icon.icon_type = "door_open"
-            renpy.notify("Door opened")
-            renpy.restart_interaction()
+            # Check if door is locked
+            metadata = icon.metadata if icon.metadata else {}
+            is_locked = metadata.get("locked", False)
+            is_unlocked = metadata.get("unlocked", False)
+
+            if is_locked and not is_unlocked:
+                # Door is locked - show examination screen
+                renpy.show_screen("locked_object_examination", x=adj_x, y=adj_y, icon=icon, is_door=True)
+            else:
+                # Door is unlocked or not locked - open normally
+                icon.icon_type = "door_open"
+                renpy.notify("Door opened")
+                renpy.restart_interaction()
 
     def handle_teleporter_interaction(adj_x, adj_y):
         """Handle teleporter interaction (teleport to paired teleporter).
@@ -380,7 +389,17 @@ init python:
         if inv_icon:
             # Handle investigation interaction
             if inv_type == "terminal":
-                handle_terminal_interaction(content_id)
+                # Check if terminal is locked
+                metadata = inv_icon.metadata if inv_icon.metadata else {}
+                is_locked = metadata.get("locked", False)
+                is_unlocked = metadata.get("unlocked", False)
+
+                if is_locked and not is_unlocked:
+                    # Terminal is locked - show examination screen
+                    renpy.show_screen("locked_object_examination", x=inv_x, y=inv_y, icon=inv_icon, is_door=False)
+                else:
+                    # Terminal is unlocked or not locked - access normally
+                    handle_terminal_interaction(content_id)
             elif inv_type == "examinable":
                 handle_examinable_interaction(content_id)
             return
